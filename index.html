@@ -7,6 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <style>
 /* ══════════════════════════════════════════
    DESIGN SYSTEM — IMMOAI PRO v3
@@ -3788,6 +3789,175 @@ body{font-family:var(--fb);background:#FAFAFA;color:var(--g900);min-height:100vh
 <div class="toast" id="toast"></div>
 
 <script>
+
+// ══════════════════════════════════════════════════════════
+// SUPABASE — Configuration et helpers
+// ══════════════════════════════════════════════════════════
+const SUPABASE_URL = 'https://wwqccgacezbzkbaptyup.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_OOngedtVqoGbWIzRTrRMqg_nKd8tJ3U';
+let _sb = null;
+
+function getSB() {
+  if(!_sb && window.supabase) {
+    _sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  }
+  return _sb;
+}
+
+// ── Auth Supabase ──
+async function sbLogin(email, password) {
+  const sb = getSB();
+  if(!sb) return null;
+  const { data, error } = await sb.auth.signInWithPassword({ email, password });
+  if(error) throw error;
+  return data.user;
+}
+
+async function sbRegister(email, password, meta) {
+  const sb = getSB();
+  if(!sb) return null;
+  const { data, error } = await sb.auth.signUp({
+    email, password,
+    options: { data: meta }
+  });
+  if(error) throw error;
+  return data.user;
+}
+
+async function sbLogout() {
+  const sb = getSB();
+  if(sb) await sb.auth.signOut();
+}
+
+async function sbGetSession() {
+  const sb = getSB();
+  if(!sb) return null;
+  const { data } = await sb.auth.getSession();
+  return data?.session?.user || null;
+}
+
+// ── CRUD helpers ──
+async function sbGet(table, filters) {
+  const sb = getSB();
+  if(!sb) return [];
+  let q = sb.from(table).select('*');
+  if(filters) Object.entries(filters).forEach(([k,v]) => { q = q.eq(k, v); });
+  const { data, error } = await q;
+  if(error) { console.error('sbGet error:', error); return []; }
+  return data || [];
+}
+
+async function sbUpsert(table, data) {
+  const sb = getSB();
+  if(!sb) return null;
+  const { data: result, error } = await sb.from(table).upsert(data, { onConflict: 'id' });
+  if(error) { console.error('sbUpsert error:', error); return null; }
+  return result;
+}
+
+async function sbDelete(table, id) {
+  const sb = getSB();
+  if(!sb) return;
+  const { error } = await sb.from(table).delete().eq('id', id);
+  if(error) console.error('sbDelete error:', error);
+}
+
+async function sbDeleteWhere(table, field, value) {
+  const sb = getSB();
+  if(!sb) return;
+  const { error } = await sb.from(table).delete().eq(field, value);
+  if(error) console.error('sbDeleteWhere error:', error);
+}
+
+// ── Sync data ──
+async function syncToSupabase() {
+  if(!currentUser?.id) return;
+  const userId = currentUser.sbId || currentUser.id;
+  if(!userId || typeof userId !== 'string' || !userId.includes('-')) return; // Pas un UUID Supabase
+  
+  try {
+    // Sync mandats
+    if(mandats.length > 0) {
+      const mandatsData = mandats.map(m => ({...m, user_id: userId, updated_at: new Date().toISOString()}));
+      await getSB()?.from('mandats').upsert(mandatsData, {onConflict: 'id'});
+    }
+    
+    // Sync prospects
+    if(prospects.length > 0) {
+      const prospectsData = prospects.map(p => ({...p, user_id: userId, updated_at: new Date().toISOString()}));
+      await getSB()?.from('prospects').upsert(prospectsData, {onConflict: 'id'});
+    }
+    
+    // Sync RDVs
+    if(rdvs.length > 0) {
+      const rdvsData = rdvs.map(r => ({...r, user_id: userId, updated_at: new Date().toISOString()}));
+      await getSB()?.from('rdvs').upsert(rdvsData, {onConflict: 'id'});
+    }
+    
+    // Sync profil
+    if(profile && profile.prenom) {
+      await getSB()?.from('profiles').upsert({
+        id: userId,
+        email: currentUser.email,
+        prenom: profile.prenom || '',
+        nom: profile.nom || '',
+        agence: profile.agence || '',
+        tel: profile.tel || '',
+        photo: profile.photo || '',
+        plan: getUserCurrentPlan(),
+        updated_at: new Date().toISOString()
+      }, {onConflict: 'id'});
+    }
+  } catch(e) {
+    console.warn('Sync Supabase failed (offline?):', e.message);
+  }
+}
+
+async function loadFromSupabase() {
+  if(!currentUser?.sbId) return;
+  const userId = currentUser.sbId;
+  
+  try {
+    // Charger mandats
+    const sbMandats = await sbGet('mandats', {user_id: userId});
+    if(sbMandats.length > 0) {
+      mandats = sbMandats;
+      localStorage.setItem('immoai_mandats', JSON.stringify(mandats));
+    }
+    
+    // Charger prospects
+    const sbProspects = await sbGet('prospects', {user_id: userId});
+    if(sbProspects.length > 0) {
+      prospects = sbProspects;
+      localStorage.setItem('immoai_crm', JSON.stringify(prospects));
+    }
+    
+    // Charger RDVs
+    const sbRdvs = await sbGet('rdvs', {user_id: userId});
+    if(sbRdvs.length > 0) {
+      rdvs = sbRdvs;
+      localStorage.setItem('immoai_rdvs', JSON.stringify(rdvs));
+    }
+    
+    // Charger profil
+    const sbProfile = await sbGet('profiles', {id: userId});
+    if(sbProfile.length > 0) {
+      const p = sbProfile[0];
+      profile = {...profile, ...p};
+      localStorage.setItem('immoai_profile', JSON.stringify(profile));
+    }
+    
+    console.log('✅ Données chargées depuis Supabase');
+  } catch(e) {
+    console.warn('Load from Supabase failed (offline?):', e.message);
+  }
+}
+
+// ── Auto-sync toutes les 30 secondes ──
+setInterval(function() {
+  if(currentUser?.sbId) syncToSupabase();
+}, 30000);
+
 // ══════════ CONFIG ══════════
 // ══ CLÉ API SÉCURISÉE ══
 var API_KEY=sessionStorage.getItem('_ak')||'';
@@ -3871,7 +4041,7 @@ let activityLogs=[];
 // ══════════ UTILS ══════════
 const toast=(m,d=3000)=>{const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),d);};
 const today_=()=>new Date().toLocaleDateString('fr-FR');
-const saveP_=()=>localStorage.setItem('immoai_crm',JSON.stringify(prospects));
+const saveP_=()=>localStorage.setItem('immoai_crm',JSON.stringify(prospects));if(currentUser&&currentUser.sbId)setTimeout(function(){syncToSupabase();},1000);
 const saveM_=()=>localStorage.setItem('immoai_mandats',JSON.stringify(mandats));
 const saveR_=()=>localStorage.setItem('immoai_rdvs',JSON.stringify(rdvs));
 const savePro=()=>localStorage.setItem('immoai_profile',JSON.stringify(profile));
@@ -7056,48 +7226,65 @@ function doLogin(){
   const spin=document.getElementById('login-spin');
   const arrow=document.getElementById('login-btn-arrow');
   const txt=document.getElementById('login-btn-text');
+  const remCb=document.getElementById('remember-me');
 
   if(!email||!pwd){showAuthAlert('login-error','Remplissez tous les champs');return;}
-  btn.disabled=true;
-  if(spin)spin.style.display='block';
+  if(btn)btn.disabled=true;
+  if(spin)spin.style.display='inline';
   if(arrow)arrow.style.display='none';
   if(txt)txt.textContent='Connexion…';
 
-  setTimeout(()=>{
-    const user=getUsers().find(u=>u.email.toLowerCase()===email&&u.pwd===pwd);
+  // Essai connexion Supabase d'abord
+  sbLogin(email, pwd).then(function(sbUser){
+    const user = {
+      id: sbUser.id,
+      sbId: sbUser.id,
+      email: sbUser.email,
+      prenom: (sbUser.user_metadata && sbUser.user_metadata.prenom) || email.split('@')[0],
+      nom: (sbUser.user_metadata && sbUser.user_metadata.nom) || '',
+      agence: (sbUser.user_metadata && sbUser.user_metadata.agence) || ''
+    };
+    _finishLogin(user, remCb);
+    // Charger les données depuis Supabase
+    loadFromSupabase().then(function(){
+      try{renderMandats();}catch(e){}
+      try{renderList();}catch(e){}
+      try{renderAgenda();}catch(e){}
+      try{updateDashKPIs();}catch(e){}
+    });
+  }).catch(function(){
+    // Fallback compte démo local
+    const user=getUsers().find(function(u){return u.email.toLowerCase()===email&&u.pwd===pwd;});
     if(!user){
       showAuthAlert('login-error','Email ou mot de passe incorrect');
-      btn.disabled=false;
+      if(btn)btn.disabled=false;
       if(spin)spin.style.display='none';
       if(arrow)arrow.style.display='';
       if(txt)txt.textContent='Se connecter';
       return;
     }
-    currentUser={id:user.id,email:user.email,prenom:user.prenom,nom:user.nom,agence:user.agence||''};
-    sessionStorage.setItem('immoai_session',JSON.stringify(currentUser));
-    const _remCb=document.getElementById('remember-me');
-    if(_remCb&&_remCb.checked){
-      localStorage.setItem('immoai_remember',JSON.stringify({email:email,ts:Date.now()}));
-      localStorage.setItem('immoai_session_persist',JSON.stringify(currentUser));
-    }
-    addLog('Connexion',currentUser);
+    const localUser={id:user.id,email:user.email,prenom:user.prenom,nom:user.nom,agence:user.agence||''};
+    _finishLogin(localUser, remCb);
+  });
+}
 
-    ['login-screen','register-screen','reset-screen'].forEach(s=>{
-      const el=document.getElementById(s);if(el)el.classList.add('hidden');
-    });
-    const app=document.getElementById('app-root');
-    if(app)app.style.display='flex';
-
-    updateUserUI();
-    updateStorageIndicator();
-    startClock();
-    bootApp();
-
-    const isNew=!localStorage.getItem('immoai_onboarded')&&user.id!=='demo';
-    if(isNew){
-      setTimeout(()=>document.getElementById('onboard-welcome')?.classList.add('active'),800);
-    }
-  },700);
+function _finishLogin(user, remCb){
+  currentUser = user;
+  sessionStorage.setItem('immoai_session', JSON.stringify(currentUser));
+  if(remCb && remCb.checked){
+    localStorage.setItem('immoai_remember', JSON.stringify({email:user.email, ts:Date.now()}));
+    localStorage.setItem('immoai_session_persist', JSON.stringify(currentUser));
+  } else {
+    localStorage.removeItem('immoai_remember');
+    localStorage.removeItem('immoai_session_persist');
+  }
+  addLog('Connexion', currentUser);
+  ['login-screen','register-screen','reset-screen'].forEach(function(s){
+    const el=document.getElementById(s);if(el)el.classList.add('hidden');
+  });
+  const app=document.getElementById('app-root');
+  if(app)app.style.display='flex';
+  updateUserUI(); updateStorageIndicator(); startClock(); bootApp();
 }
 
 function doRegister(){
