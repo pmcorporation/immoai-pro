@@ -1253,96 +1253,232 @@ body{font-family:var(--fb);background:#FAFAFA;color:var(--g900);min-height:100vh
 .shared-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
 .agent-av-sm{width:30px;height:30px;border-radius:50%;background:var(--brand);display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-weight:700;font-size:.68rem;color:#fff;flex-shrink:0}
 /* ══════════════════════════════════════════
-   BACKOFFICE ADMIN — Ultra Clean
+   BACKOFFICE ADMIN — Black & White v3
+   Sidebar sombre + contenu blanc + bandeau rouge
 ══════════════════════════════════════════ */
 .admin-screen{
-  position:fixed;inset:0;z-index:9500;background:#0A0A0A;
+  position:fixed;inset:0;z-index:9500;background:#FAFAFA;
   display:flex;flex-direction:column;overflow:hidden;
 }
 .admin-screen.hidden{display:none!important}
-/* Topbar admin */
-.admin-topbar{
-  height:52px;background:#111;border-bottom:1px solid rgba(255,255,255,.07);
-  display:flex;align-items:center;padding:0 24px;gap:16px;flex-shrink:0;
+
+/* ━━ BANDEAU ROUGE ALERTE ADMIN ━━ */
+.admin-warning-bar{
+  height:32px;background:#DC2626;color:#fff;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 18px;flex-shrink:0;
+  font-size:.74rem;font-weight:600;letter-spacing:.02em;
 }
-.admin-logo{display:flex;align-items:center;gap:8px}
-.admin-logo-mark{width:26px;height:26px;background:var(--red);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:700;color:#fff}
-.admin-logo-text{font-family:var(--fd);font-weight:700;font-size:.82rem;color:#fff}
-.admin-logo-badge{background:rgba(220,38,38,.15);border:1px solid rgba(220,38,38,.25);color:#FCA5A5;font-size:.6rem;font-weight:700;padding:1px 7px;border-radius:20px;text-transform:uppercase;letter-spacing:.06em}
-.admin-nav{display:flex;gap:2px;flex:1;padding-left:24px}
-.admin-nav-btn{padding:5px 12px;border-radius:6px;border:none;background:none;font-size:.76rem;font-weight:500;color:rgba(255,255,255,.4);cursor:pointer;transition:all .15s;white-space:nowrap}
-.admin-nav-btn:hover{background:rgba(255,255,255,.06);color:rgba(255,255,255,.8)}
-.admin-nav-btn.active{background:rgba(220,38,38,.1);color:#FCA5A5;font-weight:600}
-.admin-topbar-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+.admin-warning-bar-left{display:flex;align-items:center;gap:9px}
+.admin-warning-bar-left::before{
+  content:"";width:8px;height:8px;border-radius:50%;
+  background:#FCA5A5;animation:adminPulse 2s infinite;
+}
+@keyframes adminPulse{
+  0%,100%{opacity:1;transform:scale(1)}
+  50%{opacity:.6;transform:scale(1.15)}
+}
+.admin-warning-bar-right{display:flex;align-items:center;gap:14px;font-size:.7rem;font-weight:500;opacity:.95}
+.admin-warning-bar-btn{
+  background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);
+  color:#fff;padding:3px 11px;border-radius:5px;font-size:.7rem;font-weight:600;
+  cursor:pointer;transition:all .12s;
+}
+.admin-warning-bar-btn:hover{background:rgba(255,255,255,.25)}
+
+/* ━━ ZONE FLEX (sidebar + main) ━━ */
+.admin-body{display:flex;flex-direction:row;flex:1;overflow:hidden}
+
+/* ━━ SIDEBAR ━━ */
+.admin-sidebar{
+  width:236px;background:#0F0F11;
+  display:flex;flex-direction:column;flex-shrink:0;
+}
+.admin-sidebar-header{
+  padding:20px 18px 14px;
+  border-bottom:1px solid rgba(255,255,255,.06);
+}
+.admin-logo{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.admin-logo-mark{
+  width:30px;height:30px;background:#fff;border-radius:7px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:.78rem;font-weight:800;color:#0F0F11;letter-spacing:-.02em;
+}
+.admin-logo-text{font-family:var(--fd);font-weight:700;font-size:.85rem;color:#fff;letter-spacing:-.01em}
+.admin-logo-badge{
+  display:inline-flex;align-items:center;gap:4px;
+  background:#DC2626;color:#fff;
+  font-size:.56rem;font-weight:800;
+  padding:2px 8px;border-radius:4px;text-transform:uppercase;letter-spacing:.08em;
+}
+.admin-sidebar-nav{flex:1;overflow-y:auto;padding:14px 10px;}
+.admin-sidebar-nav::-webkit-scrollbar{width:3px}
+.admin-sidebar-nav::-webkit-scrollbar-thumb{background:rgba(255,255,255,.08);border-radius:3px}
+.admin-nav-section{margin-bottom:13px;}
+.admin-nav-section-title{
+  font-size:.58rem;font-weight:700;color:rgba(255,255,255,.3);
+  letter-spacing:.13em;text-transform:uppercase;
+  padding:5px 10px 4px;
+}
+.admin-nav-btn{
+  width:100%;display:flex;align-items:center;gap:11px;
+  padding:8px 11px;border-radius:6px;border:none;background:none;
+  font-family:var(--fb);font-size:.79rem;font-weight:500;
+  color:rgba(255,255,255,.55);cursor:pointer;
+  transition:all .12s;text-align:left;
+  margin-bottom:1px;
+}
+.admin-nav-btn:hover{background:rgba(255,255,255,.05);color:#fff}
+.admin-nav-btn.active{
+  background:#fff;color:#0F0F11;font-weight:600;
+}
+.admin-nav-btn .nav-icon{font-size:.95rem;width:18px;text-align:center;flex-shrink:0;opacity:.85}
+.admin-nav-btn.active .nav-icon{opacity:1}
+.admin-nav-btn.disabled{
+  opacity:.32;cursor:not-allowed;
+}
+.admin-nav-btn.disabled:hover{background:none;color:rgba(255,255,255,.32)}
+.admin-nav-btn .nav-soon{
+  margin-left:auto;font-size:.55rem;
+  background:rgba(255,255,255,.07);
+  color:rgba(255,255,255,.4);
+  padding:1px 6px;border-radius:8px;
+  font-weight:700;letter-spacing:.05em;
+}
+.admin-sidebar-footer{
+  padding:11px;border-top:1px solid rgba(255,255,255,.06);
+}
+.admin-sidebar-footer-btn{
+  width:100%;display:flex;align-items:center;gap:9px;
+  padding:9px 11px;border-radius:6px;border:none;
+  background:rgba(255,255,255,.04);color:rgba(255,255,255,.65);
+  font-family:var(--fb);font-size:.74rem;font-weight:500;
+  cursor:pointer;transition:all .12s;
+}
+.admin-sidebar-footer-btn:hover{background:rgba(255,255,255,.09);color:#fff}
+
+/* ━━ ZONE PRINCIPALE ━━ */
+.admin-main{flex:1;display:flex;flex-direction:column;overflow:hidden;background:#FAFAFA}
+.admin-topbar-light{
+  height:54px;background:#fff;border-bottom:1px solid #EAEAEA;
+  display:flex;align-items:center;padding:0 28px;gap:16px;flex-shrink:0;
+}
+.admin-topbar-title{
+  font-family:var(--fd);font-weight:700;font-size:1rem;color:#0F0F11;letter-spacing:-.01em;
+}
+.admin-topbar-right-light{
+  margin-left:auto;display:flex;align-items:center;gap:14px;
+}
+.admin-clock-light{font-size:.74rem;color:#737373;font-weight:500}
+
 /* Login admin */
 .admin-login{
-  flex:1;display:flex;align-items:center;justify-content:center;
+  flex:1;display:flex;align-items:center;justify-content:center;background:#FAFAFA;
 }
 .admin-login-card{
-  background:#161618;border:1px solid rgba(255,255,255,.08);
-  border-radius:16px;padding:36px;width:360px;
-  box-shadow:0 32px 80px rgba(0,0,0,.5);
+  background:#fff;border:1px solid #EAEAEA;
+  border-radius:14px;padding:36px;width:380px;
+  box-shadow:0 18px 48px rgba(0,0,0,.07);
 }
+.admin-login-card .adm-label{color:#525252}
+.admin-login-card .adm-input{background:#FAFAFA;border-color:#E5E5E5;color:#0F0F11}
+.admin-login-card .adm-input:focus{border-color:#0F0F11;background:#fff;box-shadow:0 0 0 3px rgba(15,15,17,.06)}
+
 /* Content admin */
-.admin-content{flex:1;overflow-y:auto;padding:24px 28px;background:#0D0D0D}
-.admin-content::-webkit-scrollbar{width:4px}
-.admin-content::-webkit-scrollbar-thumb{background:#333;border-radius:4px}
-/* Cards admin dark */
-.adm-card{background:#161618;border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:18px}
-.adm-kpi-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:24px}
-.adm-kpi{background:#161618;border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:16px;position:relative;overflow:hidden}
-.adm-kpi-accent{position:absolute;top:0;left:0;width:100%;height:2px}
-.adm-kpi-val{font-family:var(--fd);font-weight:800;font-size:1.6rem;letter-spacing:-.04em;color:#fff;margin-bottom:3px}
-.adm-kpi-label{font-size:.67rem;color:rgba(255,255,255,.35);font-weight:500;text-transform:uppercase;letter-spacing:.05em}
-.adm-kpi-trend{font-size:.7rem;margin-top:6px;font-weight:600}
-/* Table admin */
-.adm-table{background:#161618;border:1px solid rgba(255,255,255,.07);border-radius:10px;overflow:hidden}
-.adm-th{display:grid;background:rgba(255,255,255,.03);border-bottom:1px solid rgba(255,255,255,.06);padding:8px 14px;font-size:.62rem;font-weight:700;color:rgba(255,255,255,.3);letter-spacing:.08em;text-transform:uppercase}
-.adm-row{display:grid;border-bottom:1px solid rgba(255,255,255,.04);padding:10px 14px;align-items:center;transition:background .12s;cursor:pointer}
+.admin-content{flex:1;overflow-y:auto;padding:28px 32px;background:#FAFAFA}
+.admin-content::-webkit-scrollbar{width:6px}
+.admin-content::-webkit-scrollbar-thumb{background:#D4D4D4;border-radius:6px}
+
+/* Cards admin LIGHT */
+.adm-card{background:#fff;border:1px solid #EAEAEA;border-radius:11px;padding:18px;}
+.adm-kpi-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:22px}
+.adm-kpi{background:#fff;border:1px solid #EAEAEA;border-radius:10px;padding:16px;position:relative;overflow:hidden;transition:all .15s}
+.adm-kpi:hover{border-color:#0F0F11;transform:translateY(-1px)}
+.adm-kpi-accent{position:absolute;top:0;left:0;width:100%;height:2px;background:#0F0F11}
+.adm-kpi-val{font-family:var(--fd);font-weight:800;font-size:1.65rem;letter-spacing:-.04em;color:#0F0F11;margin-bottom:2px;line-height:1.05}
+.adm-kpi-label{font-size:.62rem;color:#737373;font-weight:600;text-transform:uppercase;letter-spacing:.07em;margin-top:5px}
+.adm-kpi-trend{font-size:.68rem;margin-top:6px;font-weight:600}
+
+/* Table admin LIGHT */
+.adm-table{background:#fff;border:1px solid #EAEAEA;border-radius:11px;overflow:hidden}
+.adm-th{display:grid;background:#FAFAFA;border-bottom:1px solid #EAEAEA;padding:9px 16px;font-size:.6rem;font-weight:700;color:#737373;letter-spacing:.09em;text-transform:uppercase}
+.adm-row{display:grid;border-bottom:1px solid #F5F5F5;padding:11px 16px;align-items:center;transition:background .1s;cursor:pointer}
 .adm-row:last-child{border-bottom:none}
-.adm-row:hover{background:rgba(255,255,255,.03)}
-.adm-cell{font-size:.79rem;color:rgba(255,255,255,.65)}
-.adm-cell.bold{color:#fff;font-weight:600}
+.adm-row:hover{background:#FAFAFA}
+.adm-cell{font-size:.78rem;color:#525252}
+.adm-cell.bold{color:#0F0F11;font-weight:600}
+
 /* Badges admin */
-.adm-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:20px;font-size:.62rem;font-weight:700}
-.adm-badge-green{background:rgba(22,163,74,.15);color:#86EFAC}
-.adm-badge-red{background:rgba(220,38,38,.15);color:#FCA5A5}
-.adm-badge-amber{background:rgba(217,119,6,.15);color:#FCD34D}
-.adm-badge-blue{background:rgba(37,99,235,.15);color:#93C5FD}
-.adm-badge-gray{background:rgba(255,255,255,.08);color:rgba(255,255,255,.4)}
+.adm-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:5px;font-size:.6rem;font-weight:700;letter-spacing:.02em}
+.adm-badge-green{background:#DCFCE7;color:#15803D}
+.adm-badge-red{background:#FEE2E2;color:#B91C1C}
+.adm-badge-amber{background:#FEF3C7;color:#B45309}
+.adm-badge-blue{background:#DBEAFE;color:#1D4ED8}
+.adm-badge-gray{background:#F5F5F5;color:#525252}
+
 /* Section title */
-.adm-sec{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
-.adm-sec-title{font-family:var(--fd);font-weight:700;font-size:.85rem;color:#fff}
+.adm-sec{display:flex;align-items:center;justify-content:space-between;margin-bottom:13px}
+.adm-sec-title{font-family:var(--fd);font-weight:700;font-size:.92rem;color:#0F0F11}
+
 /* Search admin */
-.adm-search{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:7px 12px;transition:all .15s}
-.adm-search:focus-within{border-color:var(--red);background:rgba(255,255,255,.07)}
-.adm-search input{background:none;border:none;outline:none;font-family:var(--fb);font-size:.8rem;color:#fff;width:200px}
-.adm-search input::placeholder{color:rgba(255,255,255,.25)}
+.adm-search{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid #EAEAEA;border-radius:8px;padding:7px 12px;transition:all .12s}
+.adm-search:focus-within{border-color:#0F0F11;box-shadow:0 0 0 3px rgba(15,15,17,.06)}
+.adm-search input{background:none;border:none;outline:none;font-family:var(--fb);font-size:.79rem;color:#0F0F11;width:220px}
+.adm-search input::placeholder{color:#A3A3A3}
+
 /* Modal admin */
-.adm-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:10100;display:flex;align-items:center;justify-content:center}
+.adm-modal-overlay{position:fixed;inset:0;background:rgba(15,15,17,.55);backdrop-filter:blur(4px);z-index:10100;display:flex;align-items:center;justify-content:center}
 .adm-modal-overlay.hidden{display:none}
-.adm-modal{background:#1A1A1C;border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:24px;width:480px;max-width:90vw}
-.adm-modal-title{font-family:var(--fd);font-weight:700;font-size:.95rem;color:#fff;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.adm-modal{background:#fff;border:1px solid #EAEAEA;border-radius:14px;padding:26px;width:480px;max-width:90vw;box-shadow:0 32px 80px rgba(0,0,0,.18)}
+.adm-modal-title{font-family:var(--fd);font-weight:700;font-size:.96rem;color:#0F0F11;margin-bottom:16px;display:flex;align-items:center;gap:9px}
+
 /* Charts */
-.adm-bar-row{display:flex;align-items:center;gap:10px;margin-bottom:8px}
-.adm-bar-label{font-size:.74rem;color:rgba(255,255,255,.5);min-width:120px}
-.adm-bar-wrap{flex:1;height:6px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden}
-.adm-bar-fill{height:100%;border-radius:3px;transition:width .5s ease}
-.adm-bar-val{font-size:.72rem;color:rgba(255,255,255,.5);min-width:40px;text-align:right}
+.adm-bar-row{display:flex;align-items:center;gap:10px;margin-bottom:9px}
+.adm-bar-label{font-size:.74rem;color:#525252;min-width:120px;font-weight:500}
+.adm-bar-wrap{flex:1;height:6px;background:#F0F0F0;border-radius:3px;overflow:hidden}
+.adm-bar-fill{height:100%;border-radius:3px;background:#0F0F11;transition:width .5s ease}
+.adm-bar-val{font-size:.72rem;color:#0F0F11;min-width:44px;text-align:right;font-weight:600}
+
+/* MRR sparkline */
+.adm-spark-container{position:relative;height:120px;display:flex;align-items:flex-end;gap:4px;margin-top:14px}
+.adm-spark-bar{flex:1;background:linear-gradient(180deg,#0F0F11,#404040);border-radius:3px 3px 0 0;min-height:2px;transition:all .25s;cursor:pointer;position:relative}
+.adm-spark-bar:hover{background:linear-gradient(180deg,#DC2626,#7F1D1D)}
+.adm-spark-bar:hover::after{
+  content:attr(data-tooltip);position:absolute;bottom:100%;left:50%;transform:translateX(-50%);
+  background:#0F0F11;color:#fff;padding:4px 8px;border-radius:5px;
+  font-size:.65rem;white-space:nowrap;margin-bottom:5px;font-weight:600;z-index:10;
+}
+.adm-spark-labels{display:flex;justify-content:space-between;margin-top:6px;font-size:.6rem;color:#A3A3A3;font-weight:500}
+
 /* Input admin */
-.adm-input{width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:9px 12px;font-family:var(--fb);font-size:.83rem;color:#fff;outline:none;transition:all .15s;margin-bottom:10px}
-.adm-input:focus{border-color:var(--red);background:rgba(255,255,255,.08)}
-.adm-label{font-size:.65rem;font-weight:700;color:rgba(255,255,255,.3);letter-spacing:.08em;text-transform:uppercase;margin-bottom:5px;display:block}
-.adm-btn{padding:8px 16px;border-radius:8px;border:none;font-family:var(--fb);font-size:.78rem;font-weight:600;cursor:pointer;transition:all .15s}
-.adm-btn-red{background:var(--red);color:#fff}
+.adm-input{width:100%;background:#FAFAFA;border:1px solid #EAEAEA;border-radius:8px;padding:10px 12px;font-family:var(--fb);font-size:.83rem;color:#0F0F11;outline:none;transition:all .12s;margin-bottom:11px}
+.adm-input:focus{border-color:#0F0F11;background:#fff;box-shadow:0 0 0 3px rgba(15,15,17,.06)}
+.adm-label{font-size:.62rem;font-weight:700;color:#737373;letter-spacing:.09em;text-transform:uppercase;margin-bottom:5px;display:block}
+.adm-btn{padding:9px 17px;border-radius:8px;border:none;font-family:var(--fb);font-size:.78rem;font-weight:600;cursor:pointer;transition:all .12s}
+.adm-btn-primary{background:#0F0F11;color:#fff}
+.adm-btn-primary:hover{background:#262626;transform:translateY(-1px)}
+.adm-btn-red{background:#DC2626;color:#fff}
 .adm-btn-red:hover{background:#B91C1C}
-.adm-btn-outline{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.7)}
-.adm-btn-outline:hover{background:rgba(255,255,255,.1);color:#fff}
+.adm-btn-outline{background:#fff;border:1px solid #EAEAEA;color:#0F0F11}
+.adm-btn-outline:hover{background:#FAFAFA;border-color:#0F0F11}
+
 /* Plan badges */
-.plan-free{background:rgba(255,255,255,.06);color:rgba(255,255,255,.4)}
-.plan-starter{background:rgba(29,111,232,.15);color:#93C5FD}
-.plan-pro{background:rgba(243,106,31,.15);color:#FDBA74}
-.plan-agency{background:rgba(139,92,246,.15);color:#C4B5FD}
+.plan-free{background:#F5F5F5;color:#525252}
+.plan-starter{background:#DBEAFE;color:#1D4ED8}
+.plan-pro{background:#FEE2E2;color:#B91C1C}
+.plan-agency{background:#EDE9FE;color:#6D28D9}
+
+/* Activity feed */
+.adm-activity{background:#fff;border:1px solid #EAEAEA;border-radius:11px;padding:18px}
+.adm-activity-item{display:flex;align-items:flex-start;gap:11px;padding:10px 0;border-bottom:1px solid #F5F5F5}
+.adm-activity-item:last-child{border-bottom:none}
+.adm-activity-dot{width:7px;height:7px;border-radius:50%;background:#0F0F11;margin-top:6px;flex-shrink:0}
+.adm-activity-dot.green{background:#16A34A}
+.adm-activity-dot.red{background:#DC2626}
+.adm-activity-dot.amber{background:#D97706}
+.adm-activity-text{font-size:.79rem;color:#0F0F11;line-height:1.4}
+.adm-activity-meta{font-size:.7rem;color:#737373;margin-top:2px}
+
 
 /* ══ PLAN GATE ══ */
 .plan-gate-overlay{
@@ -8100,6 +8236,9 @@ function openAdmin(){
       if(isAdmin){
         adminAuthed = true;
         adminUserId = currentUser.sbId;
+        // Afficher email admin dans bandeau rouge
+        const ucu = document.getElementById('admin-current-user');
+        if(ucu) ucu.textContent = currentUser.email || '—';
         document.getElementById('admin-login-gate').style.display = 'none';
         const dash = document.getElementById('admin-dashboard');
         dash.style.cssText = 'display:flex;flex-direction:column;overflow:hidden;flex:1';
@@ -8152,6 +8291,9 @@ async function adminAuth(){
         if(prof?.is_admin){
           adminAuthed = true;
           adminUserId = authData.user.id;
+          // Afficher email admin dans bandeau rouge
+          const ucu = document.getElementById('admin-current-user');
+          if(ucu) ucu.textContent = email;
           document.getElementById('admin-login-gate').style.display = 'none';
           const dash = document.getElementById('admin-dashboard');
           dash.style.cssText = 'display:flex;flex-direction:column;overflow:hidden;flex:1';
@@ -8170,6 +8312,9 @@ async function adminAuth(){
   if(email === ADMIN_FALLBACK_CREDS.email && pwd === ADMIN_FALLBACK_CREDS.pwd){
     adminAuthed = true;
     adminUserId = null;
+    // Afficher email admin dans bandeau rouge
+    const ucu = document.getElementById('admin-current-user');
+    if(ucu) ucu.textContent = email + ' (mode fallback)';
     document.getElementById('admin-login-gate').style.display = 'none';
     const dash = document.getElementById('admin-dashboard');
     dash.style.cssText = 'display:flex;flex-direction:column;overflow:hidden;flex:1';
@@ -8188,12 +8333,26 @@ function showAdminWarning(msg){
 }
 
 function adminTab(btn, tab){
+  // Ne rien faire si bouton désactivé
+  if(btn.classList.contains('disabled')) return;
   document.querySelectorAll('.admin-nav-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   ['overview','users','crm','subscriptions','codes','events','logs'].forEach(t => {
     const el = document.getElementById('admin-tab-'+t);
     if(el) el.style.display = (t === tab) ? 'block' : 'none';
   });
+  // Mettre à jour le titre du topbar light
+  const titles = {
+    'overview':'📊 Vue d\'ensemble',
+    'users':'👥 Utilisateurs',
+    'crm':'🎯 CRM & Données',
+    'subscriptions':'💳 Abonnements',
+    'codes':'🎟️ Codes d\'activation',
+    'events':'🪝 Stripe Events',
+    'logs':'📋 Logs admin'
+  };
+  const titleEl = document.getElementById('admin-topbar-title');
+  if(titleEl && titles[tab]) titleEl.textContent = titles[tab];
   if(tab === 'overview')           renderAdminOverview();
   else if(tab === 'users')         renderAdminUsers();
   else if(tab === 'crm')           renderAdminCRM();
@@ -8244,18 +8403,42 @@ async function renderAdminOverview(){
     set('adm-total-users',     stats.users);
     set('adm-active-subs',     stats.active_subs);
     set('adm-total-mrr',       stats.mrr + ' €');
+    set('adm-mrr-current',     stats.mrr + ' €');
     set('adm-total-prospects', stats.prospects);
     set('adm-total-mandats',   stats.mandats);
     set('adm-new-today',       '+' + stats.new_today + ' aujourd\'hui');
+
+    // Sparkline MRR — placeholder data si pas encore d'historique
+    const sp = document.getElementById('adm-mrr-sparkline');
+    if(sp){
+      // Pour l'instant, on simule une progression: 0,0,0,...0, MRR_actuel
+      // Quand on aura l'historique en DB, on remplacera par les vraies valeurs
+      const mrr = parseFloat(stats.mrr) || 0;
+      const months = 12;
+      const data = [];
+      for(let i = 0; i < months; i++){
+        const factor = Math.pow(i/(months-1), 2.5); // courbe accélérée
+        data.push(Math.round(mrr * factor));
+      }
+      const max = Math.max(...data, 1);
+      const monthsLabels = ['Mai','Juin','Juil','Août','Sep','Oct','Nov','Déc','Jan','Fév','Mar','Avr','Mai'];
+      const now = new Date();
+      sp.innerHTML = data.map((v, i) => {
+        const h = (v / max) * 100;
+        const m = new Date(now.getFullYear(), now.getMonth() - (months - 1 - i), 1);
+        const label = m.toLocaleDateString('fr-FR', { month: 'short', year: '2-digit' });
+        return `<div class="adm-spark-bar" style="height:${Math.max(2, h)}%" data-tooltip="${label} — ${v} €"></div>`;
+      }).join('');
+    }
 
     const total = Math.max(stats.users, 1);
     const pc = document.getElementById('adm-plans-chart');
     if(pc){
       const rows = [
-        { l: 'Gratuit', v: stats.plans.free,    c: 'rgba(255,255,255,.2)' },
-        { l: 'Starter', v: stats.plans.starter, c: '#1D6FE8' },
-        { l: 'Pro',     v: stats.plans.pro,     c: '#F08A6E' },
-        { l: 'Agence',  v: stats.plans.agency,  c: '#8B5CF6' },
+        { l: 'Gratuit', v: stats.plans.free,    c: '#A3A3A3' },
+        { l: 'Starter', v: stats.plans.starter, c: '#3B82F6' },
+        { l: 'Pro',     v: stats.plans.pro,     c: '#0F0F11' },
+        { l: 'Agence',  v: stats.plans.agency,  c: '#7C3AED' },
       ];
       pc.innerHTML = rows.map(r => `<div class="adm-bar-row"><div class="adm-bar-label">${r.l}</div><div class="adm-bar-wrap"><div class="adm-bar-fill" style="width:${(r.v/total)*100}%;background:${r.c}"></div></div><div class="adm-bar-val">${r.v}</div></div>`).join('');
     }
@@ -8264,9 +8447,9 @@ async function renderAdminOverview(){
     const ac = document.getElementById('adm-activity-chart');
     if(ac){
       ac.innerHTML = (audit || []).map(l => {
-        const c = l.action.includes('login') ? '#86EFAC' : l.action.includes('code') ? '#93C5FD' : '#FDBA74';
-        return `<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.04)"><div style="width:6px;height:6px;border-radius:50%;background:${c};flex-shrink:0"></div><div style="flex:1;font-size:.73rem;color:rgba(255,255,255,.5);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${(l.actor_email || '—').split('@')[0]} · ${l.action}</div><div style="font-size:.64rem;color:rgba(255,255,255,.2)">${new Date(l.created_at).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})}</div></div>`;
-      }).join('') || '<div style="font-size:.76rem;color:rgba(255,255,255,.3)">Aucune activité</div>';
+        const dotClass = l.action.includes('login') ? 'green' : l.action.includes('code') ? '' : l.action.includes('delete') || l.action.includes('revoke') ? 'red' : 'amber';
+        return `<div class="adm-activity-item"><div class="adm-activity-dot ${dotClass}"></div><div style="flex:1;min-width:0"><div class="adm-activity-text" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${(l.actor_email || '—').split('@')[0]} · ${l.action}</div><div class="adm-activity-meta">${new Date(l.created_at).toLocaleString('fr-FR',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})}</div></div></div>`;
+      }).join('') || '<div style="padding:14px 0;font-size:.78rem;color:#A3A3A3;text-align:center">Aucune activité récente</div>';
     }
 
     const ru = document.getElementById('adm-recent-users');
@@ -8275,7 +8458,7 @@ async function renderAdminOverview(){
       ru.innerHTML = recent.map(u => {
         const pl = u.plan || 'free';
         return `<div class="adm-row" style="grid-template-columns:1fr 1.5fr 1fr .8fr" onclick="openUserModal('${u.id}')"><div class="adm-cell bold">${u.prenom || '—'} ${u.nom || ''}</div><div class="adm-cell" style="font-size:.74rem">${u.email || ''}</div><div class="adm-cell" style="font-size:.72rem">${u.created_at ? new Date(u.created_at).toLocaleDateString('fr-FR') : '—'}</div><div class="adm-cell"><span class="adm-badge ${planBadgeClass(pl)}">${planLabel(pl)}</span></div></div>`;
-      }).join('') || '<div style="padding:16px;text-align:center;font-size:.78rem;color:rgba(255,255,255,.3)">Aucun utilisateur</div>';
+      }).join('') || '<div style="padding:18px;text-align:center;font-size:.78rem;color:#A3A3A3">Aucun utilisateur</div>';
     }
   } catch(e){ console.warn('renderAdminOverview error:', e); }
 }
@@ -8579,40 +8762,127 @@ if(window.location.hash === '#admin') setTimeout(openAdmin, 500);
 <!-- ══════════════ BACKOFFICE ADMIN ══════════════ -->
 <div class="admin-screen hidden" id="admin-screen">
 
-  <!-- Topbar -->
-  <div class="admin-topbar">
-    <div class="admin-logo">
-      <div class="admin-logo-mark">A</div>
-      <div class="admin-logo-text">mon-crm-immo</div>
-      <span class="admin-logo-badge">Admin</span>
+  <!-- ━━ BANDEAU ROUGE ALERTE ━━ -->
+  <div class="admin-warning-bar">
+    <div class="admin-warning-bar-left">
+      <span>🚨 ESPACE ADMIN — Vous avez accès aux données de tous les utilisateurs</span>
     </div>
-    <div class="admin-nav">
-      <button class="admin-nav-btn active" onclick="adminTab(this,'overview')">📊 Vue d'ensemble</button>
-      <button class="admin-nav-btn" onclick="adminTab(this,'users')">👥 Utilisateurs</button>
-      <button class="admin-nav-btn" onclick="adminTab(this,'crm')">🎯 CRM &amp; Données</button>
-      <button class="admin-nav-btn" onclick="adminTab(this,'subscriptions')">💳 Abonnements</button>
-      <button class="admin-nav-btn" onclick="adminTab(this,'codes')">🎟️ Codes</button>
-      <button class="admin-nav-btn" onclick="adminTab(this,'events')">🪝 Stripe</button>
-      <button class="admin-nav-btn" onclick="adminTab(this,'logs')">📋 Logs</button>
-    </div>
-    <div class="admin-topbar-right">
-      <span style="font-size:.72rem;color:rgba(255,255,255,.3)" id="admin-clock"></span>
-      <button class="adm-btn adm-btn-outline" onclick="closeAdmin()" style="font-size:.72rem;padding:5px 12px">← Retour app</button>
+    <div class="admin-warning-bar-right">
+      <span id="admin-current-user">—</span>
+      <button class="admin-warning-bar-btn" onclick="closeAdmin()">↩ Quitter</button>
     </div>
   </div>
+
+  <!-- ━━ SIDEBAR + MAIN (flex row) ━━ -->
+  <div class="admin-body">
+
+  <!-- ━━ SIDEBAR ━━ -->
+  <aside class="admin-sidebar">
+    <div class="admin-sidebar-header">
+      <div class="admin-logo">
+        <div class="admin-logo-mark">M</div>
+        <div>
+          <div class="admin-logo-text">mon-crm-immo</div>
+        </div>
+      </div>
+      <span class="admin-logo-badge">Backoffice</span>
+    </div>
+
+    <nav class="admin-sidebar-nav">
+
+      <!-- Vue d'ensemble (seul, sans groupe) -->
+      <div class="admin-nav-section" style="margin-bottom:8px">
+        <button class="admin-nav-btn active" onclick="adminTab(this,'overview')">
+          <span class="nav-icon">📊</span>Vue d'ensemble
+        </button>
+      </div>
+
+      <!-- Gestion -->
+      <div class="admin-nav-section">
+        <div class="admin-nav-section-title">Gestion</div>
+        <button class="admin-nav-btn" onclick="adminTab(this,'users')">
+          <span class="nav-icon">👥</span>Utilisateurs
+        </button>
+        <button class="admin-nav-btn" onclick="adminTab(this,'subscriptions')">
+          <span class="nav-icon">💳</span>Abonnements
+        </button>
+        <button class="admin-nav-btn" onclick="adminTab(this,'crm')">
+          <span class="nav-icon">🎯</span>CRM &amp; Données
+        </button>
+      </div>
+
+      <!-- Activation -->
+      <div class="admin-nav-section">
+        <div class="admin-nav-section-title">Activation</div>
+        <button class="admin-nav-btn" onclick="adminTab(this,'codes')">
+          <span class="nav-icon">🎟️</span>Codes d'activation
+        </button>
+        <button class="admin-nav-btn disabled" title="Bientôt disponible">
+          <span class="nav-icon">📧</span>Emails clients
+          <span class="nav-soon">SOON</span>
+        </button>
+      </div>
+
+      <!-- Monitoring -->
+      <div class="admin-nav-section">
+        <div class="admin-nav-section-title">Monitoring</div>
+        <button class="admin-nav-btn" onclick="adminTab(this,'events')">
+          <span class="nav-icon">🪝</span>Stripe Events
+        </button>
+        <button class="admin-nav-btn" onclick="adminTab(this,'logs')">
+          <span class="nav-icon">📋</span>Logs admin
+        </button>
+        <button class="admin-nav-btn disabled" title="Bientôt disponible">
+          <span class="nav-icon">📈</span>Stats avancées
+          <span class="nav-soon">SOON</span>
+        </button>
+      </div>
+
+      <!-- Configuration -->
+      <div class="admin-nav-section">
+        <div class="admin-nav-section-title">Configuration</div>
+        <button class="admin-nav-btn disabled" title="Bientôt disponible">
+          <span class="nav-icon">⚙️</span>Paramètres
+          <span class="nav-soon">SOON</span>
+        </button>
+        <button class="admin-nav-btn disabled" title="Bientôt disponible">
+          <span class="nav-icon">🔐</span>Sécurité 2FA
+          <span class="nav-soon">SOON</span>
+        </button>
+      </div>
+
+    </nav>
+
+    <div class="admin-sidebar-footer">
+      <button class="admin-sidebar-footer-btn" onclick="closeAdmin()">
+        <span>←</span><span>Retour à l'app</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- ━━ ZONE PRINCIPALE ━━ -->
+  <div class="admin-main">
+
+    <!-- Topbar light (titre + horloge) -->
+    <div class="admin-topbar-light">
+      <div class="admin-topbar-title" id="admin-topbar-title">Vue d'ensemble</div>
+      <div class="admin-topbar-right-light">
+        <span class="admin-clock-light" id="admin-clock"></span>
+      </div>
+    </div>
 
   <!-- Login admin (si non auth) -->
   <div id="admin-login-gate" class="admin-login">
     <div class="admin-login-card">
       <div style="font-size:1.5rem;margin-bottom:12px;text-align:center">🛡️</div>
-      <div style="font-family:var(--fd);font-weight:700;font-size:1.05rem;color:#fff;text-align:center;margin-bottom:4px">Accès Administrateur</div>
-      <div style="font-size:.76rem;color:rgba(255,255,255,.35);text-align:center;margin-bottom:22px">Zone réservée — authentification requise</div>
+      <div style="font-family:var(--fd);font-weight:700;font-size:1.05rem;color:#0F0F11;text-align:center;margin-bottom:4px">Accès Administrateur</div>
+      <div style="font-size:.76rem;color:#737373;text-align:center;margin-bottom:22px">Zone réservée — authentification requise</div>
       <div class="auth-alert error hidden" id="admin-auth-error" style="margin-bottom:12px"><span>⚠️</span><span id="admin-auth-msg"></span></div>
       <label class="adm-label">Email admin</label>
       <input class="adm-input" type="email" id="admin-auth-email" placeholder="admin@immoai.pro" onkeydown="if(event.key==='Enter')document.getElementById('admin-auth-pwd').focus()">
       <label class="adm-label">Mot de passe</label>
       <input class="adm-input" type="password" id="admin-auth-pwd" placeholder="••••••••" onkeydown="if(event.key==='Enter')adminAuth()">
-      <button class="adm-btn adm-btn-red" style="width:100%;margin-top:4px;padding:10px" onclick="adminAuth()">Accéder au backoffice →</button>
+      <button class="adm-btn adm-btn-primary" style="width:100%;margin-top:4px;padding:11px" onclick="adminAuth()">Accéder au backoffice →</button>
     </div>
   </div>
 
@@ -8622,29 +8892,46 @@ if(window.location.hash === '#admin') setTimeout(openAdmin, 500);
 
       <!-- TAB: Overview -->
       <div id="admin-tab-overview">
-        <div style="margin-bottom:20px">
-          <div style="font-family:var(--fd);font-weight:700;font-size:1.1rem;color:#fff;margin-bottom:3px">Vue d'ensemble</div>
-          <div style="font-size:.76rem;color:rgba(255,255,255,.3)" id="admin-last-refresh"></div>
+        <div style="margin-bottom:18px">
+          <div style="font-family:var(--fd);font-weight:700;font-size:1.15rem;color:#0F0F11;margin-bottom:3px;letter-spacing:-.01em">Vue d'ensemble</div>
+          <div style="font-size:.74rem;color:#737373" id="admin-last-refresh"></div>
         </div>
-        <!-- KPIs -->
+        <!-- KPIs (5 colonnes, dense) -->
         <div class="adm-kpi-grid">
-          <div class="adm-kpi"><div class="adm-kpi-accent" style="background:#F08A6E"></div><div class="adm-kpi-val" id="adm-total-users">0</div><div class="adm-kpi-label">Utilisateurs</div><div class="adm-kpi-trend" style="color:#86EFAC" id="adm-new-today">+0 aujourd'hui</div></div>
-          <div class="adm-kpi"><div class="adm-kpi-accent" style="background:#8B5CF6"></div><div class="adm-kpi-val" id="adm-active-subs">0</div><div class="adm-kpi-label">Abonnés actifs</div><div class="adm-kpi-trend" style="color:#C4B5FD">Pro + Agence</div></div>
-          <div class="adm-kpi"><div class="adm-kpi-accent" style="background:#16A34A"></div><div class="adm-kpi-val" id="adm-total-mrr">0 €</div><div class="adm-kpi-label">MRR estimé</div><div class="adm-kpi-trend" style="color:#86EFAC">Revenus récurrents</div></div>
-          <div class="adm-kpi"><div class="adm-kpi-accent" style="background:#2563EB"></div><div class="adm-kpi-val" id="adm-total-prospects">0</div><div class="adm-kpi-label">Prospects CRM</div><div class="adm-kpi-trend" style="color:#93C5FD">Total plateforme</div></div>
-          <div class="adm-kpi"><div class="adm-kpi-accent" style="background:#EF4444"></div><div class="adm-kpi-val" id="adm-total-mandats">0</div><div class="adm-kpi-label">Mandats</div><div class="adm-kpi-trend" style="color:#FCA5A5">Total plateforme</div></div>
+          <div class="adm-kpi"><div class="adm-kpi-accent"></div><div class="adm-kpi-val" id="adm-total-users">0</div><div class="adm-kpi-label">Utilisateurs</div><div class="adm-kpi-trend" style="color:#16A34A" id="adm-new-today">+0 aujourd'hui</div></div>
+          <div class="adm-kpi"><div class="adm-kpi-accent"></div><div class="adm-kpi-val" id="adm-active-subs">0</div><div class="adm-kpi-label">Abonnés actifs</div><div class="adm-kpi-trend" style="color:#737373">Starter + Pro</div></div>
+          <div class="adm-kpi"><div class="adm-kpi-accent"></div><div class="adm-kpi-val" id="adm-total-mrr">0 €</div><div class="adm-kpi-label">MRR estimé</div><div class="adm-kpi-trend" style="color:#16A34A">Revenus récurrents</div></div>
+          <div class="adm-kpi"><div class="adm-kpi-accent"></div><div class="adm-kpi-val" id="adm-total-prospects">0</div><div class="adm-kpi-label">Prospects CRM</div><div class="adm-kpi-trend" style="color:#737373">Total plateforme</div></div>
+          <div class="adm-kpi"><div class="adm-kpi-accent"></div><div class="adm-kpi-val" id="adm-total-mandats">0</div><div class="adm-kpi-label">Mandats</div><div class="adm-kpi-trend" style="color:#737373">Total plateforme</div></div>
         </div>
-        <!-- Graphiques -->
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">
+
+        <!-- Évolution MRR (graphique principal) -->
+        <div class="adm-card" style="margin-bottom:18px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+            <div>
+              <div style="font-family:var(--fd);font-weight:700;font-size:.9rem;color:#0F0F11">📈 Évolution MRR (12 mois)</div>
+              <div style="font-size:.7rem;color:#737373;margin-top:2px">Revenus mensuels récurrents</div>
+            </div>
+            <div style="font-family:var(--fd);font-weight:800;font-size:1.4rem;color:#0F0F11" id="adm-mrr-current">0 €</div>
+          </div>
+          <div class="adm-spark-container" id="adm-mrr-sparkline"></div>
+          <div class="adm-spark-labels" id="adm-mrr-labels">
+            <span>Mai 25</span><span>Aoû 25</span><span>Nov 25</span><span>Fév 26</span><span>Mai 26</span>
+          </div>
+        </div>
+
+        <!-- 2 colonnes : Répartition + Activité -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px">
           <div class="adm-card">
-            <div style="font-family:var(--fd);font-weight:700;font-size:.82rem;color:#fff;margin-bottom:14px">📊 Répartition des plans</div>
+            <div style="font-family:var(--fd);font-weight:700;font-size:.85rem;color:#0F0F11;margin-bottom:14px">Répartition des plans</div>
             <div id="adm-plans-chart"></div>
           </div>
-          <div class="adm-card">
-            <div style="font-family:var(--fd);font-weight:700;font-size:.82rem;color:#fff;margin-bottom:14px">🌍 Activité récente</div>
+          <div class="adm-activity">
+            <div style="font-family:var(--fd);font-weight:700;font-size:.85rem;color:#0F0F11;margin-bottom:10px">Activité récente</div>
             <div id="adm-activity-chart"></div>
           </div>
         </div>
+
         <!-- Dernières inscriptions -->
         <div class="adm-sec"><div class="adm-sec-title">🆕 Dernières inscriptions</div></div>
         <div class="adm-table">
@@ -8660,8 +8947,8 @@ if(window.location.hash === '#admin') setTimeout(openAdmin, 500);
         <div class="adm-sec">
           <div class="adm-sec-title">👥 Gestion des utilisateurs</div>
           <div style="display:flex;gap:8px">
-            <div class="adm-search"><span style="color:rgba(255,255,255,.3)">🔍</span><input type="text" placeholder="Rechercher..." id="adm-user-search" oninput="renderAdminUsers()"></div>
-            <select id="adm-user-plan-filter" onchange="renderAdminUsers()" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:7px 10px;font-size:.76rem;color:rgba(255,255,255,.6);outline:none">
+            <div class="adm-search"><span style="color:#737373">🔍</span><input type="text" placeholder="Rechercher..." id="adm-user-search" oninput="renderAdminUsers()"></div>
+            <select id="adm-user-plan-filter" onchange="renderAdminUsers()" style="background:#FAFAFA;border:1px solid #EAEAEA;border-radius:8px;padding:7px 10px;font-size:.76rem;color:#525252;outline:none">
               <option value="all">Tous les plans</option>
               <option value="free">Gratuit</option>
               <option value="pro">Pro</option>
@@ -8681,22 +8968,22 @@ if(window.location.hash === '#admin') setTimeout(openAdmin, 500);
       <div id="admin-tab-crm" style="display:none">
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:20px">
           <div class="adm-card">
-            <div style="font-size:.65rem;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px">Prospects totaux</div>
-            <div style="font-family:var(--fd);font-weight:800;font-size:1.8rem;color:#fff" id="adm-crm-prospects">0</div>
+            <div style="font-size:.65rem;color:#737373;text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px">Prospects totaux</div>
+            <div style="font-family:var(--fd);font-weight:800;font-size:1.8rem;color:#0F0F11" id="adm-crm-prospects">0</div>
           </div>
           <div class="adm-card">
-            <div style="font-size:.65rem;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px">Mandats totaux</div>
-            <div style="font-family:var(--fd);font-weight:800;font-size:1.8rem;color:#fff" id="adm-crm-mandats">0</div>
+            <div style="font-size:.65rem;color:#737373;text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px">Mandats totaux</div>
+            <div style="font-family:var(--fd);font-weight:800;font-size:1.8rem;color:#0F0F11" id="adm-crm-mandats">0</div>
           </div>
           <div class="adm-card">
-            <div style="font-size:.65rem;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px">Comm. pipeline</div>
-            <div style="font-family:var(--fd);font-weight:800;font-size:1.8rem;color:#fff" id="adm-crm-comm">0 €</div>
+            <div style="font-size:.65rem;color:#737373;text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px">Comm. pipeline</div>
+            <div style="font-family:var(--fd);font-weight:800;font-size:1.8rem;color:#0F0F11" id="adm-crm-comm">0 €</div>
           </div>
         </div>
         <div class="adm-sec">
           <div class="adm-sec-title">🎯 Tous les prospects (vue admin)</div>
           <div style="display:flex;gap:8px;align-items:center">
-            <div class="adm-search"><span style="color:rgba(255,255,255,.3)">🔍</span><input type="text" placeholder="Rechercher..." id="adm-crm-search" oninput="renderAdminCRM()"></div>
+            <div class="adm-search"><span style="color:#737373">🔍</span><input type="text" placeholder="Rechercher..." id="adm-crm-search" oninput="renderAdminCRM()"></div>
             <button class="adm-btn adm-btn-outline" onclick="exportAdminCRM()">📥 Export CSV</button>
           </div>
         </div>
@@ -8713,23 +9000,23 @@ if(window.location.hash === '#admin') setTimeout(openAdmin, 500);
         <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px">
           <div class="adm-card" style="border-color:rgba(29,111,232,.2)">
             <div style="font-size:.65rem;color:#93C5FD;text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px">Plan Starter · 35€/mois</div>
-            <div style="font-family:var(--fd);font-weight:800;font-size:1.8rem;color:#fff" id="adm-sub-starter">0</div>
-            <div style="font-size:.72rem;color:rgba(255,255,255,.3);margin-top:4px" id="adm-sub-starter-mrr">0 € MRR</div>
+            <div style="font-family:var(--fd);font-weight:800;font-size:1.8rem;color:#0F0F11" id="adm-sub-starter">0</div>
+            <div style="font-size:.72rem;color:#737373;margin-top:4px" id="adm-sub-starter-mrr">0 € MRR</div>
           </div>
           <div class="adm-card" style="border-color:rgba(243,106,31,.2)">
             <div style="font-size:.65rem;color:#FDBA74;text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px">Plan Pro · 75€/mois</div>
-            <div style="font-family:var(--fd);font-weight:800;font-size:1.8rem;color:#fff" id="adm-sub-pro">0</div>
-            <div style="font-size:.72rem;color:rgba(255,255,255,.3);margin-top:4px" id="adm-sub-pro-mrr">0 € MRR</div>
+            <div style="font-family:var(--fd);font-weight:800;font-size:1.8rem;color:#0F0F11" id="adm-sub-pro">0</div>
+            <div style="font-size:.72rem;color:#737373;margin-top:4px" id="adm-sub-pro-mrr">0 € MRR</div>
           </div>
           <div class="adm-card" style="border-color:rgba(139,92,246,.2)">
             <div style="font-size:.65rem;color:#C4B5FD;text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px">Plan Agence · 149€/mois</div>
-            <div style="font-family:var(--fd);font-weight:800;font-size:1.8rem;color:#fff" id="adm-sub-agency">0</div>
-            <div style="font-size:.72rem;color:rgba(255,255,255,.3);margin-top:4px" id="adm-sub-agency-mrr">0 € MRR</div>
+            <div style="font-family:var(--fd);font-weight:800;font-size:1.8rem;color:#0F0F11" id="adm-sub-agency">0</div>
+            <div style="font-size:.72rem;color:#737373;margin-top:4px" id="adm-sub-agency-mrr">0 € MRR</div>
           </div>
           <div class="adm-card">
-            <div style="font-size:.65rem;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px">MRR Total</div>
+            <div style="font-size:.65rem;color:#737373;text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px">MRR Total</div>
             <div style="font-family:var(--fd);font-weight:800;font-size:1.8rem;color:#16A34A" id="adm-sub-mrr-total">0 €</div>
-            <div style="font-size:.72rem;color:rgba(255,255,255,.3);margin-top:4px">Revenus récurrents</div>
+            <div style="font-size:.72rem;color:#737373;margin-top:4px">Revenus récurrents</div>
           </div>
         </div>
         <div class="adm-sec"><div class="adm-sec-title">💳 Abonnements actifs</div></div>
@@ -8749,11 +9036,11 @@ if(window.location.hash === '#admin') setTimeout(openAdmin, 500);
         <div class="adm-kpi-grid" style="grid-template-columns:repeat(4,1fr)">
           <div class="adm-kpi"><div class="adm-kpi-accent" style="background:#FBBF24"></div><div class="adm-kpi-val" id="adm-codes-pending">0</div><div class="adm-kpi-label">En attente</div></div>
           <div class="adm-kpi"><div class="adm-kpi-accent" style="background:#22C55E"></div><div class="adm-kpi-val" id="adm-codes-used">0</div><div class="adm-kpi-label">Utilisés</div></div>
-          <div class="adm-kpi"><div class="adm-kpi-accent" style="background:rgba(255,255,255,.3)"></div><div class="adm-kpi-val" id="adm-codes-expired">0</div><div class="adm-kpi-label">Expirés</div></div>
+          <div class="adm-kpi"><div class="adm-kpi-accent" style="background:#A3A3A3"></div><div class="adm-kpi-val" id="adm-codes-expired">0</div><div class="adm-kpi-label">Expirés</div></div>
           <div class="adm-kpi"><div class="adm-kpi-accent" style="background:#EF4444"></div><div class="adm-kpi-val" id="adm-codes-revoked">0</div><div class="adm-kpi-label">Révoqués</div></div>
         </div>
         <div class="adm-card" style="margin-bottom:18px">
-          <div style="font-family:var(--fd);font-weight:700;font-size:.82rem;color:#fff;margin-bottom:14px">⚡ Générer un code manuel</div>
+          <div style="font-family:var(--fd);font-weight:700;font-size:.82rem;color:#0F0F11;margin-bottom:14px">⚡ Générer un code manuel</div>
           <div style="display:grid;grid-template-columns:1fr 1.5fr 90px 1fr 100px;gap:8px;align-items:end">
             <div>
               <label class="adm-label" style="font-size:.66rem">Plan</label>
@@ -8784,8 +9071,8 @@ if(window.location.hash === '#admin') setTimeout(openAdmin, 500);
         <div class="adm-sec">
           <div class="adm-sec-title">Tous les codes</div>
           <div style="display:flex;gap:8px">
-            <div class="adm-search"><span style="color:rgba(255,255,255,.3)">🔍</span><input type="text" placeholder="Code ou email..." id="adm-code-search" oninput="renderAdminCodes()"></div>
-            <select id="adm-code-status-filter" onchange="renderAdminCodes()" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:7px 10px;font-size:.76rem;color:rgba(255,255,255,.6);outline:none">
+            <div class="adm-search"><span style="color:#737373">🔍</span><input type="text" placeholder="Code ou email..." id="adm-code-search" oninput="renderAdminCodes()"></div>
+            <select id="adm-code-status-filter" onchange="renderAdminCodes()" style="background:#FAFAFA;border:1px solid #EAEAEA;border-radius:8px;padding:7px 10px;font-size:.76rem;color:#525252;outline:none">
               <option value="all">Tous</option>
               <option value="pending">En attente</option>
               <option value="used">Utilisés</option>
@@ -8808,7 +9095,7 @@ if(window.location.hash === '#admin') setTimeout(openAdmin, 500);
           <div class="adm-sec-title">🪝 Events Stripe (webhook)</div>
           <button class="adm-btn adm-btn-outline" onclick="renderAdminEvents()" style="font-size:.72rem">↺ Actualiser</button>
         </div>
-        <div style="background:rgba(96,165,250,.08);border:1px solid rgba(96,165,250,.2);border-radius:8px;padding:12px 16px;margin-bottom:14px;font-size:.76rem;color:rgba(255,255,255,.6);line-height:1.6">
+        <div style="background:rgba(96,165,250,.08);border:1px solid rgba(96,165,250,.2);border-radius:8px;padding:12px 16px;margin-bottom:14px;font-size:.76rem;color:#525252;line-height:1.6">
           💡 Les 100 derniers events reçus par l'Edge Function <code>stripe-webhook</code>.
           Point <span style="color:#22C55E">vert</span> = traité, <span style="color:#FBBF24">jaune</span> = en cours, <span style="color:#EF4444">rouge</span> = erreur.
         </div>
@@ -8825,7 +9112,7 @@ if(window.location.hash === '#admin') setTimeout(openAdmin, 500);
         <div class="adm-sec">
           <div class="adm-sec-title">📋 Logs d'activité plateforme</div>
           <div style="display:flex;gap:8px">
-            <div class="adm-search"><span style="color:rgba(255,255,255,.3)">🔍</span><input type="text" placeholder="Filtrer..." id="adm-log-search" oninput="renderAdminLogs()"></div>
+            <div class="adm-search"><span style="color:#737373">🔍</span><input type="text" placeholder="Filtrer..." id="adm-log-search" oninput="renderAdminLogs()"></div>
             <button class="adm-btn adm-btn-outline" onclick="renderAdminLogs()">↺ Actualiser</button>
           </div>
         </div>
@@ -8837,9 +9124,11 @@ if(window.location.hash === '#admin') setTimeout(openAdmin, 500);
         </div>
       </div>
 
-    </div>
-  </div>
-</div>
+    </div><!-- /admin-content -->
+  </div><!-- /admin-dashboard -->
+  </div><!-- /admin-main -->
+  </div><!-- /admin-body -->
+</div><!-- /admin-screen -->
 
 <!-- Modal édition utilisateur -->
 <div class="adm-modal-overlay hidden" id="adm-user-modal">
