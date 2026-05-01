@@ -1340,6 +1340,7 @@ body{font-family:var(--fb);background:#FAFAFA;color:var(--g900);min-height:100vh
 .adm-btn-outline:hover{background:rgba(255,255,255,.1);color:#fff}
 /* Plan badges */
 .plan-free{background:rgba(255,255,255,.06);color:rgba(255,255,255,.4)}
+.plan-starter{background:rgba(29,111,232,.15);color:#93C5FD}
 .plan-pro{background:rgba(243,106,31,.15);color:#FDBA74}
 .plan-agency{background:rgba(139,92,246,.15);color:#C4B5FD}
 
@@ -1425,7 +1426,7 @@ body{font-family:var(--fb);background:#FAFAFA;color:var(--g900);min-height:100vh
   <div class="auth-right">
     <div class="auth-form-wrap">
       <div class="auth-form-title">Bon retour 👋</div>
-      <div class="auth-form-sub">Pas encore de compte&nbsp;? <a href="https://mon-crm-immo.fr/#tarifs" style="color:var(--brand)">Voir les offres &rarr;</a></div>
+      <div class="auth-form-sub">Pas encore de compte&nbsp;? <a href="#" onclick="showScreen('register-screen')" style="color:var(--brand);font-weight:600">Voir les offres &rarr;</a></div>
 
       
 
@@ -2832,25 +2833,6 @@ body{font-family:var(--fb);background:#FAFAFA;color:var(--g900);min-height:100vh
     </div>
   </div>
 </div>
-
-<!-- ══ PANNEAU LEÇON ══ -->
-<div class="lesson-overlay hidden" id="lesson-overlay">
-  <div class="lesson-panel">
-    <div class="lesson-header" id="lesson-header">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-        <div style="display:flex;align-items:center;gap:8px">
-          <span id="lesson-module-icon" style="font-size:1.2rem">📋</span>        </div>
-        <span style="font-size:.68rem;font-weight:600;opacity:.8" id="lesson-step-info">Étape 1/1</span>
-      </div>
-    </div>
-    <div class="lesson-body" id="lesson-body"></div>
-    <div style="padding:16px 24px;border-top:1px solid var(--g100);display:flex;gap:10px;background:var(--w);flex-shrink:0">
-      <button id="lesson-prev-btn" onclick="lessonNav(-1)" class="btn btn-outline" style="font-size:.78rem;padding:9px 18px">← Précédent</button>
-      <button id="lesson-next-btn" onclick="lessonNav(1)" class="btn" style="background:#6366F1;color:#fff;border:none;font-family:var(--fd);font-weight:700;font-size:.78rem;padding:9px 24px;border-radius:9px;cursor:pointer;flex:1">Suivant →</button>
-    </div>
-  </div>
-</div>
-
 
 <!-- ══ PRODUITS ══ -->
 <div id="v-products" class="view">
@@ -7394,39 +7376,116 @@ function toggleBilling(){
   if(pp) pp.innerHTML = _billingAnnual ? '60&euro;' : '75&euro;';
 }
 
+// ══ AUTO-FILL CODE D'ACTIVATION DEPUIS L'URL ══
+// Le webhook Stripe envoie un email avec un lien vers /?code=MCI-XXXX-XXXX
+// Cette fonction pré-remplit le formulaire d'activation automatiquement.
+(function autoFillActivationCode(){
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const code   = params.get('code');
+    const paid   = params.get('paid');
+
+    // Détection retour Stripe (paiement réussi)
+    if(paid === '1'){
+      setTimeout(() => {
+        if(typeof toast === 'function') toast('✅ Paiement reçu ! Votre code d\'activation arrive par email dans une minute.');
+        else alert('✅ Paiement reçu ! Votre code d\'activation arrive par email dans une minute.');
+      }, 800);
+      window.history.replaceState({}, '', window.location.pathname);
+      return;
+    }
+
+    if(!code) return;
+
+    // Aller sur l'écran d'inscription et pré-remplir
+    document.addEventListener('DOMContentLoaded', () => {
+      if(typeof showScreen === 'function') showScreen('register-screen');
+      setTimeout(() => {
+        const input = document.getElementById('activation-code');
+        if(input){
+          input.value = code.trim().toUpperCase();
+          if(typeof checkActivationCode === 'function') checkActivationCode();
+        }
+      }, 600);
+    });
+
+    // Si DOMContentLoaded déjà passé
+    if(document.readyState === 'complete' || document.readyState === 'interactive'){
+      setTimeout(() => {
+        if(typeof showScreen === 'function') showScreen('register-screen');
+        const input = document.getElementById('activation-code');
+        if(input){
+          input.value = code.trim().toUpperCase();
+          if(typeof checkActivationCode === 'function') checkActivationCode();
+        }
+      }, 600);
+    }
+
+    // Nettoyer l'URL pour ne pas exposer le code
+    window.history.replaceState({}, '', window.location.pathname);
+  } catch(e){ console.warn('autoFillActivationCode error:', e); }
+})();
+
 // ══ CODES D'ACTIVATION ══
-const ACTIVATION_CODES = {
-  'STARTER2026': { plan: 'starter', label: 'Plan Starter' },
-  'PRO2026':     { plan: 'pro',     label: 'Plan Pro' },
-  'PMCORP35':    { plan: 'starter', label: 'Plan Starter — PM Corp' },
-  'PMCORP75':    { plan: 'pro',     label: 'Plan Pro — PM Corp' },
-  'BETA2026':    { plan: 'pro',     label: 'Accès Beta Gratuit' },
+// La source de vérité est la table Supabase activation_codes (générée par Stripe webhook).
+// Les codes "master" ci-dessous sont des fallback en dur pour démos / tests internes.
+const MASTER_ACTIVATION_CODES = {
+  'PMCORP75':  { plan: 'pro',     label: 'Plan Pro — PM Corp' },
+  'BETA2026':  { plan: 'pro',     label: 'Accès Beta Gratuit' },
 };
 
-function checkActivationCode(){
-  const code = (document.getElementById('activation-code')?.value || '').trim().toUpperCase();
-  const errEl = document.getElementById('activation-error');
-  
-  if(!code){ 
-    if(errEl){ errEl.style.display='block'; errEl.textContent='Entrez un code d\'activation'; }
-    return; 
+async function checkActivationCode(){
+  const codeRaw = (document.getElementById('activation-code')?.value || '').trim().toUpperCase();
+  const errEl   = document.getElementById('activation-error');
+  const btn     = document.querySelector('button[onclick="checkActivationCode()"]');
+  const showErr = (msg) => { if(errEl){ errEl.style.display='block'; errEl.textContent=msg; } };
+
+  if(!codeRaw){ return showErr('Entrez un code d\'activation'); }
+
+  // 1) Master codes en dur (fallback démo/test)
+  if(MASTER_ACTIVATION_CODES[codeRaw]){
+    if(errEl) errEl.style.display='none';
+    sessionStorage.setItem('activation_code', codeRaw);
+    sessionStorage.setItem('activation_plan', MASTER_ACTIVATION_CODES[codeRaw].plan);
+    return showActivationForm(MASTER_ACTIVATION_CODES[codeRaw]);
   }
-  
-  const plan = ACTIVATION_CODES[code];
-  if(!plan){
-    if(errEl){ errEl.style.display='block'; errEl.textContent='Code invalide ou expiré'; }
-    return;
+
+  // 2) Lookup Supabase
+  const sb = getSB();
+  if(!sb){ return showErr('Connexion serveur indisponible. Réessayez.'); }
+
+  if(btn){ btn.disabled = true; btn.textContent = 'Vérification…'; }
+
+  try {
+    const { data, error } = await sb
+      .from('activation_codes')
+      .select('code, plan, status, expires_at, email')
+      .eq('code', codeRaw)
+      .maybeSingle();
+
+    if(error){ console.warn(error); return showErr('Erreur de vérification. Réessayez.'); }
+    if(!data){ return showErr('Code invalide ou expiré'); }
+
+    if(data.status === 'used')    return showErr('Ce code a déjà été utilisé. Connectez-vous à votre compte.');
+    if(data.status === 'expired' || new Date(data.expires_at) < new Date()) return showErr('Ce code a expiré. Contactez le support.');
+    if(data.status === 'revoked') return showErr('Ce code a été révoqué. Contactez le support.');
+
+    // Code valide
+    if(errEl) errEl.style.display='none';
+    sessionStorage.setItem('activation_code', codeRaw);
+    sessionStorage.setItem('activation_plan', data.plan);
+    sessionStorage.setItem('activation_email_hint', data.email || '');
+
+    showActivationForm({
+      plan: data.plan,
+      label: data.plan === 'pro' ? 'Plan Pro' : data.plan === 'agency' ? 'Plan Agence' : 'Plan Starter',
+    });
+  } catch(e){
+    console.error(e);
+    showErr('Erreur réseau. Réessayez dans un instant.');
+  } finally {
+    if(btn){ btn.disabled = false; btn.innerHTML = 'Valider &#8594;'; }
   }
-  
-  // Code valide → afficher le formulaire d'inscription simplifié
-  if(errEl) errEl.style.display='none';
-  
-  // Stocker le code validé
-  sessionStorage.setItem('activation_code', code);
-  sessionStorage.setItem('activation_plan', plan.plan);
-  
-  // Afficher le formulaire de création de compte
-  showActivationForm(plan);
 }
 
 function showActivationForm(plan){
@@ -7541,26 +7600,97 @@ function _finishLogin(user, remCb){
   const app=document.getElementById('app-root');
   if(app)app.style.display='flex';
   updateUserUI(); updateStorageIndicator(); startClock(); bootApp();
+
+  // Charger le plan depuis Supabase (source de vérité)
+  if(typeof refreshUserPlan === 'function'){
+    refreshUserPlan().then(plan => {
+      if(plan && typeof updatePlanBadge === 'function') updatePlanBadge();
+    }).catch(_ => {});
+  }
 }
 
-function doRegister(){
-  const prenom=document.getElementById('reg-prenom').value.trim();
-  const nom=document.getElementById('reg-nom').value.trim();
-  const email=document.getElementById('reg-email').value.trim().toLowerCase();
-  const pwd=document.getElementById('reg-pwd').value;
-  const agence=document.getElementById('reg-agence').value.trim();
-  if(!prenom||!nom||!email||!pwd){showAuthAlert('reg-error','Remplissez les champs obligatoires');return;}
-  if(pwd.length<6){showAuthAlert('reg-error','Le mot de passe doit faire au moins 6 caractères');return;}
-  const users=getUsers();
-  if(users.find(u=>u.email.toLowerCase()===email)){showAuthAlert('reg-error','Cet email est déjà utilisé');return;}
-  const newUser={id:'u'+Date.now(),email,pwd,prenom,nom,agence,createdAt:new Date().toISOString()};
-  authUsers.push(newUser);
-  localStorage.setItem('immoai_users',JSON.stringify(authUsers));
-  addLog('Création de compte',newUser);
-  document.getElementById('login-email').value=email;
-  document.getElementById('login-pwd').value=pwd;
-  showScreen('login-screen');
-  setTimeout(()=>doLogin(),200);
+async function doRegister(){
+  const prenom = document.getElementById('reg-prenom').value.trim();
+  const nom    = document.getElementById('reg-nom').value.trim();
+  const email  = document.getElementById('reg-email').value.trim().toLowerCase();
+  const pwd    = document.getElementById('reg-pwd').value;
+  const agence = document.getElementById('reg-agence').value.trim();
+  const btn    = document.querySelector('#register-screen .auth-btn');
+
+  if(!prenom || !nom || !email || !pwd){ showAuthAlert('reg-error','Remplissez les champs obligatoires'); return; }
+  if(pwd.length < 6){ showAuthAlert('reg-error','Le mot de passe doit faire au moins 6 caractères'); return; }
+
+  // Récupérer un éventuel code d'activation
+  const activationCode = sessionStorage.getItem('activation_code');
+  const isMasterCode   = activationCode && MASTER_ACTIVATION_CODES[activationCode];
+
+  if(btn){ btn.disabled = true; btn.textContent = 'Création du compte…'; }
+
+  try {
+    // 1) Création du compte Supabase
+    let sbUser = null;
+    try {
+      sbUser = await sbRegister(email, pwd, { prenom, nom, agence });
+    } catch(sbErr){
+      const msg = sbErr?.message || '';
+      if(msg.toLowerCase().includes('already')){
+        showAuthAlert('reg-error','Cet email est déjà utilisé. Connectez-vous.');
+        if(btn){ btn.disabled = false; btn.textContent = 'Créer mon compte →'; }
+        return;
+      }
+      // Sinon on continue en fallback localStorage
+      console.warn('sbRegister failed, fallback localStorage:', sbErr);
+    }
+
+    // 2) Fallback localStorage (au cas où Supabase échoue)
+    const users = getUsers();
+    if(!users.find(u => u.email.toLowerCase() === email)){
+      const newUser = {
+        id: sbUser?.id || ('u' + Date.now()),
+        sbId: sbUser?.id,
+        email, pwd, prenom, nom, agence,
+        createdAt: new Date().toISOString(),
+      };
+      authUsers.push(newUser);
+      localStorage.setItem('immoai_users', JSON.stringify(authUsers));
+      addLog('Création de compte', newUser);
+    }
+
+    // 3) Consommer le code d'activation (RPC atomique)
+    if(activationCode && !isMasterCode && sbUser){
+      try {
+        // Petit délai pour laisser la session Supabase s'établir
+        await new Promise(r => setTimeout(r, 500));
+        const sb = getSB();
+        const { data: useResult, error: useErr } = await sb.rpc('use_activation_code', {
+          p_code: activationCode,
+        });
+        if(useErr){ console.warn('use_activation_code error:', useErr); }
+        else if(useResult?.ok){
+          console.log('✅ Code activé:', useResult.plan);
+          profile.plan = useResult.plan;
+          localStorage.setItem('immoai_profile', JSON.stringify(profile));
+        } else {
+          console.warn('Activation refused:', useResult?.error);
+        }
+      } catch(e){ console.warn('Activation RPC error:', e); }
+    }
+
+    // 4) Nettoyer
+    sessionStorage.removeItem('activation_code');
+    sessionStorage.removeItem('activation_plan');
+    sessionStorage.removeItem('activation_email_hint');
+
+    // 5) Auto-login
+    document.getElementById('login-email').value = email;
+    document.getElementById('login-pwd').value   = pwd;
+    showScreen('login-screen');
+    setTimeout(() => doLogin(), 200);
+  } catch(e){
+    console.error('doRegister error:', e);
+    showAuthAlert('reg-error', 'Erreur création de compte. Réessayez.');
+    if(btn){ btn.disabled = false; btn.textContent = 'Créer mon compte →'; }
+  }
 }
 
 function doLogout(){
@@ -7770,11 +7900,6 @@ function startClock(){
 // ══════════════════════════════════════════
 
 function skipOnboarding(){
-  document.getElementById('onboard-welcome')?.classList.remove('active');
-  document.getElementById('onboard-overlay').classList.remove('active');
-  document.getElementById('onboard-backdrop').classList.remove('dim');
-  document.getElementById('onboard-highlight').classList.add('hidden');
-  document.getElementById('onboard-bubble').classList.add('hidden');
   localStorage.setItem('immoai_onboarded','1');
   toast('🎉 Bienvenue sur mon-crm-immo ! Vous pouvez relancer le tuto depuis votre profil.');
 }
@@ -7811,17 +7936,54 @@ function positionBubble(bubble, targetRect, pos){
 
 function relaunchOnboarding(){
   localStorage.removeItem('immoai_onboarded');
-  document.getElementById('onboard-welcome')?.classList.add('active');
 }
 
 
 // ══ PLAN MANAGEMENT ══
+// Cache en mémoire pour éviter trop d'allers-retours Supabase
+let _planCache = null;
+let _planCacheTs = 0;
+
+async function refreshUserPlan(){
+  // Source de vérité = Supabase profiles.plan
+  if(currentUser?.sbId){
+    try {
+      const sb = getSB();
+      if(sb){
+        const { data } = await sb.from('profiles')
+          .select('plan, subscription_status')
+          .eq('id', currentUser.sbId)
+          .maybeSingle();
+        if(data){
+          const plan = (data.subscription_status === 'active') ? (data.plan || 'free') : 'free';
+          _planCache = plan;
+          _planCacheTs = Date.now();
+          // Sync localStorage pour fallback offline
+          const subs = JSON.parse(localStorage.getItem('immoai_subs') || '{}');
+          subs[currentUser.sbId] = plan;
+          subs[currentUser.id]   = plan;
+          localStorage.setItem('immoai_subs', JSON.stringify(subs));
+          return plan;
+        }
+      }
+    } catch(e){ console.warn('refreshUserPlan error:', e); }
+  }
+  return null;
+}
+
 function getUserCurrentPlan(){
-  // Lit le plan depuis localStorage (mis à jour par l'admin ou Stripe)
-  const subs = JSON.parse(localStorage.getItem('immoai_subs')||'{}');
-  const session = JSON.parse(sessionStorage.getItem('immoai_session')||'null');
+  // Cache mémoire (5 min)
+  if(_planCache && (Date.now() - _planCacheTs) < 5*60*1000) return _planCache;
+
+  // Fallback localStorage
+  const subs    = JSON.parse(localStorage.getItem('immoai_subs') || '{}');
+  const session = JSON.parse(sessionStorage.getItem('immoai_session') || 'null');
   if(!session) return 'free';
-  return subs[session.id] || 'free';
+
+  // Trigger refresh async pour la prochaine fois
+  if(currentUser?.sbId) refreshUserPlan().catch(_ => {});
+
+  return subs[session.sbId] || subs[session.id] || 'free';
 }
 
 const PLAN_ACCESS = {
@@ -7917,234 +8079,501 @@ function bootApp(){
   }
 })();
 
-// ══════════════════════════════════════════════
-// BACKOFFICE ADMIN — Accès restreint
+// ══════════════════════════════════════════════════════════════
+// BACKOFFICE ADMIN — VERSION SUPABASE
 // Raccourci : Ctrl+Shift+A ou URL #admin
-// Identifiants : admin@immoai.pro / AdminImmo2025!
-// ══════════════════════════════════════════════
-const ADMIN_CREDS={email:'admin@immoai.pro',pwd:'AdminImmo2025!'};
-let adminAuthed=false;
+// Auth : profiles.is_admin = TRUE (fallback password en urgence)
+// ══════════════════════════════════════════════════════════════
+const ADMIN_FALLBACK_CREDS = { email: 'admin@immoai.pro', pwd: 'AdminImmo2025!' };
+
+let adminAuthed = false;
+let adminUserId = null;
+let _adminUsersCache = [];
+let _adminCodesCache = [];
+let _adminEventsCache = [];
+let _adminAuditCache = [];
 
 function openAdmin(){
   document.getElementById('admin-screen').classList.remove('hidden');
-  if(!adminAuthed){
-    document.getElementById('admin-login-gate').style.display='flex';
-    document.getElementById('admin-dashboard').style.display='none';
-  } else { renderAdminDashboard(); }
-  setInterval(()=>{const el=document.getElementById('admin-clock');if(el)el.textContent=new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});},1000);
+  if(currentUser?.sbId){
+    checkSupabaseAdmin().then(isAdmin => {
+      if(isAdmin){
+        adminAuthed = true;
+        adminUserId = currentUser.sbId;
+        document.getElementById('admin-login-gate').style.display = 'none';
+        const dash = document.getElementById('admin-dashboard');
+        dash.style.cssText = 'display:flex;flex-direction:column;overflow:hidden;flex:1';
+        renderAdminDashboard();
+      } else {
+        document.getElementById('admin-login-gate').style.display = 'flex';
+        document.getElementById('admin-dashboard').style.display = 'none';
+      }
+    });
+  } else if(adminAuthed){
+    renderAdminDashboard();
+  } else {
+    document.getElementById('admin-login-gate').style.display = 'flex';
+    document.getElementById('admin-dashboard').style.display = 'none';
+  }
+  setInterval(() => {
+    const el = document.getElementById('admin-clock');
+    if(el) el.textContent = new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+  }, 1000);
 }
-function closeAdmin(){document.getElementById('admin-screen').classList.add('hidden');}
 
-function adminAuth(){
-  const email=document.getElementById('admin-auth-email').value.trim().toLowerCase();
-  const pwd=document.getElementById('admin-auth-pwd').value;
-  const errEl=document.getElementById('admin-auth-error');
-  if(email!==ADMIN_CREDS.email||pwd!==ADMIN_CREDS.pwd){
-    if(errEl){errEl.classList.remove('hidden');errEl.classList.add('show');}
-    document.getElementById('admin-auth-msg').textContent='Identifiants incorrects';
-    setTimeout(()=>errEl?.classList.remove('show'),4000);
+function closeAdmin(){ document.getElementById('admin-screen').classList.add('hidden'); }
+
+async function checkSupabaseAdmin(){
+  try {
+    const sb = getSB();
+    if(!sb || !currentUser?.sbId) return false;
+    const { data, error } = await sb.from('profiles').select('is_admin').eq('id', currentUser.sbId).maybeSingle();
+    if(error){ console.warn('checkSupabaseAdmin:', error); return false; }
+    return data?.is_admin === true;
+  } catch(e){ console.warn(e); return false; }
+}
+
+async function adminAuth(){
+  const email  = document.getElementById('admin-auth-email').value.trim().toLowerCase();
+  const pwd    = document.getElementById('admin-auth-pwd').value;
+  const errEl  = document.getElementById('admin-auth-error');
+  const showErr = (msg) => {
+    if(errEl){ errEl.classList.remove('hidden'); errEl.classList.add('show'); }
+    document.getElementById('admin-auth-msg').textContent = msg;
+    setTimeout(() => errEl?.classList.remove('show'), 4000);
+  };
+
+  const sb = getSB();
+  if(sb){
+    try {
+      const { data: authData, error: authErr } = await sb.auth.signInWithPassword({ email, password: pwd });
+      if(!authErr && authData?.user){
+        const { data: prof } = await sb.from('profiles').select('is_admin').eq('id', authData.user.id).maybeSingle();
+        if(prof?.is_admin){
+          adminAuthed = true;
+          adminUserId = authData.user.id;
+          document.getElementById('admin-login-gate').style.display = 'none';
+          const dash = document.getElementById('admin-dashboard');
+          dash.style.cssText = 'display:flex;flex-direction:column;overflow:hidden;flex:1';
+          try { await sb.rpc('admin_log', { p_action: 'admin.login', p_details: {} }); } catch(_){}
+          renderAdminDashboard();
+          return;
+        } else {
+          await sb.auth.signOut();
+          showErr('Ce compte n\'est pas administrateur.');
+          return;
+        }
+      }
+    } catch(e){ console.warn('Supabase admin auth error:', e); }
+  }
+
+  if(email === ADMIN_FALLBACK_CREDS.email && pwd === ADMIN_FALLBACK_CREDS.pwd){
+    adminAuthed = true;
+    adminUserId = null;
+    document.getElementById('admin-login-gate').style.display = 'none';
+    const dash = document.getElementById('admin-dashboard');
+    dash.style.cssText = 'display:flex;flex-direction:column;overflow:hidden;flex:1';
+    showAdminWarning('⚠️ Mode fallback — connecte-toi avec un compte Supabase pour accès complet.');
+    renderAdminDashboard();
     return;
   }
-  adminAuthed=true;
-  addLog('Connexion admin',{prenom:'Admin',nom:'',email});
-  document.getElementById('admin-login-gate').style.display='none';
-  const dash=document.getElementById('admin-dashboard');
-  dash.style.cssText='display:flex;flex-direction:column;overflow:hidden;flex:1';
-  renderAdminDashboard();
+  showErr('Identifiants incorrects.');
 }
 
-function adminTab(btn,tab){
-  document.querySelectorAll('.admin-nav-btn').forEach(b=>b.classList.remove('active'));
+function showAdminWarning(msg){
+  const el = document.createElement('div');
+  el.style.cssText = 'background:rgba(251,146,60,.1);border:1px solid rgba(251,146,60,.3);color:#FCD34D;padding:8px 14px;border-radius:8px;font-size:.74rem;margin-bottom:14px';
+  el.textContent = msg;
+  document.getElementById('admin-content')?.prepend(el);
+}
+
+function adminTab(btn, tab){
+  document.querySelectorAll('.admin-nav-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
-  ['overview','users','crm','subscriptions','logs'].forEach(t=>{
-    const el=document.getElementById('admin-tab-'+t);
-    if(el)el.style.display=t===tab?'block':'none';
+  ['overview','users','crm','subscriptions','codes','events','logs'].forEach(t => {
+    const el = document.getElementById('admin-tab-'+t);
+    if(el) el.style.display = (t === tab) ? 'block' : 'none';
   });
-  if(tab==='overview')renderAdminOverview();
-  else if(tab==='users')renderAdminUsers();
-  else if(tab==='crm')renderAdminCRM();
-  else if(tab==='subscriptions')renderAdminSubs();
-  else if(tab==='logs')renderAdminLogs();
+  if(tab === 'overview')           renderAdminOverview();
+  else if(tab === 'users')         renderAdminUsers();
+  else if(tab === 'crm')           renderAdminCRM();
+  else if(tab === 'subscriptions') renderAdminSubs();
+  else if(tab === 'codes')         renderAdminCodes();
+  else if(tab === 'events')        renderAdminEvents();
+  else if(tab === 'logs')          renderAdminLogs();
 }
 
-function renderAdminDashboard(){
-  document.getElementById('admin-last-refresh').textContent='Mise à jour : '+new Date().toLocaleString('fr-FR');
+async function renderAdminDashboard(){
+  document.getElementById('admin-last-refresh').textContent = 'Mise à jour : ' + new Date().toLocaleString('fr-FR');
+  await loadAdminUsersFromSupabase();
   renderAdminOverview();
 }
 
-function getUserPlan(uid){return(JSON.parse(localStorage.getItem('immoai_subs')||'{}')||{})[uid]||'free';}
-function setUserPlan(uid,plan){const s=JSON.parse(localStorage.getItem('immoai_subs')||'{}');s[uid]=plan;localStorage.setItem('immoai_subs',JSON.stringify(s));}
-function getUserSubDate(uid){return(JSON.parse(localStorage.getItem('immoai_sub_dates')||'{}')||{})[uid]||null;}
-function setUserSubDate(uid,d){const s=JSON.parse(localStorage.getItem('immoai_sub_dates')||'{}');s[uid]=d;localStorage.setItem('immoai_sub_dates',JSON.stringify(s));}
-function getLastLogin(email){const logs=JSON.parse(localStorage.getItem('immoai_logs')||'[]');const l=logs.find(lg=>lg.email===email&&lg.action==='Connexion');return l?new Date(l.ts).toLocaleDateString('fr-FR'):'—';}
-
-function renderAdminOverview(){
-  const users=getUsers();
-  const pro=users.filter(u=>getUserPlan(u.id)==='pro').length;
-  const agency=users.filter(u=>getUserPlan(u.id)==='agency').length;
-  const mrr=pro*49+agency*149;
-  const prospects=JSON.parse(localStorage.getItem('immoai_crm')||'[]');
-  const mandats=JSON.parse(localStorage.getItem('immoai_mandats')||'[]');
-  const logs=JSON.parse(localStorage.getItem('immoai_logs')||'[]');
-  const today=new Date().toLocaleDateString('fr-FR');
-  const newToday=logs.filter(l=>l.action==='Création de compte'&&new Date(l.ts).toLocaleDateString('fr-FR')===today).length;
-  const set=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};
-  set('adm-total-users',users.length);set('adm-active-subs',pro+agency);set('adm-total-mrr',mrr+'€');
-  set('adm-total-prospects',prospects.length);set('adm-total-mandats',mandats.length);set('adm-new-today','+'+newToday+' aujourd\'hui');
-  const total=Math.max(users.length,1);
-  const freeCount=users.length-pro-agency;
-  const pc=document.getElementById('adm-plans-chart');
-  if(pc)pc.innerHTML=[{l:'Gratuit',v:freeCount,c:'rgba(255,255,255,.2)'},{l:'Pro',v:pro,c:'#F08A6E'},{l:'Agence',v:agency,c:'#8B5CF6'}]
-    .map(r=>`<div class="adm-bar-row"><div class="adm-bar-label">${r.l}</div><div class="adm-bar-wrap"><div class="adm-bar-fill" style="width:${(r.v/total)*100}%;background:${r.c}"></div></div><div class="adm-bar-val">${r.v}</div></div>`).join('');
-  const ac=document.getElementById('adm-activity-chart');
-  if(ac)ac.innerHTML=logs.slice(0,6).map(l=>`<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.04)"><div style="width:6px;height:6px;border-radius:50%;background:${l.action.includes('Connexion')&&!l.action.includes('Décon')?'#86EFAC':l.action.includes('Création')?'#93C5FD':'#FDBA74'};flex-shrink:0"></div><div style="flex:1;font-size:.73rem;color:rgba(255,255,255,.5);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${l.user} · ${l.action}</div><div style="font-size:.64rem;color:rgba(255,255,255,.2)">${new Date(l.ts).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})}</div></div>`).join('')||'<div style="font-size:.76rem;color:rgba(255,255,255,.3)">Aucune activité</div>';
-  const ru=document.getElementById('adm-recent-users');
-  if(ru)ru.innerHTML=users.slice(0,5).map(u=>{const pl=getUserPlan(u.id);return`<div class="adm-row" style="grid-template-columns:1fr 1.5fr 1fr .8fr" onclick="openUserModal('${u.id}')"><div class="adm-cell bold">${u.prenom} ${u.nom}</div><div class="adm-cell" style="font-size:.74rem">${u.email}</div><div class="adm-cell" style="font-size:.72rem">${u.createdAt?new Date(u.createdAt).toLocaleDateString('fr-FR'):'—'}</div><div class="adm-cell"><span class="adm-badge ${pl==='pro'?'plan-pro':pl==='agency'?'plan-agency':'plan-free'}">${pl==='pro'?'Pro':pl==='agency'?'Agence':'Gratuit'}</span></div></div>`;}).join('')||'<div style="padding:16px;text-align:center;font-size:.78rem;color:rgba(255,255,255,.3)">Aucun utilisateur</div>';
+async function loadAdminUsersFromSupabase(){
+  const sb = getSB();
+  if(!sb){ _adminUsersCache = []; return; }
+  try {
+    const { data, error } = await sb.from('admin_users_overview').select('*').order('created_at', { ascending: false });
+    if(error){ console.warn('loadAdminUsers:', error); _adminUsersCache = []; return; }
+    _adminUsersCache = data || [];
+  } catch(e){ console.warn(e); _adminUsersCache = []; }
 }
 
-function renderAdminUsers(){
-  const q=(document.getElementById('adm-user-search')?.value||'').toLowerCase();
-  const pf=document.getElementById('adm-user-plan-filter')?.value||'all';
-  let users=getUsers().filter(u=>(!q||(u.prenom+' '+u.nom+' '+u.email).toLowerCase().includes(q))&&(pf==='all'||getUserPlan(u.id)===pf));
-  const tb=document.getElementById('adm-users-table');if(!tb)return;
-  if(!users.length){tb.innerHTML='<div style="padding:16px;text-align:center;font-size:.78rem;color:rgba(255,255,255,.3)">Aucun utilisateur</div>';return;}
-  tb.innerHTML=users.map(u=>{const pl=getUserPlan(u.id);return`<div class="adm-row" style="grid-template-columns:1.5fr 1.8fr .8fr .8fr .8fr 110px">
-    <div class="adm-cell bold">${u.prenom} ${u.nom}${u.agence?'<div style="font-size:.67rem;color:rgba(255,255,255,.3)">'+u.agence+'</div>':''}</div>
-    <div class="adm-cell" style="font-size:.75rem">${u.email}</div>
-    <div class="adm-cell"><span class="adm-badge ${pl==='pro'?'plan-pro':pl==='agency'?'plan-agency':'plan-free'}">${pl==='pro'?'Pro 49€':pl==='agency'?'Agence 149€':'Gratuit'}</span></div>
-    <div class="adm-cell" style="font-size:.72rem">${u.createdAt?new Date(u.createdAt).toLocaleDateString('fr-FR'):'—'}</div>
-    <div class="adm-cell" style="font-size:.72rem">${getLastLogin(u.email)}</div>
-    <div class="adm-cell" onclick="event.stopPropagation()"><div style="display:flex;gap:5px">
-      <button class="adm-btn adm-btn-outline" style="padding:3px 8px;font-size:.68rem" onclick="openUserModal('${u.id}')">✏️ Éditer</button>
-      ${u.id!=='demo'?`<button class="adm-btn adm-btn-outline" style="padding:3px 8px;font-size:.68rem;color:#FCA5A5;border-color:rgba(220,38,38,.3)" onclick="deleteAdminUser('${u.id}')">🗑️</button>`:''}
-    </div></div>
-  </div>`;}).join('');
+const PLAN_PRICES = { starter: 35, pro: 75, agency: 149, free: 0 };
+const PLAN_LABELS = { starter: 'Starter', pro: 'Pro', agency: 'Agence', free: 'Gratuit' };
+
+function planBadgeClass(plan){
+  if(plan === 'pro') return 'plan-pro';
+  if(plan === 'agency') return 'plan-agency';
+  if(plan === 'starter') return 'plan-starter';
+  return 'plan-free';
 }
 
-function renderAdminCRM(){
-  const q=(document.getElementById('adm-crm-search')?.value||'').toLowerCase();
-  const prospects=JSON.parse(localStorage.getItem('immoai_crm')||'[]');
-  const mandats_data=JSON.parse(localStorage.getItem('immoai_mandats')||'[]');
-  const totalComm=prospects.reduce((s,p)=>s+(parseFloat(p.commission)||0),0);
-  const set=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};
-  set('adm-crm-prospects',prospects.length);set('adm-crm-mandats',mandats_data.length);set('adm-crm-comm',fmtEur(totalComm));
-  const list=q?prospects.filter(p=>(p.prenom+' '+p.nom+' '+(p.bien||'')).toLowerCase().includes(q)):prospects;
-  const tb=document.getElementById('adm-crm-table');if(!tb)return;
-  const SL={contact:'Contact',rdv:'RDV',estim:'Estimation',mandat:'Mandat',vente:'En vente',offre:'Offre',compromis:'Compromis',acte:'Acte'};
-  tb.innerHTML=list.map(p=>`<div class="adm-row" style="grid-template-columns:1.5fr 1.5fr 1fr .8fr .8fr .8fr">
-    <div class="adm-cell bold">${p.prenom} ${p.nom}<div style="font-size:.67rem;color:rgba(255,255,255,.3)">${p.tel||''}</div></div>
-    <div class="adm-cell" style="font-size:.75rem">${p.bien||'—'}</div>
-    <div class="adm-cell">${p.budget||'—'}</div>
-    <div class="adm-cell">${p.commission?fmtEur(parseFloat(p.commission)):'—'}</div>
-    <div class="adm-cell"><span class="adm-badge ${(p.mandat==='vente'||p.mandat==='recherche')?'adm-badge-green':'adm-badge-gray'}">${(p.mandat==='vente'||p.mandat==='recherche')?'Pipeline':'Prospect'}</span></div>
-    <div class="adm-cell" style="font-size:.72rem">${SL[p.stage]||p.stage||'—'}</div>
-  </div>`).join('')||'<div style="padding:16px;text-align:center;font-size:.78rem;color:rgba(255,255,255,.3)">Aucun prospect</div>';
+function planLabel(plan, withPrice){
+  const p = plan || 'free';
+  return withPrice && p !== 'free' ? `${PLAN_LABELS[p]} ${PLAN_PRICES[p]}€` : PLAN_LABELS[p];
 }
 
-function exportAdminCRM(){
-  const ps=JSON.parse(localStorage.getItem('immoai_crm')||'[]');
-  const rows=[['Prénom','Nom','Tél','Email','Bien','Budget','Commission','Statut','Étape','Créé le']];
-  ps.forEach(p=>rows.push([p.prenom,p.nom,p.tel||'',p.email||'',p.bien||'',p.budget||'',p.commission||'',p.mandat||'prospect',p.stage||'',p.createdAt||'']));
-  const csv=rows.map(r=>r.map(c=>'"'+(c+'').replace(/"/g,'""')+'"').join(';')).join('\n');
-  const blob=new Blob(['﻿'+csv],{type:'text/csv;charset=utf-8'});
-  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='crm-export-'+new Date().toISOString().split('T')[0]+'.csv';a.click();
+async function renderAdminOverview(){
+  const sb = getSB();
+  if(!sb) return;
+  try {
+    const { data: stats } = await sb.rpc('admin_stats');
+    if(!stats?.ok){ console.warn('admin_stats refused:', stats?.error); return; }
+    const set = (id, v) => { const el = document.getElementById(id); if(el) el.textContent = v; };
+    set('adm-total-users',     stats.users);
+    set('adm-active-subs',     stats.active_subs);
+    set('adm-total-mrr',       stats.mrr + ' €');
+    set('adm-total-prospects', stats.prospects);
+    set('adm-total-mandats',   stats.mandats);
+    set('adm-new-today',       '+' + stats.new_today + ' aujourd\'hui');
+
+    const total = Math.max(stats.users, 1);
+    const pc = document.getElementById('adm-plans-chart');
+    if(pc){
+      const rows = [
+        { l: 'Gratuit', v: stats.plans.free,    c: 'rgba(255,255,255,.2)' },
+        { l: 'Starter', v: stats.plans.starter, c: '#1D6FE8' },
+        { l: 'Pro',     v: stats.plans.pro,     c: '#F08A6E' },
+        { l: 'Agence',  v: stats.plans.agency,  c: '#8B5CF6' },
+      ];
+      pc.innerHTML = rows.map(r => `<div class="adm-bar-row"><div class="adm-bar-label">${r.l}</div><div class="adm-bar-wrap"><div class="adm-bar-fill" style="width:${(r.v/total)*100}%;background:${r.c}"></div></div><div class="adm-bar-val">${r.v}</div></div>`).join('');
+    }
+
+    const { data: audit } = await sb.from('audit_log').select('*').order('created_at', { ascending: false }).limit(8);
+    const ac = document.getElementById('adm-activity-chart');
+    if(ac){
+      ac.innerHTML = (audit || []).map(l => {
+        const c = l.action.includes('login') ? '#86EFAC' : l.action.includes('code') ? '#93C5FD' : '#FDBA74';
+        return `<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.04)"><div style="width:6px;height:6px;border-radius:50%;background:${c};flex-shrink:0"></div><div style="flex:1;font-size:.73rem;color:rgba(255,255,255,.5);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${(l.actor_email || '—').split('@')[0]} · ${l.action}</div><div style="font-size:.64rem;color:rgba(255,255,255,.2)">${new Date(l.created_at).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})}</div></div>`;
+      }).join('') || '<div style="font-size:.76rem;color:rgba(255,255,255,.3)">Aucune activité</div>';
+    }
+
+    const ru = document.getElementById('adm-recent-users');
+    if(ru){
+      const recent = _adminUsersCache.slice(0, 5);
+      ru.innerHTML = recent.map(u => {
+        const pl = u.plan || 'free';
+        return `<div class="adm-row" style="grid-template-columns:1fr 1.5fr 1fr .8fr" onclick="openUserModal('${u.id}')"><div class="adm-cell bold">${u.prenom || '—'} ${u.nom || ''}</div><div class="adm-cell" style="font-size:.74rem">${u.email || ''}</div><div class="adm-cell" style="font-size:.72rem">${u.created_at ? new Date(u.created_at).toLocaleDateString('fr-FR') : '—'}</div><div class="adm-cell"><span class="adm-badge ${planBadgeClass(pl)}">${planLabel(pl)}</span></div></div>`;
+      }).join('') || '<div style="padding:16px;text-align:center;font-size:.78rem;color:rgba(255,255,255,.3)">Aucun utilisateur</div>';
+    }
+  } catch(e){ console.warn('renderAdminOverview error:', e); }
 }
 
-function renderAdminSubs(){
-  const users=getUsers();
-  const pro=users.filter(u=>getUserPlan(u.id)==='pro');
-  const agency=users.filter(u=>getUserPlan(u.id)==='agency');
-  const mrr=pro.length*49+agency.length*149;
-  const set=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};
-  set('adm-sub-pro',pro.length);set('adm-sub-agency',agency.length);
-  set('adm-sub-pro-mrr',(pro.length*49)+' € MRR');set('adm-sub-agency-mrr',(agency.length*149)+' € MRR');
-  set('adm-sub-mrr-total',mrr+' €');
-  const all=[...pro.map(u=>({...u,plan:'pro'})),...agency.map(u=>({...u,plan:'agency'}))];
-  const tb=document.getElementById('adm-subs-table');if(!tb)return;
-  if(!all.length){tb.innerHTML='<div style="padding:20px;text-align:center;font-size:.78rem;color:rgba(255,255,255,.3)">Aucun abonné payant</div>';return;}
-  tb.innerHTML=all.map(u=>{
-    const sd=getUserSubDate(u.id)||u.createdAt||new Date().toISOString();
-    const nd=new Date(sd);nd.setMonth(nd.getMonth()+1);
-    return`<div class="adm-row" style="grid-template-columns:1.5fr 1.8fr .8fr 1fr 1fr 100px">
-      <div class="adm-cell bold">${u.prenom} ${u.nom}</div>
+async function renderAdminUsers(){
+  if(!_adminUsersCache.length) await loadAdminUsersFromSupabase();
+  const q  = (document.getElementById('adm-user-search')?.value || '').toLowerCase();
+  const pf = document.getElementById('adm-user-plan-filter')?.value || 'all';
+
+  let users = _adminUsersCache.filter(u => {
+    const fullText = ((u.prenom || '') + ' ' + (u.nom || '') + ' ' + (u.email || '')).toLowerCase();
+    return (!q || fullText.includes(q)) && (pf === 'all' || (u.plan || 'free') === pf);
+  });
+
+  const tb = document.getElementById('adm-users-table');
+  if(!tb) return;
+  if(!users.length){ tb.innerHTML = '<div style="padding:16px;text-align:center;font-size:.78rem;color:rgba(255,255,255,.3)">Aucun utilisateur</div>'; return; }
+
+  tb.innerHTML = users.map(u => {
+    const pl = u.plan || 'free';
+    const lastSync = u.updated_at ? new Date(u.updated_at).toLocaleDateString('fr-FR') : '—';
+    return `<div class="adm-row" style="grid-template-columns:1.5fr 1.8fr .8fr .8fr .8fr 110px">
+      <div class="adm-cell bold">${u.prenom || ''} ${u.nom || ''}${u.agence ? '<div style="font-size:.67rem;color:rgba(255,255,255,.3)">' + u.agence + '</div>' : ''}${u.is_admin ? '<span style="background:rgba(220,38,38,.15);color:#FCA5A5;font-size:.6rem;padding:1px 6px;border-radius:8px;margin-left:5px">ADMIN</span>' : ''}</div>
       <div class="adm-cell" style="font-size:.75rem">${u.email}</div>
-      <div class="adm-cell"><span class="adm-badge ${u.plan==='pro'?'plan-pro':'plan-agency'}">${u.plan==='pro'?'Pro 49€':'Agence 149€'}</span></div>
-      <div class="adm-cell" style="font-size:.72rem">${new Date(sd).toLocaleDateString('fr-FR')}</div>
-      <div class="adm-cell" style="font-size:.72rem">${nd.toLocaleDateString('fr-FR')}</div>
-      <div class="adm-cell" onclick="event.stopPropagation()"><button class="adm-btn adm-btn-outline" style="padding:3px 8px;font-size:.68rem" onclick="openUserModal('${u.id}')">Gérer</button></div>
-    </div>`;
-  }).join('');
-}
-
-function renderAdminLogs(){
-  const q=(document.getElementById('adm-log-search')?.value||'').toLowerCase();
-  let logs=JSON.parse(localStorage.getItem('immoai_logs')||'[]');
-  if(q)logs=logs.filter(l=>(l.user+' '+l.action+' '+l.email).toLowerCase().includes(q));
-  const tb=document.getElementById('adm-logs-table');if(!tb)return;
-  if(!logs.length){tb.innerHTML='<div style="padding:16px;text-align:center;font-size:.78rem;color:rgba(255,255,255,.3)">Aucun log</div>';return;}
-  tb.innerHTML=logs.slice(0,100).map(l=>{
-    const c=l.action.includes('Connexion')&&!l.action.includes('Décon')?'#86EFAC':l.action.includes('Décon')?'rgba(255,255,255,.3)':'#FDBA74';
-    return`<div class="adm-row" style="grid-template-columns:130px 1fr 1.2fr auto">
-      <div class="adm-cell" style="display:flex;align-items:center;gap:6px"><div style="width:6px;height:6px;border-radius:50%;background:${c};flex-shrink:0"></div><span style="font-size:.72rem">${new Date(l.ts).toLocaleString('fr-FR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}</span></div>
-      <div class="adm-cell bold">${l.user||'—'}</div>
-      <div class="adm-cell">${l.action}</div>
-      <div class="adm-cell" style="font-size:.68rem;color:rgba(255,255,255,.3)">${l.device||''}</div>
+      <div class="adm-cell"><span class="adm-badge ${planBadgeClass(pl)}">${planLabel(pl, true)}</span></div>
+      <div class="adm-cell" style="font-size:.72rem">${u.created_at ? new Date(u.created_at).toLocaleDateString('fr-FR') : '—'}</div>
+      <div class="adm-cell" style="font-size:.72rem">${lastSync}</div>
+      <div class="adm-cell" onclick="event.stopPropagation()"><div style="display:flex;gap:5px">
+        <button class="adm-btn adm-btn-outline" style="padding:3px 8px;font-size:.68rem" onclick="openUserModal('${u.id}')">✏️ Éditer</button>
+      </div></div>
     </div>`;
   }).join('');
 }
 
 function openUserModal(userId){
-  const user=getUsers().find(u=>u.id===userId);if(!user)return;
-  const pl=getUserPlan(userId);
-  document.getElementById('adm-modal-username').textContent=user.prenom+' '+user.nom;
-  document.getElementById('adm-modal-content').innerHTML=`
+  const user = _adminUsersCache.find(u => u.id === userId);
+  if(!user) return;
+  const pl = user.plan || 'free';
+
+  document.getElementById('adm-modal-username').textContent = (user.prenom || '') + ' ' + (user.nom || '');
+  document.getElementById('adm-modal-content').innerHTML = `
     <div style="margin-bottom:12px">
       <label class="adm-label">Plan d'abonnement</label>
       <select id="modal-plan-sel" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:9px 12px;font-size:.82rem;color:#fff;outline:none;width:100%;margin-bottom:10px">
-        <option value="free" ${pl==='free'?'selected':''}>Gratuit</option>
-        <option value="pro" ${pl==='pro'?'selected':''}>Pro — 49€/mois</option>
-        <option value="agency" ${pl==='agency'?'selected':''}>Agence — 149€/mois</option>
+        <option value="free"    ${pl === 'free'    ? 'selected' : ''}>Gratuit</option>
+        <option value="starter" ${pl === 'starter' ? 'selected' : ''}>Starter — 35€/mois</option>
+        <option value="pro"     ${pl === 'pro'     ? 'selected' : ''}>Pro — 75€/mois</option>
+        <option value="agency"  ${pl === 'agency'  ? 'selected' : ''}>Agence — 149€/mois</option>
       </select>
     </div>
-    <div style="margin-bottom:12px">
-      <label class="adm-label">Réinitialiser le mot de passe</label>
-      <input class="adm-input" type="password" id="modal-new-pwd" placeholder="Nouveau mot de passe (laisser vide pour conserver)">
-    </div>
-    <div style="background:rgba(255,255,255,.03);border-radius:8px;padding:10px 12px">
-      <div style="font-size:.65rem;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">Informations du compte</div>
-      <div style="font-size:.75rem;color:rgba(255,255,255,.5);line-height:1.9">Email : ${user.email}<br>Agence : ${user.agence||'—'}<br>Inscrit le : ${user.createdAt?new Date(user.createdAt).toLocaleDateString('fr-FR'):'—'}<br>Dernière connexion : ${getLastLogin(user.email)}</div>
+    <div style="background:rgba(255,255,255,.03);border-radius:8px;padding:10px 12px;font-size:.74rem;color:rgba(255,255,255,.5);line-height:1.9">
+      <strong style="color:#fff">Compte</strong><br>
+      Email : ${user.email}<br>
+      Agence : ${user.agence || '—'}<br>
+      Inscrit le : ${user.created_at ? new Date(user.created_at).toLocaleDateString('fr-FR') : '—'}<br>
+      Stripe customer : ${user.stripe_customer_id || '—'}<br>
+      Sub status : ${user.subscription_status || '—'}<br>
+      Renouvellement : ${user.subscription_renews_at ? new Date(user.subscription_renews_at).toLocaleDateString('fr-FR') : '—'}<br>
+      <hr style="border:none;border-top:1px solid rgba(255,255,255,.05);margin:8px 0">
+      Mandats : ${user.nb_mandats || 0} · Prospects : ${user.nb_prospects || 0} · RDVs : ${user.nb_rdvs || 0}
     </div>`;
-  document.getElementById('adm-modal-save-btn').onclick=()=>saveUserModal(userId);
+  document.getElementById('adm-modal-save-btn').onclick = () => saveUserModal(userId);
   document.getElementById('adm-user-modal').classList.remove('hidden');
 }
 
-function saveUserModal(userId){
-  const pl=document.getElementById('modal-plan-sel').value;
-  const pwd=document.getElementById('modal-new-pwd').value;
-  setUserPlan(userId,pl);
-  if(pl!=='free')setUserSubDate(userId,new Date().toISOString());
-  if(pwd&&pwd.length>=6){
-    const idx=authUsers.findIndex(u=>u.id===userId);
-    if(idx>=0){authUsers[idx].pwd=pwd;localStorage.setItem('immoai_users',JSON.stringify(authUsers));}
-  }
-  document.getElementById('adm-user-modal').classList.add('hidden');
-  addLog('Admin — Modif utilisateur '+userId,{prenom:'Admin',nom:'',email:ADMIN_CREDS.email});
-  renderAdminUsers();renderAdminSubs();renderAdminOverview();
-  const t=document.createElement('div');
-  t.style.cssText='position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#1A1A1C;color:#fff;border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:10px 18px;font-size:.78rem;z-index:10200';
-  t.textContent='✅ Modifications enregistrées';document.body.appendChild(t);setTimeout(()=>t.remove(),3000);
+async function saveUserModal(userId){
+  const newPlan = document.getElementById('modal-plan-sel').value;
+  const sb = getSB();
+  if(!sb){ alert('Connexion DB indisponible'); return; }
+  try {
+    const { data, error } = await sb.rpc('admin_set_user_plan', { p_user_id: userId, p_plan: newPlan });
+    if(error || !data?.ok){ alert('Erreur : ' + (error?.message || data?.error)); return; }
+    await sb.rpc('admin_log', { p_action: 'user.plan_changed', p_target_type: 'user', p_target_id: userId, p_details: { plan: newPlan } });
+    document.getElementById('adm-user-modal').classList.add('hidden');
+    await loadAdminUsersFromSupabase();
+    renderAdminUsers(); renderAdminSubs(); renderAdminOverview();
+    showAdminToast('✅ Plan mis à jour');
+  } catch(e){ alert('Erreur : ' + e.message); }
 }
 
-function deleteAdminUser(uid){
-  const u=getUsers().find(x=>x.id===uid);if(!u)return;
-  if(!confirm('Supprimer '+u.prenom+' '+u.nom+' définitivement ?'))return;
-  authUsers=authUsers.filter(x=>x.id!==uid);
-  localStorage.setItem('immoai_users',JSON.stringify(authUsers));
-  renderAdminUsers();renderAdminOverview();
+function showAdminToast(msg){
+  const t = document.createElement('div');
+  t.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#1A1A1C;color:#fff;border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:10px 18px;font-size:.78rem;z-index:10200';
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 3000);
 }
 
-document.addEventListener('keydown',e=>{if(e.ctrlKey&&e.shiftKey&&e.key==='A'){e.preventDefault();openAdmin();}});
-if(window.location.hash==='#admin')setTimeout(openAdmin,500);
+async function renderAdminCRM(){
+  const sb = getSB();
+  if(!sb) return;
+  const q = (document.getElementById('adm-crm-search')?.value || '').toLowerCase();
+  try {
+    const { data: stats } = await sb.rpc('admin_stats');
+    if(stats?.ok){
+      const set = (id, v) => { const el = document.getElementById(id); if(el) el.textContent = v; };
+      set('adm-crm-prospects', stats.prospects);
+      set('adm-crm-mandats',   stats.mandats);
+    }
+  } catch(_){}
+  try {
+    const { data: prospects } = await sb.from('prospects').select('*').limit(500);
+    let list = prospects || [];
+    if(q) list = list.filter(p => ((p.prenom || '') + ' ' + (p.nom || '') + ' ' + (p.bien || '')).toLowerCase().includes(q));
+    const totalComm = list.reduce((s, p) => s + (parseFloat(p.commission) || 0), 0);
+    const set = (id, v) => { const el = document.getElementById(id); if(el) el.textContent = v; };
+    set('adm-crm-comm', typeof fmtEur === 'function' ? fmtEur(totalComm) : totalComm + ' €');
+    const SL = { contact:'Contact', rdv:'RDV', estim:'Estimation', mandat:'Mandat', vente:'En vente', offre:'Offre', compromis:'Compromis', acte:'Acte' };
+    const tb = document.getElementById('adm-crm-table');
+    if(!tb) return;
+    tb.innerHTML = list.map(p => `<div class="adm-row" style="grid-template-columns:1.5fr 1.5fr 1fr .8fr .8fr .8fr">
+      <div class="adm-cell bold">${p.prenom || ''} ${p.nom || ''}<div style="font-size:.67rem;color:rgba(255,255,255,.3)">${p.tel || ''}</div></div>
+      <div class="adm-cell" style="font-size:.75rem">${p.bien || '—'}</div>
+      <div class="adm-cell">${p.budget || '—'}</div>
+      <div class="adm-cell">${p.commission ? (typeof fmtEur === 'function' ? fmtEur(parseFloat(p.commission)) : p.commission + '€') : '—'}</div>
+      <div class="adm-cell"><span class="adm-badge ${(p.mandat === 'vente' || p.mandat === 'recherche') ? 'adm-badge-green' : 'adm-badge-gray'}">${(p.mandat === 'vente' || p.mandat === 'recherche') ? 'Pipeline' : 'Prospect'}</span></div>
+      <div class="adm-cell" style="font-size:.72rem">${SL[p.stage] || p.stage || '—'}</div>
+    </div>`).join('') || '<div style="padding:16px;text-align:center;font-size:.78rem;color:rgba(255,255,255,.3)">Aucun prospect</div>';
+  } catch(e){ console.warn(e); }
+}
+
+function exportAdminCRM(){
+  const ps = JSON.parse(localStorage.getItem('immoai_crm') || '[]');
+  const rows = [['Prénom','Nom','Tél','Email','Bien','Budget','Commission','Statut','Étape','Créé le']];
+  ps.forEach(p => rows.push([p.prenom,p.nom,p.tel||'',p.email||'',p.bien||'',p.budget||'',p.commission||'',p.mandat||'prospect',p.stage||'',p.createdAt||'']));
+  const csv = rows.map(r => r.map(c => '"'+(c+'').replace(/"/g,'""')+'"').join(';')).join('\n');
+  const blob = new Blob(['\ufeff'+csv], { type: 'text/csv;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'crm-export-' + new Date().toISOString().split('T')[0] + '.csv';
+  a.click();
+}
+
+async function renderAdminSubs(){
+  if(!_adminUsersCache.length) await loadAdminUsersFromSupabase();
+  const paying = _adminUsersCache.filter(u => ['starter','pro','agency'].includes(u.plan) && u.subscription_status === 'active');
+  const counts = { starter: 0, pro: 0, agency: 0 };
+  paying.forEach(u => { counts[u.plan] = (counts[u.plan] || 0) + 1; });
+  const mrr = counts.starter * 35 + counts.pro * 75 + counts.agency * 149;
+  const set = (id, v) => { const el = document.getElementById(id); if(el) el.textContent = v; };
+  set('adm-sub-starter',      counts.starter);
+  set('adm-sub-pro',          counts.pro);
+  set('adm-sub-agency',       counts.agency);
+  set('adm-sub-starter-mrr', (counts.starter * 35) + ' € MRR');
+  set('adm-sub-pro-mrr',     (counts.pro     * 75) + ' € MRR');
+  set('adm-sub-agency-mrr',  (counts.agency  * 149) + ' € MRR');
+  set('adm-sub-mrr-total',    mrr + ' €');
+
+  const tb = document.getElementById('adm-subs-table');
+  if(!tb) return;
+  if(!paying.length){ tb.innerHTML = '<div style="padding:20px;text-align:center;font-size:.78rem;color:rgba(255,255,255,.3)">Aucun abonné payant</div>'; return; }
+  tb.innerHTML = paying.map(u => {
+    const sd = u.subscription_started_at || u.created_at;
+    const nd = u.subscription_renews_at;
+    return `<div class="adm-row" style="grid-template-columns:1.5fr 1.8fr .8fr 1fr 1fr 100px">
+      <div class="adm-cell bold">${u.prenom || ''} ${u.nom || ''}</div>
+      <div class="adm-cell" style="font-size:.75rem">${u.email}</div>
+      <div class="adm-cell"><span class="adm-badge ${planBadgeClass(u.plan)}">${planLabel(u.plan, true)}</span></div>
+      <div class="adm-cell" style="font-size:.72rem">${sd ? new Date(sd).toLocaleDateString('fr-FR') : '—'}</div>
+      <div class="adm-cell" style="font-size:.72rem">${nd ? new Date(nd).toLocaleDateString('fr-FR') : '—'}</div>
+      <div class="adm-cell" onclick="event.stopPropagation()"><button class="adm-btn adm-btn-outline" style="padding:3px 8px;font-size:.68rem" onclick="openUserModal('${u.id}')">Gérer</button></div>
+    </div>`;
+  }).join('');
+}
+
+async function renderAdminCodes(){
+  const sb = getSB();
+  if(!sb) return;
+  try {
+    const { data, error } = await sb.from('activation_codes').select('*').order('created_at', { ascending: false }).limit(200);
+    if(error){ console.warn(error); return; }
+    _adminCodesCache = data || [];
+    const pending = _adminCodesCache.filter(c => c.status === 'pending').length;
+    const used    = _adminCodesCache.filter(c => c.status === 'used').length;
+    const expired = _adminCodesCache.filter(c => c.status === 'expired').length;
+    const revoked = _adminCodesCache.filter(c => c.status === 'revoked').length;
+    const set = (id, v) => { const el = document.getElementById(id); if(el) el.textContent = v; };
+    set('adm-codes-pending', pending);
+    set('adm-codes-used',    used);
+    set('adm-codes-expired', expired);
+    set('adm-codes-revoked', revoked);
+
+    const q  = (document.getElementById('adm-code-search')?.value || '').toLowerCase();
+    const sf = document.getElementById('adm-code-status-filter')?.value || 'all';
+    let list = _adminCodesCache;
+    if(q)  list = list.filter(c => (c.code + ' ' + (c.email || '')).toLowerCase().includes(q));
+    if(sf !== 'all') list = list.filter(c => c.status === sf);
+
+    const tb = document.getElementById('adm-codes-table');
+    if(!tb) return;
+    if(!list.length){ tb.innerHTML = '<div style="padding:16px;text-align:center;font-size:.78rem;color:rgba(255,255,255,.3)">Aucun code</div>'; return; }
+    const statusColors = { pending:'#FBBF24', used:'#22C55E', expired:'rgba(255,255,255,.3)', revoked:'#EF4444' };
+    tb.innerHTML = list.map(c => {
+      const isPending = c.status === 'pending';
+      return `<div class="adm-row" style="grid-template-columns:1.5fr 1.5fr .8fr .8fr 1fr 90px">
+        <div class="adm-cell bold" style="font-family:monospace;letter-spacing:.04em;font-size:.72rem">${c.code}</div>
+        <div class="adm-cell" style="font-size:.74rem">${c.email}</div>
+        <div class="adm-cell"><span class="adm-badge ${planBadgeClass(c.plan)}">${planLabel(c.plan)}</span></div>
+        <div class="adm-cell"><span style="display:inline-flex;align-items:center;gap:5px;font-size:.7rem"><span style="width:6px;height:6px;border-radius:50%;background:${statusColors[c.status]}"></span>${c.status}</span></div>
+        <div class="adm-cell" style="font-size:.7rem">${new Date(c.created_at).toLocaleDateString('fr-FR')}<div style="font-size:.62rem;color:rgba(255,255,255,.3)">exp. ${new Date(c.expires_at).toLocaleDateString('fr-FR')}</div></div>
+        <div class="adm-cell" onclick="event.stopPropagation()">
+          <button class="adm-btn adm-btn-outline" style="padding:3px 8px;font-size:.66rem;margin-right:4px" onclick="copyCode('${c.code}')">📋</button>
+          ${isPending ? `<button class="adm-btn adm-btn-outline" style="padding:3px 8px;font-size:.66rem;color:#FCA5A5;border-color:rgba(220,38,38,.3)" onclick="revokeCode('${c.code}')">🚫</button>` : ''}
+        </div>
+      </div>`;
+    }).join('');
+  } catch(e){ console.warn(e); }
+}
+
+function copyCode(code){
+  navigator.clipboard?.writeText(code);
+  showAdminToast('📋 Code copié');
+}
+
+async function revokeCode(code){
+  if(!confirm('Révoquer le code ' + code + ' ?')) return;
+  const sb = getSB();
+  try {
+    const { data, error } = await sb.rpc('admin_revoke_activation_code', { p_code: code });
+    if(error || !data?.ok){ alert('Erreur : ' + (error?.message || data?.error)); return; }
+    await sb.rpc('admin_log', { p_action: 'code.revoked', p_target_type: 'code', p_target_id: code });
+    showAdminToast('🚫 Code révoqué');
+    renderAdminCodes();
+  } catch(e){ alert('Erreur : ' + e.message); }
+}
+
+async function generateCode(){
+  const plan  = document.getElementById('gen-code-plan').value;
+  const email = (document.getElementById('gen-code-email').value || '').trim().toLowerCase();
+  const days  = parseInt(document.getElementById('gen-code-days').value || '90', 10);
+  const note  = document.getElementById('gen-code-note').value || '';
+  if(!email || !email.includes('@')){ alert('Email invalide'); return; }
+  const sb = getSB();
+  try {
+    const { data, error } = await sb.rpc('admin_generate_activation_code', { p_plan: plan, p_email: email, p_expires_days: days, p_note: note });
+    if(error || !data?.ok){ alert('Erreur : ' + (error?.message || data?.error)); return; }
+    await sb.rpc('admin_log', { p_action: 'code.generated', p_target_type: 'code', p_target_id: data.code, p_details: { plan, email } });
+    document.getElementById('gen-code-result').innerHTML = `
+      <div style="background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3);border-radius:8px;padding:14px;margin-top:10px">
+        <div style="font-size:.7rem;color:rgba(255,255,255,.4);margin-bottom:6px">Code généré :</div>
+        <div style="font-family:monospace;font-size:1.1rem;font-weight:700;color:#86EFAC;letter-spacing:.05em">${data.code}</div>
+        <button class="adm-btn adm-btn-outline" style="margin-top:8px;font-size:.7rem" onclick="copyCode('${data.code}')">📋 Copier</button>
+      </div>`;
+    document.getElementById('gen-code-email').value = '';
+    document.getElementById('gen-code-note').value = '';
+    renderAdminCodes();
+  } catch(e){ alert('Erreur : ' + e.message); }
+}
+
+async function renderAdminEvents(){
+  const sb = getSB();
+  if(!sb) return;
+  try {
+    const { data } = await sb.from('stripe_events').select('*').order('created_at', { ascending: false }).limit(100);
+    _adminEventsCache = data || [];
+    const tb = document.getElementById('adm-events-table');
+    if(!tb) return;
+    if(!_adminEventsCache.length){ tb.innerHTML = '<div style="padding:16px;text-align:center;font-size:.78rem;color:rgba(255,255,255,.3)">Aucun event Stripe encore</div>'; return; }
+    tb.innerHTML = _adminEventsCache.map(e => {
+      const c = e.error ? '#EF4444' : e.processed ? '#22C55E' : '#FBBF24';
+      return `<div class="adm-row" style="grid-template-columns:130px 1.5fr 1fr 1fr">
+        <div class="adm-cell" style="display:flex;align-items:center;gap:6px"><div style="width:6px;height:6px;border-radius:50%;background:${c};flex-shrink:0"></div><span style="font-size:.7rem">${new Date(e.created_at).toLocaleString('fr-FR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}</span></div>
+        <div class="adm-cell bold" style="font-size:.72rem;font-family:monospace">${e.type}</div>
+        <div class="adm-cell" style="font-size:.68rem;color:rgba(255,255,255,.4);font-family:monospace">${e.id}</div>
+        <div class="adm-cell" style="font-size:.7rem;color:${e.error ? '#FCA5A5' : 'rgba(255,255,255,.5)'}">${e.error || (e.processed ? '✓ traité' : '⏳ en cours')}</div>
+      </div>`;
+    }).join('');
+  } catch(err){ console.warn(err); }
+}
+
+async function renderAdminLogs(){
+  const sb = getSB();
+  if(!sb) return;
+  try {
+    const { data } = await sb.from('audit_log').select('*').order('created_at', { ascending: false }).limit(200);
+    _adminAuditCache = data || [];
+    const q = (document.getElementById('adm-log-search')?.value || '').toLowerCase();
+    let logs = _adminAuditCache;
+    if(q) logs = logs.filter(l => ((l.actor_email || '') + ' ' + l.action + ' ' + (l.target_id || '')).toLowerCase().includes(q));
+    const tb = document.getElementById('adm-logs-table');
+    if(!tb) return;
+    if(!logs.length){ tb.innerHTML = '<div style="padding:16px;text-align:center;font-size:.78rem;color:rgba(255,255,255,.3)">Aucun log</div>'; return; }
+    tb.innerHTML = logs.map(l => {
+      const c = l.action.includes('login') ? '#86EFAC' : l.action.includes('plan') ? '#FDBA74' : '#93C5FD';
+      return `<div class="adm-row" style="grid-template-columns:130px 1fr 1.2fr auto">
+        <div class="adm-cell" style="display:flex;align-items:center;gap:6px"><div style="width:6px;height:6px;border-radius:50%;background:${c};flex-shrink:0"></div><span style="font-size:.72rem">${new Date(l.created_at).toLocaleString('fr-FR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}</span></div>
+        <div class="adm-cell bold" style="font-size:.74rem">${(l.actor_email || '—').split('@')[0]}</div>
+        <div class="adm-cell" style="font-size:.74rem">${l.action}${l.target_id ? '<span style="color:rgba(255,255,255,.3);font-family:monospace;margin-left:6px;font-size:.68rem">'+l.target_id.slice(0,8)+'…</span>' : ''}</div>
+        <div class="adm-cell" style="font-size:.66rem;color:rgba(255,255,255,.3)">${l.details && Object.keys(l.details).length ? JSON.stringify(l.details).slice(0,40) : ''}</div>
+      </div>`;
+    }).join('');
+  } catch(err){ console.warn(err); }
+}
+
+document.addEventListener('keydown', e => {
+  if(e.ctrlKey && e.shiftKey && e.key === 'A'){ e.preventDefault(); openAdmin(); }
+});
+if(window.location.hash === '#admin') setTimeout(openAdmin, 500);
 </script>
 </div><!-- /app-root -->
 <!-- ══════════════ BACKOFFICE ADMIN ══════════════ -->
@@ -8160,8 +8589,10 @@ if(window.location.hash==='#admin')setTimeout(openAdmin,500);
     <div class="admin-nav">
       <button class="admin-nav-btn active" onclick="adminTab(this,'overview')">📊 Vue d'ensemble</button>
       <button class="admin-nav-btn" onclick="adminTab(this,'users')">👥 Utilisateurs</button>
-      <button class="admin-nav-btn" onclick="adminTab(this,'crm')">🎯 CRM & Données</button>
+      <button class="admin-nav-btn" onclick="adminTab(this,'crm')">🎯 CRM &amp; Données</button>
       <button class="admin-nav-btn" onclick="adminTab(this,'subscriptions')">💳 Abonnements</button>
+      <button class="admin-nav-btn" onclick="adminTab(this,'codes')">🎟️ Codes</button>
+      <button class="admin-nav-btn" onclick="adminTab(this,'events')">🪝 Stripe</button>
       <button class="admin-nav-btn" onclick="adminTab(this,'logs')">📋 Logs</button>
     </div>
     <div class="admin-topbar-right">
@@ -8279,9 +8710,14 @@ if(window.location.hash==='#admin')setTimeout(openAdmin,500);
 
       <!-- TAB: Subscriptions -->
       <div id="admin-tab-subscriptions" style="display:none">
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:20px">
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px">
+          <div class="adm-card" style="border-color:rgba(29,111,232,.2)">
+            <div style="font-size:.65rem;color:#93C5FD;text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px">Plan Starter · 35€/mois</div>
+            <div style="font-family:var(--fd);font-weight:800;font-size:1.8rem;color:#fff" id="adm-sub-starter">0</div>
+            <div style="font-size:.72rem;color:rgba(255,255,255,.3);margin-top:4px" id="adm-sub-starter-mrr">0 € MRR</div>
+          </div>
           <div class="adm-card" style="border-color:rgba(243,106,31,.2)">
-            <div style="font-size:.65rem;color:#FDBA74;text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px">Plan Pro · 49€/mois</div>
+            <div style="font-size:.65rem;color:#FDBA74;text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px">Plan Pro · 75€/mois</div>
             <div style="font-family:var(--fd);font-weight:800;font-size:1.8rem;color:#fff" id="adm-sub-pro">0</div>
             <div style="font-size:.72rem;color:rgba(255,255,255,.3);margin-top:4px" id="adm-sub-pro-mrr">0 € MRR</div>
           </div>
@@ -8302,6 +8738,85 @@ if(window.location.hash==='#admin')setTimeout(openAdmin,500);
             <div>Utilisateur</div><div>Email</div><div>Plan</div><div>Depuis le</div><div>Prochain prélèvement</div><div>Actions</div>
           </div>
           <div id="adm-subs-table"></div>
+        </div>
+      </div>
+
+      <!-- TAB: Codes d'activation -->
+      <div id="admin-tab-codes" style="display:none">
+        <div class="adm-sec">
+          <div class="adm-sec-title">🎟️ Codes d'activation</div>
+        </div>
+        <div class="adm-kpi-grid" style="grid-template-columns:repeat(4,1fr)">
+          <div class="adm-kpi"><div class="adm-kpi-accent" style="background:#FBBF24"></div><div class="adm-kpi-val" id="adm-codes-pending">0</div><div class="adm-kpi-label">En attente</div></div>
+          <div class="adm-kpi"><div class="adm-kpi-accent" style="background:#22C55E"></div><div class="adm-kpi-val" id="adm-codes-used">0</div><div class="adm-kpi-label">Utilisés</div></div>
+          <div class="adm-kpi"><div class="adm-kpi-accent" style="background:rgba(255,255,255,.3)"></div><div class="adm-kpi-val" id="adm-codes-expired">0</div><div class="adm-kpi-label">Expirés</div></div>
+          <div class="adm-kpi"><div class="adm-kpi-accent" style="background:#EF4444"></div><div class="adm-kpi-val" id="adm-codes-revoked">0</div><div class="adm-kpi-label">Révoqués</div></div>
+        </div>
+        <div class="adm-card" style="margin-bottom:18px">
+          <div style="font-family:var(--fd);font-weight:700;font-size:.82rem;color:#fff;margin-bottom:14px">⚡ Générer un code manuel</div>
+          <div style="display:grid;grid-template-columns:1fr 1.5fr 90px 1fr 100px;gap:8px;align-items:end">
+            <div>
+              <label class="adm-label" style="font-size:.66rem">Plan</label>
+              <select id="gen-code-plan" class="adm-input" style="padding:8px 10px;font-size:.78rem">
+                <option value="starter">Starter</option>
+                <option value="pro" selected>Pro</option>
+                <option value="agency">Agence</option>
+              </select>
+            </div>
+            <div>
+              <label class="adm-label" style="font-size:.66rem">Email destinataire</label>
+              <input id="gen-code-email" class="adm-input" type="email" placeholder="client@example.com" style="font-size:.78rem">
+            </div>
+            <div>
+              <label class="adm-label" style="font-size:.66rem">Validité (j)</label>
+              <input id="gen-code-days" class="adm-input" type="number" value="90" min="1" max="365" style="font-size:.78rem">
+            </div>
+            <div>
+              <label class="adm-label" style="font-size:.66rem">Note (optionnel)</label>
+              <input id="gen-code-note" class="adm-input" type="text" placeholder="Beta tester, démo…" style="font-size:.78rem">
+            </div>
+            <div>
+              <button class="adm-btn adm-btn-red" onclick="generateCode()" style="padding:9px 14px;font-size:.76rem;width:100%">✨ Générer</button>
+            </div>
+          </div>
+          <div id="gen-code-result"></div>
+        </div>
+        <div class="adm-sec">
+          <div class="adm-sec-title">Tous les codes</div>
+          <div style="display:flex;gap:8px">
+            <div class="adm-search"><span style="color:rgba(255,255,255,.3)">🔍</span><input type="text" placeholder="Code ou email..." id="adm-code-search" oninput="renderAdminCodes()"></div>
+            <select id="adm-code-status-filter" onchange="renderAdminCodes()" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:7px 10px;font-size:.76rem;color:rgba(255,255,255,.6);outline:none">
+              <option value="all">Tous</option>
+              <option value="pending">En attente</option>
+              <option value="used">Utilisés</option>
+              <option value="expired">Expirés</option>
+              <option value="revoked">Révoqués</option>
+            </select>
+          </div>
+        </div>
+        <div class="adm-table">
+          <div class="adm-th" style="grid-template-columns:1.5fr 1.5fr .8fr .8fr 1fr 90px">
+            <div>Code</div><div>Email</div><div>Plan</div><div>Statut</div><div>Créé le</div><div>Actions</div>
+          </div>
+          <div id="adm-codes-table"></div>
+        </div>
+      </div>
+
+      <!-- TAB: Stripe Events -->
+      <div id="admin-tab-events" style="display:none">
+        <div class="adm-sec">
+          <div class="adm-sec-title">🪝 Events Stripe (webhook)</div>
+          <button class="adm-btn adm-btn-outline" onclick="renderAdminEvents()" style="font-size:.72rem">↺ Actualiser</button>
+        </div>
+        <div style="background:rgba(96,165,250,.08);border:1px solid rgba(96,165,250,.2);border-radius:8px;padding:12px 16px;margin-bottom:14px;font-size:.76rem;color:rgba(255,255,255,.6);line-height:1.6">
+          💡 Les 100 derniers events reçus par l'Edge Function <code>stripe-webhook</code>.
+          Point <span style="color:#22C55E">vert</span> = traité, <span style="color:#FBBF24">jaune</span> = en cours, <span style="color:#EF4444">rouge</span> = erreur.
+        </div>
+        <div class="adm-table">
+          <div class="adm-th" style="grid-template-columns:130px 1.5fr 1fr 1fr">
+            <div>Date</div><div>Type</div><div>Event ID</div><div>Statut</div>
+          </div>
+          <div id="adm-events-table"></div>
         </div>
       </div>
 
