@@ -8218,9 +8218,9 @@ function bootApp(){
 // ══════════════════════════════════════════════════════════════
 // BACKOFFICE ADMIN — VERSION SUPABASE
 // Raccourci : Ctrl+Shift+A ou URL #admin
-// Auth : profiles.is_admin = TRUE (fallback password en urgence)
+// Auth : profiles.is_admin = TRUE + email DANS admin_allowlist
+// Sécurité : logs IP/UA, allowlist stricte, plus de fallback
 // ══════════════════════════════════════════════════════════════
-const ADMIN_FALLBACK_CREDS = { email: 'admin@immoai.pro', pwd: 'AdminImmo2025!' };
 
 let adminAuthed = false;
 let adminUserId = null;
@@ -8228,6 +8228,34 @@ let _adminUsersCache = [];
 let _adminCodesCache = [];
 let _adminEventsCache = [];
 let _adminAuditCache = [];
+let _adminAttemptsCache = [];
+let _adminAllowlistCache = [];
+
+// Récupérer IP publique (pour logs) — best effort, peut échouer
+async function getClientIP(){
+  try {
+    const r = await fetch('https://api.ipify.org?format=json', { signal: AbortSignal.timeout(2000) });
+    const j = await r.json();
+    return j.ip || null;
+  } catch(_){ return null; }
+}
+
+// Logger une tentative de login admin (réussie ou échouée)
+async function logAdminAttempt(email, success, failureReason = null){
+  try {
+    const sb = getSB();
+    if(!sb) return;
+    const ip = await getClientIP();
+    const ua = navigator.userAgent || null;
+    await sb.rpc('log_admin_attempt', {
+      p_email: email || 'anonymous',
+      p_success: success,
+      p_failure_reason: failureReason,
+      p_ip_address: ip,
+      p_user_agent: ua
+    });
+  } catch(e){ console.warn('logAdminAttempt:', e); }
+}
 
 function openAdmin(){
   document.getElementById('admin-screen').classList.remove('hidden');
@@ -8236,12 +8264,13 @@ function openAdmin(){
       if(isAdmin){
         adminAuthed = true;
         adminUserId = currentUser.sbId;
-        // Afficher email admin dans bandeau rouge
         const ucu = document.getElementById('admin-current-user');
         if(ucu) ucu.textContent = currentUser.email || '—';
         document.getElementById('admin-login-gate').style.display = 'none';
         const dash = document.getElementById('admin-dashboard');
         dash.style.cssText = 'display:flex;flex-direction:column;overflow:hidden;flex:1';
+        // Logger ouverture admin (passive, pas vraiment un login)
+        logAdminAttempt(currentUser.email, true, 'session_resume');
         renderAdminDashboard();
       } else {
         document.getElementById('admin-login-gate').style.display = 'flex';
@@ -8266,9 +8295,10 @@ async function checkSupabaseAdmin(){
   try {
     const sb = getSB();
     if(!sb || !currentUser?.sbId) return false;
-    const { data, error } = await sb.from('profiles').select('is_admin').eq('id', currentUser.sbId).maybeSingle();
+    // Utilise la fonction is_admin() qui vérifie ÉGALEMENT l'allowlist
+    const { data, error } = await sb.rpc('is_admin');
     if(error){ console.warn('checkSupabaseAdmin:', error); return false; }
-    return data?.is_admin === true;
+    return data === true;
   } catch(e){ console.warn(e); return false; }
 }
 
@@ -8279,50 +8309,69 @@ async function adminAuth(){
   const showErr = (msg) => {
     if(errEl){ errEl.classList.remove('hidden'); errEl.classList.add('show'); }
     document.getElementById('admin-auth-msg').textContent = msg;
-    setTimeout(() => errEl?.classList.remove('show'), 4000);
+    setTimeout(() => errEl?.classList.remove('show'), 4500);
   };
 
-  const sb = getSB();
-  if(sb){
-    try {
-      const { data: authData, error: authErr } = await sb.auth.signInWithPassword({ email, password: pwd });
-      if(!authErr && authData?.user){
-        const { data: prof } = await sb.from('profiles').select('is_admin').eq('id', authData.user.id).maybeSingle();
-        if(prof?.is_admin){
-          adminAuthed = true;
-          adminUserId = authData.user.id;
-          // Afficher email admin dans bandeau rouge
-          const ucu = document.getElementById('admin-current-user');
-          if(ucu) ucu.textContent = email;
-          document.getElementById('admin-login-gate').style.display = 'none';
-          const dash = document.getElementById('admin-dashboard');
-          dash.style.cssText = 'display:flex;flex-direction:column;overflow:hidden;flex:1';
-          try { await sb.rpc('admin_log', { p_action: 'admin.login', p_details: {} }); } catch(_){}
-          renderAdminDashboard();
-          return;
-        } else {
-          await sb.auth.signOut();
-          showErr('Ce compte n\'est pas administrateur.');
-          return;
-        }
-      }
-    } catch(e){ console.warn('Supabase admin auth error:', e); }
+  if(!email || !pwd){
+    showErr('Email et mot de passe requis.');
+    return;
   }
 
-  if(email === ADMIN_FALLBACK_CREDS.email && pwd === ADMIN_FALLBACK_CREDS.pwd){
+  const sb = getSB();
+  if(!sb){
+    showErr('Connexion Supabase indisponible.');
+    return;
+  }
+
+  // ━━ ÉTAPE 1 : Vérifier que l'email est dans la allowlist ━━
+  // (Avant même de tenter le password — économise une auth si email pas allowlisté)
+  try {
+    const { data: allowed } = await sb.rpc('check_admin_allowlist', { p_email: email });
+    if(allowed !== true){
+      await logAdminAttempt(email, false, 'email_not_in_allowlist');
+      showErr('Accès refusé. Cet email n\'est pas autorisé.');
+      return;
+    }
+  } catch(e){
+    console.warn('Allowlist check error:', e);
+    showErr('Erreur de vérification. Réessayez.');
+    return;
+  }
+
+  // ━━ ÉTAPE 2 : Authentifier avec Supabase ━━
+  try {
+    const { data: authData, error: authErr } = await sb.auth.signInWithPassword({ email, password: pwd });
+    if(authErr || !authData?.user){
+      await logAdminAttempt(email, false, 'invalid_password');
+      showErr('Identifiants incorrects.');
+      return;
+    }
+
+    // ━━ ÉTAPE 3 : Vérifier is_admin() (qui inclut allowlist + profiles.is_admin) ━━
+    const { data: isAdm } = await sb.rpc('is_admin');
+    if(isAdm !== true){
+      await sb.auth.signOut();
+      await logAdminAttempt(email, false, 'not_admin');
+      showErr('Ce compte n\'est pas administrateur.');
+      return;
+    }
+
+    // ━━ SUCCÈS ━━
     adminAuthed = true;
-    adminUserId = null;
-    // Afficher email admin dans bandeau rouge
+    adminUserId = authData.user.id;
     const ucu = document.getElementById('admin-current-user');
-    if(ucu) ucu.textContent = email + ' (mode fallback)';
+    if(ucu) ucu.textContent = email;
     document.getElementById('admin-login-gate').style.display = 'none';
     const dash = document.getElementById('admin-dashboard');
     dash.style.cssText = 'display:flex;flex-direction:column;overflow:hidden;flex:1';
-    showAdminWarning('⚠️ Mode fallback — connecte-toi avec un compte Supabase pour accès complet.');
+    await logAdminAttempt(email, true);
+    try { await sb.rpc('admin_log', { p_action: 'admin.login', p_details: {} }); } catch(_){}
     renderAdminDashboard();
-    return;
+  } catch(e){
+    console.warn('adminAuth error:', e);
+    await logAdminAttempt(email, false, 'unexpected_error');
+    showErr('Erreur inattendue. Réessayez.');
   }
-  showErr('Identifiants incorrects.');
 }
 
 function showAdminWarning(msg){
@@ -8337,7 +8386,7 @@ function adminTab(btn, tab){
   if(btn.classList.contains('disabled')) return;
   document.querySelectorAll('.admin-nav-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
-  ['overview','users','crm','subscriptions','codes','events','logs'].forEach(t => {
+  ['overview','users','crm','subscriptions','codes','events','logs','security'].forEach(t => {
     const el = document.getElementById('admin-tab-'+t);
     if(el) el.style.display = (t === tab) ? 'block' : 'none';
   });
@@ -8349,7 +8398,8 @@ function adminTab(btn, tab){
     'subscriptions':'💳 Abonnements',
     'codes':'🎟️ Codes d\'activation',
     'events':'🪝 Stripe Events',
-    'logs':'📋 Logs admin'
+    'logs':'📋 Logs admin',
+    'security':'🔐 Sécurité'
   };
   const titleEl = document.getElementById('admin-topbar-title');
   if(titleEl && titles[tab]) titleEl.textContent = titles[tab];
@@ -8360,6 +8410,7 @@ function adminTab(btn, tab){
   else if(tab === 'codes')         renderAdminCodes();
   else if(tab === 'events')        renderAdminEvents();
   else if(tab === 'logs')          renderAdminLogs();
+  else if(tab === 'security')      renderAdminSecurity();
 }
 
 async function renderAdminDashboard(){
@@ -8740,17 +8791,161 @@ async function renderAdminLogs(){
     if(q) logs = logs.filter(l => ((l.actor_email || '') + ' ' + l.action + ' ' + (l.target_id || '')).toLowerCase().includes(q));
     const tb = document.getElementById('adm-logs-table');
     if(!tb) return;
-    if(!logs.length){ tb.innerHTML = '<div style="padding:16px;text-align:center;font-size:.78rem;color:rgba(255,255,255,.3)">Aucun log</div>'; return; }
+    if(!logs.length){ tb.innerHTML = '<div style="padding:16px;text-align:center;font-size:.78rem;color:#A3A3A3">Aucun log</div>'; return; }
     tb.innerHTML = logs.map(l => {
-      const c = l.action.includes('login') ? '#86EFAC' : l.action.includes('plan') ? '#FDBA74' : '#93C5FD';
+      const c = l.action.includes('login') ? '#16A34A' : l.action.includes('plan') ? '#D97706' : '#3B82F6';
       return `<div class="adm-row" style="grid-template-columns:130px 1fr 1.2fr auto">
         <div class="adm-cell" style="display:flex;align-items:center;gap:6px"><div style="width:6px;height:6px;border-radius:50%;background:${c};flex-shrink:0"></div><span style="font-size:.72rem">${new Date(l.created_at).toLocaleString('fr-FR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}</span></div>
         <div class="adm-cell bold" style="font-size:.74rem">${(l.actor_email || '—').split('@')[0]}</div>
-        <div class="adm-cell" style="font-size:.74rem">${l.action}${l.target_id ? '<span style="color:rgba(255,255,255,.3);font-family:monospace;margin-left:6px;font-size:.68rem">'+l.target_id.slice(0,8)+'…</span>' : ''}</div>
-        <div class="adm-cell" style="font-size:.66rem;color:rgba(255,255,255,.3)">${l.details && Object.keys(l.details).length ? JSON.stringify(l.details).slice(0,40) : ''}</div>
+        <div class="adm-cell" style="font-size:.74rem">${l.action}${l.target_id ? '<span style="color:#A3A3A3;font-family:monospace;margin-left:6px;font-size:.68rem">'+l.target_id.slice(0,8)+'…</span>' : ''}</div>
+        <div class="adm-cell" style="font-size:.66rem;color:#A3A3A3">${l.details && Object.keys(l.details).length ? JSON.stringify(l.details).slice(0,40) : ''}</div>
       </div>`;
     }).join('');
   } catch(err){ console.warn(err); }
+}
+
+// ══════════════════════════════════════════════════════════════
+// SÉCURITÉ — Allowlist + Tentatives + KPIs
+// ══════════════════════════════════════════════════════════════
+
+async function renderAdminSecurity(){
+  const sb = getSB();
+  if(!sb) return;
+  try {
+    // 1. Charger allowlist
+    const { data: aw } = await sb.from('admin_allowlist').select('*').order('added_at', { ascending: false });
+    _adminAllowlistCache = aw || [];
+    const activeCount = _adminAllowlistCache.filter(a => a.active).length;
+
+    // 2. Charger tentatives récentes
+    const { data: at } = await sb.rpc('admin_recent_attempts', { p_limit: 100 });
+    _adminAttemptsCache = at || [];
+
+    // 3. KPIs sur les 24 dernières heures
+    const dayAgo = new Date(Date.now() - 24*60*60*1000);
+    const recent24 = _adminAttemptsCache.filter(a => new Date(a.attempted_at) > dayAgo);
+    const success24 = recent24.filter(a => a.success).length;
+    const failed24 = recent24.filter(a => !a.success).length;
+    const suspicious = recent24.filter(a =>
+      !a.success && (a.failure_reason === 'email_not_in_allowlist' || a.failure_reason === 'invalid_password')
+    ).length;
+
+    const set = (id, v) => { const el = document.getElementById(id); if(el) el.textContent = v; };
+    set('adm-sec-allowed', activeCount);
+    set('adm-sec-success', success24);
+    set('adm-sec-failed', failed24);
+    set('adm-sec-suspicious', suspicious);
+
+    // 4. Render allowlist
+    const al = document.getElementById('adm-allowlist-list');
+    if(al){
+      if(!_adminAllowlistCache.length){
+        al.innerHTML = '<div style="padding:14px;text-align:center;font-size:.78rem;color:#A3A3A3">Aucun email autorisé</div>';
+      } else {
+        al.innerHTML = _adminAllowlistCache.map(a => {
+          const isMe = currentUser?.email && currentUser.email.toLowerCase() === a.email.toLowerCase();
+          const statusBadge = a.active
+            ? '<span class="adm-badge adm-badge-green">Actif</span>'
+            : '<span class="adm-badge adm-badge-gray">Désactivé</span>';
+          const meBadge = isMe ? '<span class="adm-badge adm-badge-blue" style="margin-left:6px">Moi</span>' : '';
+          const revokeBtn = a.active && !isMe
+            ? `<button class="adm-btn adm-btn-outline" style="font-size:.66rem;padding:4px 10px" onclick="revokeAllowlist('${a.email}')">Révoquer</button>`
+            : '';
+          return `<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #F5F5F5">
+            <div style="flex:1;min-width:0">
+              <div class="adm-cell bold" style="font-size:.78rem;display:flex;align-items:center;flex-wrap:wrap;gap:5px">
+                ${a.email}${meBadge}${statusBadge}
+              </div>
+              <div style="font-size:.68rem;color:#A3A3A3;margin-top:2px">
+                Ajouté ${new Date(a.added_at).toLocaleDateString('fr-FR')} par ${a.added_by || 'system'}${a.notes ? ' · ' + a.notes : ''}
+              </div>
+            </div>
+            ${revokeBtn}
+          </div>`;
+        }).join('');
+      }
+    }
+
+    // 5. Render tentatives
+    const at_el = document.getElementById('adm-attempts-list');
+    if(at_el){
+      if(!_adminAttemptsCache.length){
+        at_el.innerHTML = '<div style="padding:14px;text-align:center;font-size:.78rem;color:#A3A3A3">Aucune tentative enregistrée</div>';
+      } else {
+        at_el.innerHTML = _adminAttemptsCache.slice(0, 30).map(a => {
+          const reasonLabels = {
+            'email_not_in_allowlist': '🚫 Email non autorisé',
+            'invalid_password': '🔑 Mot de passe incorrect',
+            'not_admin': '⛔ Pas admin',
+            'session_resume': '🔄 Session reprise',
+            'unexpected_error': '💥 Erreur inattendue'
+          };
+          const reasonText = a.failure_reason ? (reasonLabels[a.failure_reason] || a.failure_reason) : '✅ Réussie';
+          const dotClass = a.success ? 'green' : 'red';
+          const browser = (a.user_agent || '').match(/(Chrome|Safari|Firefox|Edge)\/[\d.]+/)?.[0] || 'Inconnu';
+          const ipDisplay = a.ip_address || '—';
+          return `<div class="adm-activity-item">
+            <div class="adm-activity-dot ${dotClass}"></div>
+            <div style="flex:1;min-width:0">
+              <div class="adm-activity-text" style="font-size:.76rem">
+                <span style="font-weight:600">${a.email}</span>
+                <span style="color:#737373;margin-left:6px">— ${reasonText}</span>
+              </div>
+              <div class="adm-activity-meta" style="margin-top:3px">
+                <span style="font-family:monospace">${ipDisplay}</span>
+                <span style="margin:0 6px">·</span>
+                <span>${browser}</span>
+                <span style="margin:0 6px">·</span>
+                <span>${new Date(a.attempted_at).toLocaleString('fr-FR',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})}</span>
+              </div>
+            </div>
+          </div>`;
+        }).join('');
+      }
+    }
+  } catch(e){ console.warn('renderAdminSecurity error:', e); }
+}
+
+function openAddAllowlistModal(){
+  document.getElementById('adm-allowlist-email').value = '';
+  document.getElementById('adm-allowlist-notes').value = '';
+  document.getElementById('adm-allowlist-modal').classList.remove('hidden');
+}
+
+async function submitAddAllowlist(){
+  const email = document.getElementById('adm-allowlist-email').value.trim().toLowerCase();
+  const notes = document.getElementById('adm-allowlist-notes').value.trim();
+  if(!email || !email.includes('@')){
+    alert('Email invalide');
+    return;
+  }
+  try {
+    const sb = getSB();
+    const { data, error } = await sb.rpc('admin_add_allowlist', { p_email: email, p_notes: notes || null });
+    if(error || !data?.ok){
+      alert('Erreur : ' + (data?.error || error?.message || 'inconnue'));
+      return;
+    }
+    document.getElementById('adm-allowlist-modal').classList.add('hidden');
+    renderAdminSecurity();
+  } catch(e){
+    alert('Erreur : ' + e.message);
+  }
+}
+
+async function revokeAllowlist(email){
+  if(!confirm(`Révoquer l'accès admin de ${email} ?\n\nCet email ne pourra plus se connecter au backoffice tant qu'il ne sera pas réactivé.`)) return;
+  try {
+    const sb = getSB();
+    const { data, error } = await sb.rpc('admin_revoke_allowlist', { p_email: email });
+    if(error || !data?.ok){
+      alert('Erreur : ' + (data?.error || error?.message || 'inconnue'));
+      return;
+    }
+    renderAdminSecurity();
+  } catch(e){
+    alert('Erreur : ' + e.message);
+  }
 }
 
 document.addEventListener('keydown', e => {
@@ -8841,12 +9036,11 @@ if(window.location.hash === '#admin') setTimeout(openAdmin, 500);
       <!-- Configuration -->
       <div class="admin-nav-section">
         <div class="admin-nav-section-title">Configuration</div>
-        <button class="admin-nav-btn disabled" title="Bientôt disponible">
-          <span class="nav-icon">⚙️</span>Paramètres
-          <span class="nav-soon">SOON</span>
+        <button class="admin-nav-btn" onclick="adminTab(this,'security')">
+          <span class="nav-icon">🔐</span>Sécurité
         </button>
         <button class="admin-nav-btn disabled" title="Bientôt disponible">
-          <span class="nav-icon">🔐</span>Sécurité 2FA
+          <span class="nav-icon">⚙️</span>Paramètres
           <span class="nav-soon">SOON</span>
         </button>
       </div>
@@ -9124,11 +9318,70 @@ if(window.location.hash === '#admin') setTimeout(openAdmin, 500);
         </div>
       </div>
 
+      <!-- TAB: Sécurité -->
+      <div id="admin-tab-security" style="display:none">
+        <div style="margin-bottom:18px">
+          <div style="font-family:var(--fd);font-weight:700;font-size:1.15rem;color:#0F0F11;margin-bottom:3px;letter-spacing:-.01em">🔐 Sécurité</div>
+          <div style="font-size:.74rem;color:#737373">Allowlist des admins, tentatives de connexion, surveillance</div>
+        </div>
+
+        <!-- KPIs sécurité -->
+        <div class="adm-kpi-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:22px">
+          <div class="adm-kpi"><div class="adm-kpi-accent" style="background:#16A34A"></div><div class="adm-kpi-val" id="adm-sec-allowed">0</div><div class="adm-kpi-label">Admins autorisés</div></div>
+          <div class="adm-kpi"><div class="adm-kpi-accent" style="background:#3B82F6"></div><div class="adm-kpi-val" id="adm-sec-success">0</div><div class="adm-kpi-label">Connexions OK (24h)</div></div>
+          <div class="adm-kpi"><div class="adm-kpi-accent" style="background:#DC2626"></div><div class="adm-kpi-val" id="adm-sec-failed">0</div><div class="adm-kpi-label">Échecs (24h)</div></div>
+          <div class="adm-kpi"><div class="adm-kpi-accent" style="background:#D97706"></div><div class="adm-kpi-val" id="adm-sec-suspicious">0</div><div class="adm-kpi-label">Tentatives suspectes</div></div>
+        </div>
+
+        <!-- 2 colonnes : Allowlist + Tentatives récentes -->
+        <div style="display:grid;grid-template-columns:1fr 1.4fr;gap:16px;margin-bottom:18px">
+
+          <!-- Allowlist -->
+          <div class="adm-card">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+              <div style="font-family:var(--fd);font-weight:700;font-size:.88rem;color:#0F0F11">✅ Emails admins autorisés</div>
+              <button class="adm-btn adm-btn-primary" style="font-size:.7rem;padding:6px 12px" onclick="openAddAllowlistModal()">+ Ajouter</button>
+            </div>
+            <div id="adm-allowlist-list" style="max-height:340px;overflow-y:auto"></div>
+            <div style="font-size:.7rem;color:#737373;margin-top:10px;padding-top:10px;border-top:1px solid #F0F0F0">
+              ℹ️ Seuls les emails de cette liste peuvent accéder au backoffice, même avec is_admin=TRUE en DB.
+            </div>
+          </div>
+
+          <!-- Tentatives récentes -->
+          <div class="adm-card">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+              <div style="font-family:var(--fd);font-weight:700;font-size:.88rem;color:#0F0F11">🚨 Tentatives de connexion récentes</div>
+              <button class="adm-btn adm-btn-outline" style="font-size:.7rem;padding:6px 12px" onclick="renderAdminSecurity()">↺ Actualiser</button>
+            </div>
+            <div id="adm-attempts-list" style="max-height:340px;overflow-y:auto"></div>
+          </div>
+
+        </div>
+
+      </div>
+
     </div><!-- /admin-content -->
   </div><!-- /admin-dashboard -->
   </div><!-- /admin-main -->
   </div><!-- /admin-body -->
 </div><!-- /admin-screen -->
+
+<!-- Modal Ajout Allowlist -->
+<div class="adm-modal-overlay hidden" id="adm-allowlist-modal" onclick="this.classList.add('hidden')">
+  <div class="adm-modal" onclick="event.stopPropagation()">
+    <div class="adm-modal-title">➕ Ajouter un admin autorisé</div>
+    <div style="font-size:.78rem;color:#525252;margin-bottom:14px">Ajoute un email à la liste blanche. Cet email pourra ensuite se connecter au backoffice (à condition que <code>profiles.is_admin = TRUE</code> soit aussi mis pour cet utilisateur).</div>
+    <label class="adm-label">Email</label>
+    <input class="adm-input" type="email" id="adm-allowlist-email" placeholder="nouveau-admin@exemple.fr">
+    <label class="adm-label">Notes (optionnel)</label>
+    <input class="adm-input" type="text" id="adm-allowlist-notes" placeholder="Ex: Co-fondateur, Stagiaire support, etc.">
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:14px">
+      <button class="adm-btn adm-btn-outline" onclick="document.getElementById('adm-allowlist-modal').classList.add('hidden')">Annuler</button>
+      <button class="adm-btn adm-btn-primary" onclick="submitAddAllowlist()">Ajouter à l'allowlist</button>
+    </div>
+  </div>
+</div>
 
 <!-- Modal édition utilisateur -->
 <div class="adm-modal-overlay hidden" id="adm-user-modal">
