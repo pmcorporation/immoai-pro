@@ -8271,6 +8271,7 @@ function openAdmin(){
         dash.style.cssText = 'display:flex;flex-direction:column;overflow:hidden;flex:1';
         // Logger ouverture admin (passive, pas vraiment un login)
         logAdminAttempt(currentUser.email, true, 'session_resume');
+        startAdminSession();
         renderAdminDashboard();
       } else {
         document.getElementById('admin-login-gate').style.display = 'flex';
@@ -8323,12 +8324,37 @@ async function adminAuth(){
     return;
   }
 
+  // ━━ ÉTAPE 0 : Rate limit (Niveau 2) ━━
+  try {
+    const { data: rl } = await sb.rpc('check_rate_limit', { p_email: email });
+    if(rl?.blocked === true){
+      const minutes = Math.ceil((rl.retry_after_seconds || 0) / 60);
+      showErr(`🚨 Trop de tentatives échouées. Réessayez dans ${minutes} min.`);
+      // Alerte email pour rate limit
+      sendAdminAlert({
+        type: 'rate_limit_hit',
+        email: email,
+        failure_reason: `${rl.attempts_count} échecs dans ${rl.window_minutes} min`
+      }).catch(_ => {});
+      return;
+    }
+  } catch(e){
+    console.warn('Rate limit check error:', e);
+    // En cas d'erreur, on laisse passer pour ne pas bloquer un admin légitime
+  }
+
   // ━━ ÉTAPE 1 : Vérifier que l'email est dans la allowlist ━━
-  // (Avant même de tenter le password — économise une auth si email pas allowlisté)
   try {
     const { data: allowed } = await sb.rpc('check_admin_allowlist', { p_email: email });
     if(allowed !== true){
       await logAdminAttempt(email, false, 'email_not_in_allowlist');
+      sendAdminAlert({
+        type: 'login_failed',
+        email: email,
+        failure_reason: 'email_not_in_allowlist',
+        ip: await getClientIP(),
+        user_agent: navigator.userAgent
+      }).catch(_ => {});
       showErr('Accès refusé. Cet email n\'est pas autorisé.');
       return;
     }
@@ -8343,15 +8369,29 @@ async function adminAuth(){
     const { data: authData, error: authErr } = await sb.auth.signInWithPassword({ email, password: pwd });
     if(authErr || !authData?.user){
       await logAdminAttempt(email, false, 'invalid_password');
+      sendAdminAlert({
+        type: 'login_failed',
+        email: email,
+        failure_reason: 'invalid_password',
+        ip: await getClientIP(),
+        user_agent: navigator.userAgent
+      }).catch(_ => {});
       showErr('Identifiants incorrects.');
       return;
     }
 
-    // ━━ ÉTAPE 3 : Vérifier is_admin() (qui inclut allowlist + profiles.is_admin) ━━
+    // ━━ ÉTAPE 3 : Vérifier is_admin() ━━
     const { data: isAdm } = await sb.rpc('is_admin');
     if(isAdm !== true){
       await sb.auth.signOut();
       await logAdminAttempt(email, false, 'not_admin');
+      sendAdminAlert({
+        type: 'login_failed',
+        email: email,
+        failure_reason: 'not_admin',
+        ip: await getClientIP(),
+        user_agent: navigator.userAgent
+      }).catch(_ => {});
       showErr('Ce compte n\'est pas administrateur.');
       return;
     }
@@ -8365,13 +8405,97 @@ async function adminAuth(){
     const dash = document.getElementById('admin-dashboard');
     dash.style.cssText = 'display:flex;flex-direction:column;overflow:hidden;flex:1';
     await logAdminAttempt(email, true);
+    sendAdminAlert({
+      type: 'login_success',
+      email: email,
+      ip: await getClientIP(),
+      user_agent: navigator.userAgent
+    }).catch(_ => {});
     try { await sb.rpc('admin_log', { p_action: 'admin.login', p_details: {} }); } catch(_){}
+    startAdminSession();
     renderAdminDashboard();
   } catch(e){
     console.warn('adminAuth error:', e);
     await logAdminAttempt(email, false, 'unexpected_error');
     showErr('Erreur inattendue. Réessayez.');
   }
+}
+
+// ══════════════════════════════════════════════════════════════
+// NIVEAU 2 — Alertes email + Session timer
+// ══════════════════════════════════════════════════════════════
+
+// Envoyer une alerte email via l'Edge Function
+async function sendAdminAlert(payload){
+  try {
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/admin-alert-email`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${SUPABASE_KEY}`
+      },
+      body: JSON.stringify(payload)
+    });
+    if(!res.ok){
+      const err = await res.text();
+      console.warn('admin-alert-email failed:', res.status, err);
+    }
+  } catch(e){
+    console.warn('sendAdminAlert error:', e);
+  }
+}
+
+// Session admin : 30 min d'inactivité → logout auto
+const ADMIN_SESSION_TIMEOUT_MS = 30 * 60 * 1000; // 30 min
+let _adminSessionTimer = null;
+let _adminLastActivity = Date.now();
+
+function startAdminSession(){
+  _adminLastActivity = Date.now();
+  // Reset timer à chaque interaction utilisateur dans le backoffice
+  ['mousemove', 'keydown', 'click', 'scroll'].forEach(ev => {
+    document.addEventListener(ev, resetAdminSession, { passive: true });
+  });
+  // Vérification toutes les 60 sec
+  if(_adminSessionTimer) clearInterval(_adminSessionTimer);
+  _adminSessionTimer = setInterval(() => {
+    const elapsed = Date.now() - _adminLastActivity;
+    if(elapsed >= ADMIN_SESSION_TIMEOUT_MS){
+      forceLogoutAdmin('session_expired');
+    } else {
+      // Mise à jour du compteur dans le bandeau (countdown)
+      const remaining = Math.ceil((ADMIN_SESSION_TIMEOUT_MS - elapsed) / 60000);
+      const el = document.getElementById('admin-session-timer');
+      if(el) el.textContent = `Session: ${remaining} min`;
+    }
+  }, 60000);
+}
+
+function resetAdminSession(){
+  _adminLastActivity = Date.now();
+}
+
+async function forceLogoutAdmin(reason){
+  console.log('Admin logout:', reason);
+  if(_adminSessionTimer){ clearInterval(_adminSessionTimer); _adminSessionTimer = null; }
+  ['mousemove', 'keydown', 'click', 'scroll'].forEach(ev => {
+    document.removeEventListener(ev, resetAdminSession);
+  });
+  adminAuthed = false;
+  adminUserId = null;
+  // Si on était loggé via Supabase auth (pas via fallback), déconnecter aussi
+  try {
+    const sb = getSB();
+    if(sb && reason === 'session_expired'){
+      // Note: ne pas déco la session Supabase entière car ça déco aussi l'app cliente
+      // On déconnecte juste de l'admin (UI)
+    }
+  } catch(_){}
+  alert('🔒 Session admin expirée après 30 min d\'inactivité. Reconnectez-vous.');
+  closeAdmin();
+  // Reset UI
+  document.getElementById('admin-dashboard').style.display = 'none';
+  document.getElementById('admin-login-gate').style.display = 'flex';
 }
 
 function showAdminWarning(msg){
@@ -8963,6 +9087,7 @@ if(window.location.hash === '#admin') setTimeout(openAdmin, 500);
       <span>🚨 ESPACE ADMIN — Vous avez accès aux données de tous les utilisateurs</span>
     </div>
     <div class="admin-warning-bar-right">
+      <span id="admin-session-timer" style="opacity:.7"></span>
       <span id="admin-current-user">—</span>
       <button class="admin-warning-bar-btn" onclick="closeAdmin()">↩ Quitter</button>
     </div>
