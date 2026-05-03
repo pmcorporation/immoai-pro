@@ -3265,10 +3265,104 @@
       letter-spacing: -0.03em;
       color: var(--cream);
     }
+    .price-amount .num-old {
+      font-size: 22px;
+      font-weight: 700;
+      color: rgba(251, 247, 238, 0.4);
+      text-decoration: line-through;
+      text-decoration-thickness: 2px;
+      text-decoration-color: var(--salmon);
+      margin-right: 4px;
+      align-self: center;
+    }
     .price-amount .unit {
       font-size: 15px;
       color: rgba(251, 247, 238, 0.55);
       font-weight: 700;
+    }
+
+    /* Tag promo (offre lancement) */
+    .price-promo-tag {
+      position: absolute;
+      top: -12px;
+      right: 24px;
+      background: rgba(240, 138, 110, 0.12);
+      color: var(--salmon);
+      border: 1px solid rgba(240, 138, 110, 0.35);
+      padding: 5px 11px;
+      border-radius: 999px;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      backdrop-filter: blur(4px);
+    }
+    .price-card.featured .price-promo-tag {
+      top: -12px;
+      right: 24px;
+      left: auto;
+    }
+
+    /* Compte à rebours discret */
+    .countdown-banner {
+      display: inline-flex;
+      align-items: center;
+      gap: 16px;
+      margin-top: 28px;
+      padding: 10px 20px;
+      background: rgba(240, 138, 110, 0.06);
+      border: 1px solid rgba(240, 138, 110, 0.18);
+      border-radius: 999px;
+      font-size: 13px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .countdown-label {
+      color: var(--muted);
+      font-weight: 700;
+      font-size: 12px;
+      letter-spacing: 0.02em;
+    }
+    .countdown-timer {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .countdown-block {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      min-width: 36px;
+      padding: 4px 8px;
+      background: var(--white);
+      border: 1px solid rgba(15, 14, 13, 0.06);
+      border-radius: 8px;
+      line-height: 1.1;
+    }
+    .countdown-num {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--ink);
+      font-variant-numeric: tabular-nums;
+      letter-spacing: -0.02em;
+    }
+    .countdown-unit {
+      font-size: 9px;
+      color: var(--muted);
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin-top: 1px;
+    }
+    .countdown-banner.expired {
+      opacity: 0.5;
+    }
+
+    @media (max-width: 600px) {
+      .countdown-banner { padding: 10px 14px; gap: 10px; }
+      .countdown-label { font-size: 11px; }
+      .countdown-block { min-width: 32px; padding: 3px 6px; }
+      .countdown-num { font-size: 14px; }
     }
     .price-trial {
       display: inline-flex;
@@ -3645,7 +3739,7 @@
       <!-- Liens de navigation -->
       <ul class="nav-links">
         <li><a href="#features">Fonctionnalités</a></li>
-        <li><a href="#pricing">Tarifs</a></li>
+        <li><a href="/tarifs">Tarifs</a></li>
         <li><a href="/blog">Blog</a></li>
       </ul>
 
@@ -4827,14 +4921,27 @@
         <span class="eyebrow"><span class="dot"></span>Tarifs</span>
         <h2>Un prix <span class="marker">honnête</span>.<br>Sans <em>piège</em>, sans surprise.</h2>
         <p>Deux plans, prix mensuels. <strong>Sans engagement</strong>, vous résiliez en un clic à tout moment.</p>
+
+        <!-- Compte à rebours discret -->
+        <div class="countdown-banner reveal" data-delay="1">
+          <span class="countdown-label">Offre lancement valable jusqu'au 30 juin</span>
+          <div class="countdown-timer" id="countdownHome">
+            <div class="countdown-block"><span class="countdown-num" data-unit="days">--</span><span class="countdown-unit">jours</span></div>
+            <div class="countdown-block"><span class="countdown-num" data-unit="hours">--</span><span class="countdown-unit">h</span></div>
+            <div class="countdown-block"><span class="countdown-num" data-unit="minutes">--</span><span class="countdown-unit">min</span></div>
+            <div class="countdown-block"><span class="countdown-num" data-unit="seconds">--</span><span class="countdown-unit">s</span></div>
+          </div>
+        </div>
       </div>
 
       <div class="pricing-grid">
 
         <!-- Starter -->
         <div class="price-card reveal">
+          <span class="price-promo-tag">Offre lancement -40%</span>
           <div class="price-name">Starter</div>
           <div class="price-amount">
+            <span class="num-old">59 €</span>
             <span class="num">35 €</span>
             <span class="unit">HT / mois</span>
           </div>
@@ -4857,8 +4964,10 @@
         <!-- Pro -->
         <div class="price-card featured reveal" data-delay="1">
           <span class="price-badge">Le + populaire</span>
+          <span class="price-promo-tag">Offre lancement -37%</span>
           <div class="price-name">Pro</div>
           <div class="price-amount">
+            <span class="num-old">119 €</span>
             <span class="num">75 €</span>
             <span class="unit">HT / mois</span>
           </div>
@@ -5078,7 +5187,7 @@
           <h4>Produit</h4>
           <ul>
             <li><a href="#features">Fonctionnalités</a></li>
-            <li><a href="#pricing">Tarifs</a></li>
+            <li><a href="/tarifs">Tarifs</a></li>
             <li><a href="/app">Connexion</a></li>
           </ul>
         </div>
@@ -5582,6 +5691,49 @@
         paused = false;
         runTimeline();
       });
+    })();
+
+    /* ====================================================================
+       COMPTE À REBOURS — Offre lancement jusqu'au 30 juin 2026
+       ==================================================================== */
+    (function() {
+      const target = new Date('2026-06-30T23:59:59').getTime();
+      const banners = document.querySelectorAll('.countdown-banner');
+      if (!banners.length) return;
+
+      function update() {
+        const now = Date.now();
+        const diff = target - now;
+
+        if (diff <= 0) {
+          banners.forEach(b => {
+            b.classList.add('expired');
+            const label = b.querySelector('.countdown-label');
+            if (label) label.textContent = 'Offre expirée';
+            b.querySelectorAll('.countdown-num').forEach(n => n.textContent = '0');
+          });
+          return;
+        }
+
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+        const minutes = Math.floor((diff / (1000 * 60)) % 60);
+        const seconds = Math.floor((diff / 1000) % 60);
+
+        banners.forEach(b => {
+          const setNum = (unit, val) => {
+            const el = b.querySelector(`[data-unit="${unit}"]`);
+            if (el) el.textContent = String(val).padStart(2, '0');
+          };
+          setNum('days', days);
+          setNum('hours', hours);
+          setNum('minutes', minutes);
+          setNum('seconds', seconds);
+        });
+      }
+
+      update();
+      setInterval(update, 1000);
     })();
   </script>
 

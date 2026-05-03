@@ -1,95 +1,421 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Tarifs · mon-crm-immo</title>
-  <meta name="description" content="Tarifs simples et sans engagement. Starter à 35 €/mois ou Pro à 75 €/mois. Choisissez le plan qui correspond à votre activité." />
+  <meta name="description" content="Tarifs simples et sans engagement. Starter à 35 €/mois ou Pro à 75 €/mois. Offre de lancement -40% jusqu'au 30 juin 2026.">
 
-  <meta property="og:title" content="Tarifs · mon-crm-immo" />
-  <meta property="og:description" content="Starter 35 €/mois ou Pro 75 €/mois. Sans engagement." />
-  <meta property="og:url" content="https://mon-crm-immo.fr/tarifs" />
+  <meta property="og:title" content="Tarifs · mon-crm-immo">
+  <meta property="og:description" content="Starter 35 €/mois ou Pro 75 €/mois. Sans engagement.">
+  <meta property="og:url" content="https://mon-crm-immo.fr/tarifs">
 
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'%3E%3Crect x='4' y='4' width='88' height='88' rx='22' fill='%232A211B'/%3E%3Ctext x='48' y='50' text-anchor='middle' dominant-baseline='central' font-family='Manrope,sans-serif' font-weight='800' font-size='30' fill='%23FBF7EE'%3EMCI%3C/text%3E%3Ccircle cx='72' cy='31' r='3' fill='%23F08A6E'/%3E%3C/svg%3E" />
+  <link rel="canonical" href="https://mon-crm-immo.fr/tarifs">
 
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/assets/styles.css" />
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'%3E%3Crect x='4' y='4' width='88' height='88' rx='22' fill='%230F0E0D'/%3E%3Ctext x='48' y='50' text-anchor='middle' dominant-baseline='central' font-family='Manrope,sans-serif' font-weight='800' font-size='30' fill='%23FBF7EE'%3EMCI%3C/text%3E%3Ccircle cx='72' cy='31' r='3' fill='%23F08A6E'/%3E%3C/svg%3E">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&display=swap" rel="stylesheet">
 
   <style>
-    /* Styles spécifiques à la page Tarifs */
-    .pricing-cards {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 20px;
-      max-width: 880px;
-      margin: 0 auto 64px;
+    :root {
+      --ink: #0F0E0D;
+      --ink-soft: #2A211B;
+      --cream: #FBF7EE;
+      --white: #FFFFFF;
+      --salmon: #F08A6E;
+      --salmon-deep: #C26A52;
+      --muted: #776659;
+      --card: #FAFAF7;
+      --border: rgba(15, 14, 13, 0.08);
     }
-    .price-card {
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Manrope', system-ui, -apple-system, sans-serif;
+      font-weight: 500;
+      color: var(--ink);
+      background: var(--white);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+    a { color: inherit; text-decoration: none; }
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+
+    /* === NAVBAR (identique à la home) === */
+    .nav {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: saturate(180%) blur(20px);
+      -webkit-backdrop-filter: saturate(180%) blur(20px);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 0;
+    }
+    .nav-inner {
+      display: flex; align-items: center;
+      justify-content: space-between; gap: 32px;
+    }
+    .logo-link { display: flex; align-items: center; flex-shrink: 0; transition: transform 0.2s; }
+    .logo-link:hover { transform: scale(1.03); }
+    .logo-svg { width: 40px; height: 40px; }
+    .nav-links {
+      display: flex; align-items: center; gap: 8px;
+      list-style: none; flex: 1;
+    }
+    .nav-links a {
+      position: relative; display: inline-block;
+      padding: 8px 14px;
+      font-size: 14px; font-weight: 700;
+      color: var(--ink-soft); transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--ink); }
+    .nav-links a.active { color: var(--salmon-deep); }
+    .nav-actions { display: flex; align-items: center; gap: 12px; }
+    .nav-login { font-size: 14px; font-weight: 700; color: var(--ink-soft); padding: 8px 14px; }
+    .nav-login:hover { color: var(--ink); }
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      gap: 8px; padding: 10px 20px;
+      font-size: 14px; font-weight: 700;
+      border-radius: 999px; cursor: pointer;
+      transition: all 0.25s;
+      border: 1.5px solid transparent;
+    }
+    .btn-primary {
+      background: var(--salmon); color: var(--ink); border-color: var(--salmon);
+    }
+    .btn-primary:hover {
+      background: var(--salmon-deep); border-color: var(--salmon-deep);
+      color: var(--white); transform: translateY(-1px);
+    }
+    .btn-secondary {
+      background: transparent; color: var(--ink); border-color: var(--ink);
+    }
+    .btn-secondary:hover {
+      background: var(--ink); color: var(--cream); transform: translateY(-1px);
+    }
+    .btn-large { padding: 16px 32px; font-size: 16px; }
+    @media (max-width: 800px) { .nav-links, .nav-login { display: none; } }
+
+    /* === HERO PRICING === */
+    .pricing-hero {
       position: relative;
-      padding: 40px;
+      padding: clamp(4rem, 8vw, 7rem) 0 clamp(2rem, 4vw, 3rem);
+      text-align: center;
+      background: var(--card);
+      overflow: hidden;
+    }
+    .pricing-hero::before {
+      content: '';
+      position: absolute;
+      top: -150px; left: 50%;
+      width: 800px; height: 800px;
+      transform: translateX(-50%);
+      background: radial-gradient(circle, rgba(240, 138, 110, 0.12), transparent 60%);
+      pointer-events: none;
+      animation: floatBg 20s ease-in-out infinite;
+    }
+    @keyframes floatBg {
+      0%, 100% { transform: translateX(-50%) translateY(0); }
+      50% { transform: translateX(-50%) translateY(30px); }
+    }
+
+    .pricing-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      background: rgba(240, 138, 110, 0.1);
+      border: 1px solid rgba(240, 138, 110, 0.25);
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--salmon-deep);
+      margin-bottom: 28px;
+      animation: fadeUp 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .pricing-eyebrow .dot {
+      width: 6px; height: 6px;
+      background: var(--salmon);
+      border-radius: 50%;
+      animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.4); opacity: 0.6; }
+    }
+
+    .pricing-hero h1 {
+      font-size: clamp(2.5rem, 6vw, 4.5rem);
+      font-weight: 800;
+      line-height: 1.05;
+      letter-spacing: -0.04em;
+      margin-bottom: 24px;
+      max-width: 16ch;
+      margin-left: auto; margin-right: auto;
+      animation: fadeUp 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.1s backwards;
+    }
+    .pricing-hero h1 em {
+      font-style: italic;
+      color: var(--salmon);
+      font-weight: 700;
+      position: relative;
+      display: inline-block;
+    }
+    .pricing-hero h1 em::after {
+      content: '';
+      position: absolute;
+      left: 0; right: 0; bottom: -4px;
+      height: 6px;
+      background: rgba(240, 138, 110, 0.3);
+      z-index: -1;
+      border-radius: 3px;
+      animation: highlightSweep 1.2s cubic-bezier(0.22, 1, 0.36, 1) 0.6s backwards;
+      transform-origin: left center;
+    }
+    @keyframes highlightSweep {
+      from { transform: scaleX(0); }
+      to { transform: scaleX(1); }
+    }
+
+    .pricing-hero p.lede {
+      font-size: clamp(1rem, 1.5vw, 1.2rem);
+      color: var(--muted);
+      max-width: 56ch;
+      margin: 0 auto 32px;
+      line-height: 1.55;
+      animation: fadeUp 1s cubic-bezier(0.22, 1, 0.36, 1) 0.2s backwards;
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* === COMPTE À REBOURS === */
+    .countdown-banner {
+      display: inline-flex;
+      align-items: center;
+      gap: 18px;
+      padding: 12px 24px;
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      flex-wrap: wrap;
+      justify-content: center;
+      box-shadow: 0 4px 20px -4px rgba(15, 14, 13, 0.06);
+      animation: fadeUp 1.1s cubic-bezier(0.22, 1, 0.36, 1) 0.3s backwards;
+    }
+    .countdown-label {
+      color: var(--ink-soft);
+      font-weight: 800;
+      font-size: 13px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .countdown-label::before {
+      content: '';
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--salmon);
+      animation: pulse 2s ease-in-out infinite;
+    }
+    .countdown-timer {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .countdown-block {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      min-width: 44px;
+      padding: 6px 10px;
       background: var(--card);
       border: 1px solid var(--border);
-      border-radius: 20px;
-      transition: transform 0.3s, box-shadow 0.3s;
+      border-radius: 10px;
+      line-height: 1.1;
     }
+    .countdown-num {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--ink);
+      font-variant-numeric: tabular-nums;
+      letter-spacing: -0.02em;
+    }
+    .countdown-unit {
+      font-size: 9px;
+      color: var(--muted);
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin-top: 2px;
+    }
+    .countdown-banner.expired { opacity: 0.5; }
+
+    @media (max-width: 600px) {
+      .countdown-banner { padding: 12px 16px; gap: 12px; }
+      .countdown-label { font-size: 12px; }
+      .countdown-block { min-width: 38px; padding: 5px 8px; }
+      .countdown-num { font-size: 15px; }
+    }
+
+    /* === PRICING CARDS === */
+    .pricing-section {
+      padding: clamp(3rem, 5vw, 5rem) 0 clamp(4rem, 6vw, 6rem);
+      position: relative;
+    }
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 24px;
+      max-width: 920px;
+      margin: 0 auto;
+    }
+    @media (max-width: 800px) {
+      .pricing-grid { grid-template-columns: 1fr; max-width: 480px; }
+    }
+
+    .price-card {
+      position: relative;
+      padding: 44px 36px 36px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+                  box-shadow 0.4s,
+                  border-color 0.4s;
+      opacity: 0;
+      transform: translateY(30px);
+      animation: cardEnter 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+    .price-card:nth-child(1) { animation-delay: 0.4s; }
+    .price-card:nth-child(2) { animation-delay: 0.55s; }
+
+    @keyframes cardEnter {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
     .price-card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 12px 32px -8px rgba(42, 33, 27, 0.12);
+      transform: translateY(-6px);
+      border-color: rgba(240, 138, 110, 0.3);
+      box-shadow: 0 24px 48px -16px rgba(15, 14, 13, 0.12);
     }
     .price-card.featured {
       background: var(--ink);
       color: var(--cream);
       border-color: var(--ink);
     }
+    .price-card.featured:hover {
+      box-shadow: 0 24px 48px -16px rgba(15, 14, 13, 0.5);
+    }
+
+    /* Badge "Le + populaire" */
     .price-badge {
       position: absolute;
-      top: -12px;
-      left: 40px;
+      top: -14px; left: 32px;
       background: var(--salmon);
       color: var(--ink);
-      padding: 5px 14px;
+      padding: 6px 14px;
       border-radius: 999px;
       font-size: 11px;
       font-weight: 800;
-      letter-spacing: 0.08em;
+      letter-spacing: 0.1em;
       text-transform: uppercase;
+      box-shadow: 0 6px 20px rgba(240, 138, 110, 0.4);
     }
-    .price-name {
-      font-size: 13px;
+
+    /* Tag promo */
+    .price-promo-tag {
+      position: absolute;
+      top: -14px; right: 24px;
+      background: rgba(240, 138, 110, 0.15);
+      color: var(--salmon-deep);
+      border: 1px solid rgba(240, 138, 110, 0.4);
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 10px;
       font-weight: 800;
       letter-spacing: 0.08em;
       text-transform: uppercase;
-      color: var(--muted);
-      margin-bottom: 16px;
+      backdrop-filter: blur(8px);
+    }
+    .price-card.featured .price-promo-tag {
+      background: rgba(240, 138, 110, 0.18);
+      color: var(--salmon);
+      border-color: rgba(240, 138, 110, 0.3);
+    }
+
+    .price-name {
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--salmon);
+      margin-bottom: 18px;
     }
     .price-card.featured .price-name { color: var(--salmon); }
+
     .price-amount {
       display: flex;
       align-items: baseline;
-      gap: 6px;
+      gap: 8px;
       margin-bottom: 8px;
+    }
+    .price-amount .num-old {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--muted);
+      text-decoration: line-through;
+      text-decoration-thickness: 2px;
+      text-decoration-color: var(--salmon);
+      align-self: center;
+    }
+    .price-card.featured .price-amount .num-old {
+      color: rgba(251, 247, 238, 0.4);
     }
     .price-amount .num {
       font-size: 64px;
       font-weight: 800;
-      letter-spacing: -0.03em;
+      letter-spacing: -0.04em;
       line-height: 1;
+      color: var(--ink);
     }
+    .price-card.featured .price-amount .num { color: var(--cream); }
     .price-amount .unit {
       font-size: 15px;
       color: var(--muted);
       font-weight: 700;
     }
     .price-card.featured .price-amount .unit { color: rgba(251, 247, 238, 0.6); }
+
+    .price-savings {
+      display: inline-block;
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--salmon-deep);
+      background: rgba(240, 138, 110, 0.1);
+      padding: 4px 10px;
+      border-radius: 6px;
+      margin-bottom: 20px;
+    }
+    .price-card.featured .price-savings {
+      color: var(--salmon);
+      background: rgba(240, 138, 110, 0.18);
+    }
+
     .price-desc {
       font-size: 15px;
       color: var(--muted);
       margin-bottom: 28px;
+      line-height: 1.55;
     }
     .price-card.featured .price-desc { color: rgba(251, 247, 238, 0.7); }
+
     .price-features {
       list-style: none;
       margin-bottom: 32px;
@@ -98,380 +424,700 @@
       display: flex;
       align-items: flex-start;
       gap: 10px;
-      padding: 12px 0;
-      font-size: 15px;
-      border-top: 1px solid var(--border);
+      padding: 8px 0;
+      font-size: 14px;
+      color: var(--ink-soft);
     }
-    .price-card.featured .price-features li {
-      border-color: rgba(251, 247, 238, 0.08);
-    }
+    .price-card.featured .price-features li { color: rgba(251, 247, 238, 0.85); }
     .price-features li svg {
       flex-shrink: 0;
-      margin-top: 3px;
       color: var(--salmon);
+      margin-top: 3px;
     }
-    .price-card .btn { width: 100%; }
+    .price-card.featured .price-features li svg { color: var(--salmon); }
+    .feat-pro-tag {
+      display: inline-block;
+      margin-left: 6px;
+      font-size: 9px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      padding: 2px 6px;
+      background: var(--salmon);
+      color: var(--ink);
+      border-radius: 4px;
+    }
 
-    /* Tableau comparatif */
-    .compare {
-      max-width: 880px;
-      margin: 0 auto;
-      padding: 64px 0;
-    }
-    .compare h2 {
-      text-align: center;
-      font-size: clamp(1.5rem, 3vw, 2rem);
-      margin-bottom: 32px;
-    }
-    .compare-table {
+    .price-card .btn {
       width: 100%;
-      border-collapse: collapse;
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      overflow: hidden;
-    }
-    .compare-table th,
-    .compare-table td {
-      padding: 14px 20px;
-      text-align: left;
-      border-bottom: 1px solid var(--border);
+      padding: 14px 24px;
       font-size: 15px;
     }
-    .compare-table th {
-      background: var(--cream);
-      font-weight: 800;
+    .price-card.featured .btn-primary {
+      background: var(--salmon);
       color: var(--ink);
-      font-size: 13px;
-      letter-spacing: 0.05em;
-      text-transform: uppercase;
+      border-color: var(--salmon);
     }
-    .compare-table td:nth-child(2),
-    .compare-table th:nth-child(2),
-    .compare-table td:nth-child(3),
-    .compare-table th:nth-child(3) {
-      text-align: center;
-      width: 130px;
+    .price-card.featured .btn-primary:hover {
+      background: var(--cream);
+      border-color: var(--cream);
     }
-    .compare-table tr:last-child td { border-bottom: none; }
-    .compare-table .check {
-      color: var(--salmon);
+
+    /* === GUARANTEE BANNER === */
+    .guarantee-banner {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 32px;
+      flex-wrap: wrap;
+      max-width: 920px;
+      margin: 48px auto 0;
+      padding: 24px 32px;
+      background: var(--card);
+      border-radius: 16px;
+      border: 1px solid var(--border);
+    }
+    .guarantee-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--ink-soft);
+    }
+    .guarantee-item svg {
+      color: var(--salmon-deep);
+      flex-shrink: 0;
+    }
+
+    /* === COMPARISON TABLE === */
+    .comparison-section {
+      padding: clamp(4rem, 6vw, 6rem) 0;
+      background: var(--card);
+    }
+    .comparison-section h2 {
+      font-size: clamp(1.875rem, 4vw, 2.5rem);
       font-weight: 800;
-      font-size: 18px;
+      letter-spacing: -0.03em;
+      text-align: center;
+      margin-bottom: 12px;
     }
-    .compare-table .x {
-      color: rgba(42, 33, 27, 0.25);
-      font-size: 18px;
+    .comparison-section h2 em {
+      color: var(--salmon);
+      font-style: italic;
     }
-    .compare-section {
+    .comparison-section .lede {
+      text-align: center;
+      color: var(--muted);
+      font-size: 16px;
+      margin-bottom: 48px;
+    }
+    .comparison-table {
+      max-width: 920px;
+      margin: 0 auto;
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      overflow: hidden;
+    }
+    .comparison-row {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr;
+      gap: 0;
+      border-bottom: 1px solid var(--border);
+      transition: background 0.2s;
+    }
+    .comparison-row:last-child { border-bottom: 0; }
+    .comparison-row:hover { background: var(--card); }
+    .comparison-row.header {
       background: var(--ink);
       color: var(--cream);
       font-weight: 800;
-      letter-spacing: 0.05em;
+    }
+    .comparison-row.header:hover { background: var(--ink); }
+    .comparison-row.section-title {
+      background: var(--card);
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
       text-transform: uppercase;
-      font-size: 12px;
+      color: var(--salmon-deep);
+    }
+    .comparison-cell {
+      padding: 18px 24px;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+    }
+    .comparison-cell.label { font-weight: 600; color: var(--ink-soft); }
+    .comparison-cell.center { justify-content: center; }
+    .comparison-cell svg.check { color: var(--salmon-deep); }
+    .comparison-cell svg.cross { color: var(--muted); opacity: 0.4; }
+    .comparison-cell .featured-col {
+      background: rgba(240, 138, 110, 0.04);
     }
 
-    /* FAQ courte */
-    .pricing-faq {
+    @media (max-width: 700px) {
+      .comparison-cell { padding: 14px 16px; font-size: 13px; }
+    }
+
+    /* === FAQ === */
+    .faq-section {
+      padding: clamp(4rem, 6vw, 6rem) 0;
+    }
+    .faq-section h2 {
+      font-size: clamp(1.875rem, 4vw, 2.5rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      text-align: center;
+      margin-bottom: 12px;
+    }
+    .faq-section h2 em {
+      color: var(--salmon);
+      font-style: italic;
+    }
+    .faq-section .lede {
+      text-align: center;
+      color: var(--muted);
+      font-size: 16px;
+      margin-bottom: 48px;
+    }
+    .faq-list {
       max-width: 760px;
       margin: 0 auto;
-      padding: 64px 0 96px;
-    }
-    .pricing-faq h2 {
-      text-align: center;
-      font-size: clamp(1.5rem, 3vw, 2rem);
-      margin-bottom: 32px;
     }
     .faq-item {
       border-bottom: 1px solid var(--border);
+      transition: background 0.2s;
     }
-    .faq-q {
-      width: 100%;
-      padding: 20px 0;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 24px;
-      text-align: left;
+    .faq-item:first-child { border-top: 1px solid var(--border); }
+    .faq-question {
+      padding: 24px 0;
       font-size: 17px;
       font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      color: var(--ink);
       transition: color 0.2s;
+      list-style: none;
     }
-    .faq-q:hover { color: var(--salmon); }
-    .faq-q span:last-child {
+    .faq-question::-webkit-details-marker { display: none; }
+    .faq-question:hover { color: var(--salmon-deep); }
+    .faq-icon {
       flex-shrink: 0;
-      color: var(--salmon);
       transition: transform 0.3s;
-      font-size: 22px;
+      color: var(--salmon);
     }
-    .faq-item.open .faq-q span:last-child { transform: rotate(45deg); }
-    .faq-a {
-      max-height: 0;
-      overflow: hidden;
-      transition: max-height 0.4s ease;
+    .faq-item[open] .faq-icon { transform: rotate(45deg); }
+    .faq-answer {
+      padding: 0 0 24px;
+      font-size: 15px;
       color: var(--muted);
-      font-size: 16px;
-      line-height: 1.6;
+      line-height: 1.7;
     }
-    .faq-item.open .faq-a { max-height: 300px; }
-    .faq-a-inner { padding: 0 0 20px; }
+    .faq-answer strong { color: var(--ink); }
 
-    @media (max-width: 700px) {
-      .pricing-cards { grid-template-columns: 1fr; }
-      .compare-table th, .compare-table td { padding: 10px 12px; font-size: 13px; }
-      .compare-table td:nth-child(2),
-      .compare-table th:nth-child(2),
-      .compare-table td:nth-child(3),
-      .compare-table th:nth-child(3) { width: auto; }
+    /* === CTA FINAL === */
+    .cta-final {
+      padding: clamp(4rem, 6vw, 6rem) 0;
+      background: var(--ink);
+      color: var(--cream);
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .cta-final::before {
+      content: '';
+      position: absolute;
+      bottom: -200px; left: 50%;
+      width: 800px; height: 800px;
+      transform: translateX(-50%);
+      background: radial-gradient(circle, rgba(240, 138, 110, 0.18), transparent 60%);
+      pointer-events: none;
+    }
+    .cta-final-inner { position: relative; z-index: 1; }
+    .cta-final h2 {
+      font-size: clamp(2rem, 4vw, 2.75rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      margin-bottom: 16px;
+    }
+    .cta-final h2 em {
+      color: var(--salmon);
+      font-style: italic;
+    }
+    .cta-final p {
+      font-size: 17px;
+      max-width: 56ch;
+      margin: 0 auto 32px;
+      color: rgba(251, 247, 238, 0.7);
+    }
+    .cta-final .btn-primary {
+      padding: 16px 32px;
+      font-size: 16px;
+    }
+
+    /* === FOOTER === */
+    .footer {
+      background: var(--ink);
+      color: rgba(251, 247, 238, 0.7);
+      padding: clamp(3rem, 5vw, 4rem) 0 clamp(2rem, 3vw, 3rem);
+      border-top: 1px solid rgba(251, 247, 238, 0.1);
+    }
+    .footer-inner {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 24px;
+      text-align: center;
+    }
+    .footer-logo svg { width: 48px; height: 48px; }
+    .footer-tagline { font-size: 14px; max-width: 36ch; }
+    .footer-tagline em { color: var(--salmon); font-style: italic; }
+    .footer-links {
+      display: flex; gap: 20px; flex-wrap: wrap;
+      justify-content: center; list-style: none;
+    }
+    .footer-links a {
+      font-size: 13px; color: rgba(251, 247, 238, 0.7);
+      font-weight: 700; transition: color 0.2s;
+    }
+    .footer-links a:hover { color: var(--cream); }
+    .footer-copy {
+      font-size: 12px; color: rgba(251, 247, 238, 0.5);
+      padding-top: 20px;
+      border-top: 1px solid rgba(251, 247, 238, 0.1);
+      width: 100%;
     }
   </style>
 </head>
 <body>
 
-  <!-- NAVBAR -->
+  <!-- NAV -->
   <nav class="nav">
     <div class="container nav-inner">
-      <a href="/" class="logo-link" aria-label="mon-crm-immo, accueil">
-        <svg class="logo-svg" viewBox="0 0 516 96" xmlns="http://www.w3.org/2000/svg">
-          <rect x="4" y="4" width="88" height="88" rx="22" fill="#2A211B"/>
+      <a href="/" class="logo-link" aria-label="mon-crm-immo">
+        <svg class="logo-svg" viewBox="0 0 96 96">
+          <rect x="4" y="4" width="88" height="88" rx="22" fill="#0F0E0D"/>
           <text x="48" y="50" text-anchor="middle" dominant-baseline="central"
-                font-family="Manrope, system-ui, sans-serif" font-weight="800" font-size="30" fill="#FBF7EE">MCI</text>
-          <circle class="dot" cx="72" cy="31" r="3" fill="#F08A6E"/>
-          <text x="124" y="67" font-family="Manrope, system-ui, sans-serif" font-size="56" letter-spacing="-0.025em">
-            <tspan fill="#776659" font-weight="500">mon</tspan><tspan fill="#776659" font-weight="500">-</tspan><tspan fill="#2A211B" font-weight="800">crm</tspan><tspan fill="#776659" font-weight="500">-</tspan><tspan fill="#2A211B" font-weight="800">immo</tspan>
-          </text>
+                font-family="Manrope, sans-serif" font-weight="800" font-size="30" fill="#FBF7EE">MCI</text>
+          <circle cx="72" cy="31" r="3" fill="#F08A6E"/>
         </svg>
       </a>
       <ul class="nav-links">
         <li><a href="/#features">Fonctionnalités</a></li>
-        <li><a href="/tarifs" class="current">Tarifs</a></li>
+        <li><a href="/tarifs" class="active">Tarifs</a></li>
         <li><a href="/blog">Blog</a></li>
       </ul>
       <div class="nav-actions">
         <a href="/app" class="nav-login">Connexion</a>
-        <a href="#cta" class="btn btn-primary">Démarrer</a>
+        <a href="/app#signup" class="btn btn-primary">Démarrer</a>
       </div>
     </div>
   </nav>
 
-  <!-- HEADER PAGE -->
-  <header class="page-header">
+  <!-- HERO -->
+  <section class="pricing-hero">
     <div class="container">
-      <span class="eyebrow"><span class="dot"></span>Tarifs</span>
-      <h1>Choisissez le plan<br>qui vous fait <em>respirer</em>.</h1>
-      <p class="subtitle">
-        Sans engagement de durée. Annulation en un clic depuis votre espace,
-        à tout moment.
-      </p>
+      <span class="pricing-eyebrow"><span class="dot"></span>Offre de lancement</span>
+      <h1>Un prix <em>honnête</em>. Sans surprise.</h1>
+      <p class="lede">Deux plans, prix mensuels HT. <strong>Sans engagement</strong>, vous résiliez en un clic à tout moment. Profitez de notre offre de lancement avant qu'elle ne se termine.</p>
+
+      <!-- Compte à rebours -->
+      <div class="countdown-banner">
+        <span class="countdown-label">Offre lancement jusqu'au 30 juin</span>
+        <div class="countdown-timer" id="countdownTarifs">
+          <div class="countdown-block"><span class="countdown-num" data-unit="days">--</span><span class="countdown-unit">jours</span></div>
+          <div class="countdown-block"><span class="countdown-num" data-unit="hours">--</span><span class="countdown-unit">h</span></div>
+          <div class="countdown-block"><span class="countdown-num" data-unit="minutes">--</span><span class="countdown-unit">min</span></div>
+          <div class="countdown-block"><span class="countdown-num" data-unit="seconds">--</span><span class="countdown-unit">s</span></div>
+        </div>
+      </div>
     </div>
-  </header>
+  </section>
 
-  <!-- 2 CARTES TARIFS -->
-  <section id="cta">
+  <!-- PRICING CARDS -->
+  <section class="pricing-section">
     <div class="container">
-      <div class="pricing-cards">
+      <div class="pricing-grid">
 
-        <!-- Starter -->
+        <!-- STARTER -->
         <div class="price-card">
+          <span class="price-promo-tag">-40% lancement</span>
           <div class="price-name">Starter</div>
           <div class="price-amount">
+            <span class="num-old">59 €</span>
             <span class="num">35 €</span>
-            <span class="unit">/ mois</span>
+            <span class="unit">HT / mois</span>
           </div>
-          <p class="price-desc">Pour l'agent indépendant qui démarre.</p>
+          <span class="price-savings">Vous économisez 288 €/an</span>
+          <p class="price-desc">Pour l'agent indépendant qui démarre — l'essentiel du CRM, sans superflu.</p>
+
           <ul class="price-features">
             <li><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8l3 3 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Pipeline de prospects illimité</li>
-            <li><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8l3 3 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Gestion des mandats et acquéreurs</li>
-            <li><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8l3 3 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Agenda intégré + rappels</li>
-            <li><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8l3 3 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Application mobile</li>
-            <li><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8l3 3 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Support par email</li>
+            <li><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8l3 3 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Mandats illimités</li>
+            <li><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8l3 3 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Base d'acquéreurs</li>
+            <li><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8l3 3 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Matching mandat ↔ acquéreur</li>
+            <li><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8l3 3 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Agenda intégré + rappels auto</li>
+            <li><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8l3 3 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Tableau de bord des ventes</li>
+            <li><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8l3 3 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Application mobile (iOS / Android)</li>
+            <li><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8l3 3 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Compatible Google Calendar</li>
+            <li><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8l3 3 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Support par email (réponse &lt; 24h)</li>
           </ul>
-          <a href="/app#signup?plan=starter" class="btn btn-secondary">Commencer avec Starter</a>
+
+          <a href="https://buy.stripe.com/6oU3cwddXgIt4TNd38aMU01" class="btn btn-secondary">Commencer avec Starter</a>
         </div>
 
-        <!-- Pro -->
+        <!-- PRO -->
         <div class="price-card featured">
-          <span class="price-badge">Recommandé</span>
+          <span class="price-badge">Le + populaire</span>
+          <span class="price-promo-tag">-37% lancement</span>
           <div class="price-name">Pro</div>
           <div class="price-amount">
+            <span class="num-old">119 €</span>
             <span class="num">75 €</span>
-            <span class="unit">/ mois</span>
+            <span class="unit">HT / mois</span>
           </div>
-          <p class="price-desc">Pour l'agent expérimenté ou les équipes.</p>
+          <span class="price-savings">Vous économisez 528 €/an</span>
+          <p class="price-desc">Pour l'agent expérimenté ou les équipes — IA, communauté, et accès anticipé.</p>
+
           <ul class="price-features">
-            <li><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8l3 3 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Tout le plan Starter, sans limites</li>
+            <li><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8l3 3 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><strong>Tout le plan Starter</strong></li>
             <li><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8l3 3 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>IA Google My Business</li>
-            <li><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8l3 3 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>IA LinkedIn pour la prospection</li>
+            <li><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8l3 3 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>IA LinkedIn (posts + DM)</li>
+            <li><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8l3 3 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>IA Instagram (captions + reels)</li>
+            <li><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8l3 3 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>IA Facebook (posts communautaires)</li>
+            <li><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8l3 3 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>IA Prospection &amp; Annonces</li>
             <li><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8l3 3 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Studio Visuel illimité</li>
-            <li><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8l3 3 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Cercle Pro — communauté privée + features en avant-première</li>
-            <li><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8l3 3 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Support prioritaire (réponse &lt; 2 h)</li>
+            <li><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8l3 3 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Cercle Pro<span class="feat-pro-tag">EXCLU</span></li>
+            <li><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8l3 3 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Accès anticipé aux nouveautés</li>
+            <li><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8l3 3 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Support prioritaire (réponse &lt; 2h)</li>
           </ul>
-          <a href="/app#signup?plan=pro" class="btn btn-primary">Commencer avec Pro</a>
+
+          <a href="https://buy.stripe.com/aFafZi2zjfEp2LF7IOaMU00" class="btn btn-primary">Commencer avec Pro</a>
+        </div>
+
+      </div>
+
+      <!-- Garanties -->
+      <div class="guarantee-banner">
+        <div class="guarantee-item">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="10"/></svg>
+          Sans engagement
+        </div>
+        <div class="guarantee-item">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          Données sécurisées
+        </div>
+        <div class="guarantee-item">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          Résiliation en 1 clic
+        </div>
+        <div class="guarantee-item">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          Support en français
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- COMPARISON TABLE -->
+  <section class="comparison-section">
+    <div class="container">
+      <h2>Comparez en <em>détail</em></h2>
+      <p class="lede">Tout ce qui est inclus dans chaque plan — pour bien choisir.</p>
+
+      <div class="comparison-table">
+
+        <div class="comparison-row header">
+          <div class="comparison-cell">Fonctionnalité</div>
+          <div class="comparison-cell center">Starter</div>
+          <div class="comparison-cell center">Pro</div>
+        </div>
+
+        <div class="comparison-row section-title">
+          <div class="comparison-cell">CRM &amp; gestion</div>
+          <div class="comparison-cell"></div>
+          <div class="comparison-cell"></div>
+        </div>
+
+        <div class="comparison-row">
+          <div class="comparison-cell label">Pipeline prospects illimité</div>
+          <div class="comparison-cell center"><svg class="check" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div class="comparison-cell center"><svg class="check" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+        </div>
+
+        <div class="comparison-row">
+          <div class="comparison-cell label">Mandats illimités</div>
+          <div class="comparison-cell center"><svg class="check" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div class="comparison-cell center"><svg class="check" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+        </div>
+
+        <div class="comparison-row">
+          <div class="comparison-cell label">Matching mandat ↔ acquéreur</div>
+          <div class="comparison-cell center"><svg class="check" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div class="comparison-cell center"><svg class="check" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+        </div>
+
+        <div class="comparison-row">
+          <div class="comparison-cell label">Tableau de bord des ventes</div>
+          <div class="comparison-cell center"><svg class="check" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div class="comparison-cell center"><svg class="check" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+        </div>
+
+        <div class="comparison-row">
+          <div class="comparison-cell label">Application mobile (iOS / Android)</div>
+          <div class="comparison-cell center"><svg class="check" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div class="comparison-cell center"><svg class="check" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+        </div>
+
+        <div class="comparison-row section-title">
+          <div class="comparison-cell">Intelligence Artificielle</div>
+          <div class="comparison-cell"></div>
+          <div class="comparison-cell"></div>
+        </div>
+
+        <div class="comparison-row">
+          <div class="comparison-cell label">IA Google My Business</div>
+          <div class="comparison-cell center"><svg class="cross" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div>
+          <div class="comparison-cell center"><svg class="check" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+        </div>
+
+        <div class="comparison-row">
+          <div class="comparison-cell label">IA LinkedIn (posts + DM)</div>
+          <div class="comparison-cell center"><svg class="cross" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div>
+          <div class="comparison-cell center"><svg class="check" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+        </div>
+
+        <div class="comparison-row">
+          <div class="comparison-cell label">IA Instagram (captions + reels)</div>
+          <div class="comparison-cell center"><svg class="cross" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div>
+          <div class="comparison-cell center"><svg class="check" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+        </div>
+
+        <div class="comparison-row">
+          <div class="comparison-cell label">IA Facebook</div>
+          <div class="comparison-cell center"><svg class="cross" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div>
+          <div class="comparison-cell center"><svg class="check" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+        </div>
+
+        <div class="comparison-row">
+          <div class="comparison-cell label">IA Prospection &amp; Annonces</div>
+          <div class="comparison-cell center"><svg class="cross" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div>
+          <div class="comparison-cell center"><svg class="check" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+        </div>
+
+        <div class="comparison-row">
+          <div class="comparison-cell label">Studio Visuel illimité</div>
+          <div class="comparison-cell center"><svg class="cross" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div>
+          <div class="comparison-cell center"><svg class="check" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+        </div>
+
+        <div class="comparison-row section-title">
+          <div class="comparison-cell">Communauté &amp; support</div>
+          <div class="comparison-cell"></div>
+          <div class="comparison-cell"></div>
+        </div>
+
+        <div class="comparison-row">
+          <div class="comparison-cell label">Support email (24h)</div>
+          <div class="comparison-cell center"><svg class="check" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div class="comparison-cell center"><svg class="check" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+        </div>
+
+        <div class="comparison-row">
+          <div class="comparison-cell label">Support prioritaire (2h)</div>
+          <div class="comparison-cell center"><svg class="cross" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div>
+          <div class="comparison-cell center"><svg class="check" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+        </div>
+
+        <div class="comparison-row">
+          <div class="comparison-cell label">Cercle Pro (communauté privée)</div>
+          <div class="comparison-cell center"><svg class="cross" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div>
+          <div class="comparison-cell center"><svg class="check" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+        </div>
+
+        <div class="comparison-row">
+          <div class="comparison-cell label">Accès anticipé aux nouveautés</div>
+          <div class="comparison-cell center"><svg class="cross" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div>
+          <div class="comparison-cell center"><svg class="check" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
         </div>
 
       </div>
     </div>
   </section>
 
-  <!-- TABLEAU COMPARATIF DÉTAILLÉ -->
-  <section class="compare">
+  <!-- FAQ -->
+  <section class="faq-section">
     <div class="container">
-      <h2>Comparatif détaillé</h2>
-      <table class="compare-table">
-        <thead>
-          <tr>
-            <th>Fonctionnalité</th>
-            <th>Starter</th>
-            <th>Pro</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr><td colspan="3" class="compare-section">CRM &amp; Gestion</td></tr>
-          <tr><td>Pipeline de prospects illimité</td><td><span class="check">✓</span></td><td><span class="check">✓</span></td></tr>
-          <tr><td>Mandats centralisés</td><td><span class="check">✓</span></td><td><span class="check">✓</span></td></tr>
-          <tr><td>Acquéreurs &amp; matching automatique</td><td><span class="check">✓</span></td><td><span class="check">✓</span></td></tr>
-          <tr><td>Agenda intégré + Google Calendar</td><td><span class="check">✓</span></td><td><span class="check">✓</span></td></tr>
-          <tr><td>Application mobile</td><td><span class="check">✓</span></td><td><span class="check">✓</span></td></tr>
-          <tr><td>Tableau de bord des ventes</td><td><span class="check">✓</span></td><td><span class="check">✓</span></td></tr>
+      <h2>Questions <em>fréquentes</em></h2>
+      <p class="lede">Tout ce qu'il faut savoir avant de vous lancer.</p>
 
-          <tr><td colspan="3" class="compare-section">Assistants IA</td></tr>
-          <tr><td>IA Google My Business</td><td><span class="x">—</span></td><td><span class="check">✓</span></td></tr>
-          <tr><td>IA LinkedIn (posts &amp; messages)</td><td><span class="x">—</span></td><td><span class="check">✓</span></td></tr>
-          <tr><td>IA Instagram (captions &amp; reels)</td><td><span class="x">—</span></td><td><span class="check">✓</span></td></tr>
-          <tr><td>IA Facebook (posts communautaires)</td><td><span class="x">—</span></td><td><span class="check">✓</span></td></tr>
-          <tr><td>IA Prospection &amp; Annonces</td><td><span class="x">—</span></td><td><span class="check">✓</span></td></tr>
+      <div class="faq-list">
 
-          <tr><td colspan="3" class="compare-section">Outils &amp; Ressources</td></tr>
-          <tr><td>Studio Visuel</td><td>Basique</td><td>Illimité</td></tr>
-          <tr><td>Partenariats inter-agents</td><td><span class="x">—</span></td><td><span class="check">✓</span></td></tr>
-          <tr><td>Cercle Pro (communauté privée)</td><td><span class="x">—</span></td><td><span class="check">✓</span></td></tr>
-          <tr><td>Accès aux nouvelles fonctionnalités en avant-première</td><td><span class="x">—</span></td><td><span class="check">✓</span></td></tr>
+        <details class="faq-item">
+          <summary class="faq-question">
+            Y a-t-il un engagement de durée ?
+            <svg class="faq-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          </summary>
+          <div class="faq-answer">
+            <p><strong>Aucun engagement.</strong> Vous payez chaque mois et pouvez résilier à tout moment depuis votre compte, en un seul clic. Pas de procédure compliquée, pas de frais cachés.</p>
+          </div>
+        </details>
 
-          <tr><td colspan="3" class="compare-section">Support</td></tr>
-          <tr><td>Support par email</td><td><span class="check">✓</span></td><td><span class="check">✓</span></td></tr>
-          <tr><td>Support prioritaire (&lt; 2 h)</td><td><span class="x">—</span></td><td><span class="check">✓</span></td></tr>
+        <details class="faq-item">
+          <summary class="faq-question">
+            Que se passe-t-il après le 30 juin ?
+            <svg class="faq-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          </summary>
+          <div class="faq-answer">
+            <p><strong>Si vous vous inscrivez avant le 30 juin 2026</strong>, vous gardez à vie le tarif de lancement (35€ ou 75€/mois), même après cette date. Après le 30 juin, les tarifs passeront à <strong>59€ et 119€/mois</strong>.</p>
+          </div>
+        </details>
 
-          <tr><td colspan="3" class="compare-section">Conditions</td></tr>
-          <tr><td>Engagement</td><td>Aucun</td><td>Aucun</td></tr>
-          <tr><td>Annulation</td><td>En 1 clic</td><td>En 1 clic</td></tr>
-        </tbody>
-      </table>
+        <details class="faq-item">
+          <summary class="faq-question">
+            Puis-je changer de plan à tout moment ?
+            <svg class="faq-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          </summary>
+          <div class="faq-answer">
+            <p>Oui, vous pouvez passer du plan Starter au plan Pro (ou inversement) à tout moment depuis votre compte. La facturation est ajustée au prorata.</p>
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary class="faq-question">
+            Mes données sont-elles sécurisées ?
+            <svg class="faq-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          </summary>
+          <div class="faq-answer">
+            <p><strong>Oui, intégralement.</strong> Toutes vos données sont hébergées sur des serveurs européens (RGPD), avec chiffrement au repos et en transit. Vous restez propriétaire de vos données et pouvez les exporter ou supprimer à tout moment.</p>
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary class="faq-question">
+            Comment fonctionne le paiement ?
+            <svg class="faq-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          </summary>
+          <div class="faq-answer">
+            <p>Le paiement se fait par <strong>carte bancaire via Stripe</strong>, sécurisé et reconnu mondialement. Le prélèvement est mensuel, à la date d'inscription. Vous recevez automatiquement une facture par email.</p>
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary class="faq-question">
+            Qu'est-ce que le "Cercle Pro" ?
+            <svg class="faq-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          </summary>
+          <div class="faq-answer">
+            <p>Le <strong>Cercle Pro</strong> est une communauté privée d'agents et mandataires immobiliers utilisateurs du plan Pro. Vous y partagez des bonnes pratiques, des conseils, et bénéficiez d'un réseau exclusif. Réservé aux abonnés Pro.</p>
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary class="faq-question">
+            Y a-t-il une période d'essai gratuite ?
+            <svg class="faq-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          </summary>
+          <div class="faq-answer">
+            <p>Pas de période d'essai gratuite, mais comme il n'y a <strong>aucun engagement</strong>, vous pouvez tester l'outil un mois et résilier si ça ne vous convient pas. Le risque est minime (35€).</p>
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary class="faq-question">
+            Le support est-il en français ?
+            <svg class="faq-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          </summary>
+          <div class="faq-answer">
+            <p><strong>Oui, 100% français.</strong> Notre équipe support est basée en France. Vous obtenez une réponse en moins de 24h (Starter) ou 2h (Pro), du lundi au vendredi.</p>
+          </div>
+        </details>
+
+      </div>
     </div>
   </section>
 
-  <!-- FAQ COURTE -->
-  <section class="pricing-faq">
-    <div class="container">
-      <h2>Questions sur la facturation</h2>
-
-      <div class="faq-item">
-        <button class="faq-q" onclick="this.parentElement.classList.toggle('open')">
-          <span>Comment se passe le paiement ?</span>
-          <span>+</span>
-        </button>
-        <div class="faq-a"><div class="faq-a-inner">
-          Vous choisissez votre plan, vous renseignez votre carte bancaire via Stripe (paiement 100 % sécurisé), et votre abonnement démarre immédiatement. Le prélèvement est mensuel automatique.
-        </div></div>
-      </div>
-
-      <div class="faq-item">
-        <button class="faq-q" onclick="this.parentElement.classList.toggle('open')">
-          <span>Puis-je changer de plan plus tard ?</span>
-          <span>+</span>
-        </button>
-        <div class="faq-a"><div class="faq-a-inner">
-          Bien sûr. Vous pouvez passer de Starter à Pro (ou inversement) à tout moment depuis votre espace, en un clic. Le changement est immédiat et la facturation ajustée au prorata.
-        </div></div>
-      </div>
-
-      <div class="faq-item">
-        <button class="faq-q" onclick="this.parentElement.classList.toggle('open')">
-          <span>Comment résilier mon abonnement ?</span>
-          <span>+</span>
-        </button>
-        <div class="faq-a"><div class="faq-a-inner">
-          En un clic depuis votre espace personnel. Aucune justification, aucune pénalité. L'accès reste actif jusqu'à la fin du mois en cours, puis vos données sont conservées 30 jours au cas où vous voudriez revenir.
-        </div></div>
-      </div>
-
-      <div class="faq-item">
-        <button class="faq-q" onclick="this.parentElement.classList.toggle('open')">
-          <span>Ces tarifs sont-ils HT ou TTC ?</span>
-          <span>+</span>
-        </button>
-        <div class="faq-a"><div class="faq-a-inner">
-          Les tarifs affichés sont en HT. Si vous êtes assujetti à la TVA, celle-ci sera ajoutée lors du paiement. Une facture conforme vous est envoyée chaque mois par email.
-        </div></div>
-      </div>
-
-      <div class="faq-item">
-        <button class="faq-q" onclick="this.parentElement.classList.toggle('open')">
-          <span>Mes données sont-elles en sécurité ?</span>
-          <span>+</span>
-        </button>
-        <div class="faq-a"><div class="faq-a-inner">
-          Absolument. Hébergement en Europe, conforme RGPD, données chiffrées. Vous pouvez les exporter ou les supprimer à tout moment depuis votre espace.
-        </div></div>
-      </div>
-
+  <!-- CTA FINAL -->
+  <section class="cta-final">
+    <div class="container cta-final-inner">
+      <h2>Prêt à <em>passer le cap</em> ?</h2>
+      <p>Rejoignez les agents et mandataires qui ont choisi mon-crm-immo pour développer leur activité. Sans engagement, vous résiliez quand vous voulez.</p>
+      <a href="https://buy.stripe.com/aFafZi2zjfEp2LF7IOaMU00" class="btn btn-primary">Démarrer avec Pro →</a>
     </div>
   </section>
 
   <!-- FOOTER -->
-  <footer>
+  <footer class="footer">
     <div class="container">
-      <div class="footer-grid">
-        <div class="footer-brand">
-          <a href="/" class="logo-link" aria-label="Accueil">
-            <svg class="logo-svg" viewBox="0 0 516 96" xmlns="http://www.w3.org/2000/svg" style="height:32px;width:auto;">
-              <rect x="4" y="4" width="88" height="88" rx="22" fill="#2A211B"/>
-              <text x="48" y="50" text-anchor="middle" dominant-baseline="central"
-                    font-family="Manrope, system-ui, sans-serif" font-weight="800" font-size="30" fill="#FBF7EE">MCI</text>
-              <circle cx="72" cy="31" r="3" fill="#F08A6E"/>
-              <text x="124" y="67" font-family="Manrope, system-ui, sans-serif" font-size="56" letter-spacing="-0.025em">
-                <tspan fill="#776659" font-weight="500">mon</tspan><tspan fill="#776659" font-weight="500">-</tspan><tspan fill="#2A211B" font-weight="800">crm</tspan><tspan fill="#776659" font-weight="500">-</tspan><tspan fill="#2A211B" font-weight="800">immo</tspan>
-              </text>
-            </svg>
-          </a>
-          <p>Le CRM immobilier qui vous laisse respirer. Conçu en France, pensé pour le terrain.</p>
-        </div>
-        <div class="footer-col">
-          <h4>Produit</h4>
-          <ul>
-            <li><a href="/#features">Fonctionnalités</a></li>
-            <li><a href="/tarifs">Tarifs</a></li>
-            <li><a href="/app">Connexion</a></li>
-          </ul>
-        </div>
-        <div class="footer-col">
-          <h4>Ressources</h4>
-          <ul>
-            <li><a href="/blog">Blog</a></li>
-            <li><a href="mailto:contact@mon-crm-immo.fr">Contact</a></li>
-          </ul>
-        </div>
-        <div class="footer-col">
-          <h4>Légal</h4>
-          <ul>
-            <li><a href="/legal/cgv">CGV</a></li>
-            <li><a href="/legal/cgu">CGU</a></li>
-            <li><a href="/legal/privacy">Confidentialité</a></li>
-            <li><a href="/legal/mentions">Mentions légales</a></li>
-          </ul>
-        </div>
-      </div>
-      <div class="footer-bottom">
-        <span>© 2026 mon-crm-immo. Tous droits réservés.</span>
-        <span>Conçu en France.</span>
+      <div class="footer-inner">
+        <a href="/" class="footer-logo" aria-label="Accueil">
+          <svg viewBox="0 0 96 96">
+            <rect x="4" y="4" width="88" height="88" rx="22" fill="#FBF7EE"/>
+            <text x="48" y="50" text-anchor="middle" dominant-baseline="central"
+                  font-family="Manrope, sans-serif" font-weight="800" font-size="30" fill="#0F0E0D">MCI</text>
+            <circle cx="72" cy="31" r="3" fill="#F08A6E"/>
+          </svg>
+        </a>
+        <p class="footer-tagline">Le CRM immo qui vous laisse <em>vous concentrer sur le terrain</em>.</p>
+        <ul class="footer-links">
+          <li><a href="/">Accueil</a></li>
+          <li><a href="/#features">Fonctionnalités</a></li>
+          <li><a href="/tarifs">Tarifs</a></li>
+          <li><a href="/blog">Blog</a></li>
+          <li><a href="/legal/mentions">Mentions légales</a></li>
+          <li><a href="/legal/privacy">Confidentialité</a></li>
+        </ul>
+        <p class="footer-copy">© 2026 mon-crm-immo. Tous droits réservés.</p>
       </div>
     </div>
   </footer>
 
   <script>
-    function toggleMenu() {
-      alert('Le menu mobile sera ajouté prochainement.');
-    }
+    /* Compte à rebours jusqu'au 30 juin 2026 */
+    (function() {
+      const target = new Date('2026-06-30T23:59:59').getTime();
+      const banners = document.querySelectorAll('.countdown-banner');
+      if (!banners.length) return;
+
+      function update() {
+        const now = Date.now();
+        const diff = target - now;
+
+        if (diff <= 0) {
+          banners.forEach(b => {
+            b.classList.add('expired');
+            const label = b.querySelector('.countdown-label');
+            if (label) label.textContent = 'Offre expirée';
+            b.querySelectorAll('.countdown-num').forEach(n => n.textContent = '0');
+          });
+          return;
+        }
+
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+        const minutes = Math.floor((diff / (1000 * 60)) % 60);
+        const seconds = Math.floor((diff / 1000) % 60);
+
+        banners.forEach(b => {
+          const setNum = (unit, val) => {
+            const el = b.querySelector(`[data-unit="${unit}"]`);
+            if (el) el.textContent = String(val).padStart(2, '0');
+          };
+          setNum('days', days);
+          setNum('hours', hours);
+          setNum('minutes', minutes);
+          setNum('seconds', seconds);
+        });
+      }
+
+      update();
+      setInterval(update, 1000);
+    })();
   </script>
+
 </body>
 </html>
