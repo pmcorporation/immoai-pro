@@ -1,244 +1,663 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Blog · mon-crm-immo</title>
-  <meta name="description" content="Articles, conseils et actualités pour les pros de l'immobilier qui veulent travailler mieux." />
-  <meta property="og:title" content="Blog · mon-crm-immo" />
-  <meta property="og:url" content="https://mon-crm-immo.fr/blog" />
+  <meta name="description" content="Conseils, méthodes et bonnes pratiques pour les agents et mandataires immobiliers. 20 articles pour mieux gérer vos mandats, prospects et signatures.">
+  <meta name="keywords" content="blog immobilier, agent immobilier, mandataire immobilier, CRM immobilier, conseils immobiliers, marketing immobilier">
 
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'%3E%3Crect x='4' y='4' width='88' height='88' rx='22' fill='%232A211B'/%3E%3Ctext x='48' y='50' text-anchor='middle' dominant-baseline='central' font-family='Manrope,sans-serif' font-weight='800' font-size='30' fill='%23FBF7EE'%3EMCI%3C/text%3E%3Ccircle cx='72' cy='31' r='3' fill='%23F08A6E'/%3E%3C/svg%3E" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/assets/styles.css" />
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://mon-crm-immo.fr/blog">
+  <meta property="og:title" content="Blog · mon-crm-immo">
+  <meta property="og:description" content="Conseils et bonnes pratiques pour les agents et mandataires immobiliers.">
+  <meta property="og:locale" content="fr_FR">
+
+  <!-- Canonical -->
+  <link rel="canonical" href="https://mon-crm-immo.fr/blog">
+
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'%3E%3Crect x='4' y='4' width='88' height='88' rx='22' fill='%230F0E0D'/%3E%3Ctext x='48' y='50' text-anchor='middle' dominant-baseline='central' font-family='Manrope, sans-serif' font-weight='800' font-size='30' fill='%23FBF7EE'%3EMCI%3C/text%3E%3Ccircle cx='72' cy='31' r='3' fill='%23F08A6E'/%3E%3C/svg%3E">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&display=swap" rel="stylesheet">
 
   <style>
-    .blog-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 24px;
-      max-width: 1100px;
-      margin: 0 auto;
-      padding: 0 0 96px;
+    :root {
+      --ink: #0F0E0D;
+      --ink-soft: #2A211B;
+      --cream: #FBF7EE;
+      --white: #FFFFFF;
+      --salmon: #F08A6E;
+      --salmon-deep: #C26A52;
+      --muted: #776659;
+      --card: #FAFAF7;
+      --border: rgba(15, 14, 13, 0.08);
     }
-    .blog-card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 32px;
-      transition: transform 0.3s, box-shadow 0.3s, border-color 0.3s;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      cursor: pointer;
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Manrope', system-ui, -apple-system, sans-serif;
+      font-weight: 500; color: var(--ink); background: var(--white);
+      line-height: 1.6; -webkit-font-smoothing: antialiased;
     }
-    .blog-card:hover {
-      transform: translateY(-4px);
-      border-color: rgba(240, 138, 110, 0.3);
-      box-shadow: 0 12px 32px -8px rgba(42, 33, 27, 0.1);
-    }
-    .blog-card.featured {
-      grid-column: 1 / -1;
-      padding: 48px;
-      background: var(--ink);
-      color: var(--cream);
-      border-color: var(--ink);
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 40px;
-      align-items: center;
-    }
-    .blog-card-meta {
-      display: flex;
-      gap: 12px;
-      align-items: center;
-      font-size: 13px;
-      color: var(--muted);
-      font-weight: 700;
-    }
-    .blog-card.featured .blog-card-meta { color: rgba(251, 247, 238, 0.6); }
-    .blog-tag {
-      display: inline-block;
-      padding: 3px 10px;
-      background: rgba(240, 138, 110, 0.12);
-      border-radius: 999px;
-      color: var(--salmon-deep);
-      font-size: 12px;
-      font-weight: 800;
-      letter-spacing: 0.05em;
-      text-transform: uppercase;
-    }
-    .blog-card.featured .blog-tag {
-      background: rgba(240, 138, 110, 0.18);
-      color: var(--salmon);
-    }
-    .blog-card h3 {
-      font-size: clamp(1.25rem, 2vw, 1.75rem);
-      line-height: 1.2;
-    }
-    .blog-card.featured h3 { font-size: clamp(1.75rem, 3vw, 2.5rem); color: var(--cream); }
-    .blog-card p {
-      color: var(--muted);
-      font-size: 15px;
-      line-height: 1.5;
-    }
-    .blog-card.featured p { color: rgba(251, 247, 238, 0.7); font-size: 17px; }
-    .blog-card .read-more {
-      margin-top: auto;
-      font-weight: 700;
-      color: var(--salmon);
-      font-size: 14px;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .blog-card-image {
-      width: 100%;
-      aspect-ratio: 16 / 10;
-      background: linear-gradient(135deg, rgba(240, 138, 110, 0.1), rgba(240, 138, 110, 0.05));
-      border-radius: 12px;
-      position: relative;
-      overflow: hidden;
-    }
-    .blog-card-image::after {
-      content: attr(data-emoji);
-      position: absolute;
-      inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 64px;
-      opacity: 0.6;
-    }
-    .blog-empty {
-      text-align: center;
-      padding: 80px 24px;
-      color: var(--muted);
-    }
-    .blog-empty h3 { color: var(--ink); margin-bottom: 12px; }
+    a { color: inherit; text-decoration: none; }
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
 
-    @media (max-width: 700px) {
-      .blog-grid { grid-template-columns: 1fr; }
-      .blog-card.featured { grid-template-columns: 1fr; padding: 32px; }
+    /* NAV */
+    .nav {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: saturate(180%) blur(20px);
+      -webkit-backdrop-filter: saturate(180%) blur(20px);
+      border-bottom: 1px solid var(--border); padding: 14px 0;
+    }
+    .nav-inner { display: flex; align-items: center; justify-content: space-between; gap: 32px; }
+    .logo-link { display: flex; align-items: center; flex-shrink: 0; transition: transform 0.2s; }
+    .logo-link:hover { transform: scale(1.03); }
+    .logo-svg { width: 40px; height: 40px; }
+    .nav-links { display: flex; align-items: center; gap: 8px; list-style: none; flex: 1; }
+    .nav-links a {
+      position: relative; display: inline-block; padding: 8px 14px;
+      font-size: 14px; font-weight: 700; color: var(--ink-soft); transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--ink); }
+    .nav-links a.active { color: var(--salmon-deep); }
+    .nav-actions { display: flex; align-items: center; gap: 12px; }
+    .nav-login { font-size: 14px; font-weight: 700; color: var(--ink-soft); padding: 8px 14px; }
+    .nav-login:hover { color: var(--ink); }
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      padding: 10px 20px; font-size: 14px; font-weight: 700;
+      border-radius: 999px; cursor: pointer; transition: all 0.25s;
+    }
+    .btn-primary { background: var(--salmon); color: var(--ink); border: 1.5px solid var(--salmon); }
+    .btn-primary:hover {
+      background: var(--salmon-deep); border-color: var(--salmon-deep);
+      color: var(--white); transform: translateY(-1px);
+    }
+    @media (max-width: 800px) { .nav-links, .nav-login { display: none; } }
+
+    /* HEADER */
+    .blog-header {
+      padding: clamp(4rem, 7vw, 6rem) 0 clamp(2rem, 4vw, 3rem);
+      text-align: center;
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+    }
+    .blog-eyebrow {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 7px 14px;
+      background: rgba(240, 138, 110, 0.08);
+      border: 1px solid rgba(240, 138, 110, 0.2);
+      border-radius: 999px;
+      font-size: 12px; font-weight: 800;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      color: var(--salmon-deep);
+      margin-bottom: 24px;
+    }
+    .blog-eyebrow .dot { width: 6px; height: 6px; background: var(--salmon); border-radius: 50%; }
+    .blog-header h1 {
+      font-size: clamp(2.25rem, 5vw, 3.5rem);
+      font-weight: 800; line-height: 1.05;
+      letter-spacing: -0.035em; margin-bottom: 20px;
+      max-width: 22ch; margin-left: auto; margin-right: auto;
+    }
+    .blog-header h1 em { color: var(--salmon); font-style: italic; font-weight: 700; }
+    .blog-header p {
+      font-size: clamp(1rem, 1.4vw, 1.125rem);
+      color: var(--muted); max-width: 56ch;
+      margin: 0 auto; line-height: 1.55;
+    }
+
+    /* ARTICLES GRID */
+    .blog-content { padding: clamp(3rem, 5vw, 5rem) 0; }
+    .articles-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+    @media (max-width: 1000px) { .articles-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 700px) { .articles-grid { grid-template-columns: 1fr; } }
+
+    .article-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 16px; overflow: hidden;
+      transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+                  box-shadow 0.3s, border-color 0.3s;
+      display: flex; flex-direction: column;
+    }
+    .article-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(240, 138, 110, 0.25);
+      box-shadow: 0 20px 40px -12px rgba(15, 14, 13, 0.08);
+    }
+    .article-card-media {
+      aspect-ratio: 16 / 9;
+      background: linear-gradient(135deg, rgba(240, 138, 110, 0.15), rgba(240, 138, 110, 0.04));
+      display: flex; align-items: center; justify-content: center;
+      color: var(--salmon-deep);
+      position: relative; overflow: hidden;
+    }
+    .article-card-media::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(circle at top right, rgba(240, 138, 110, 0.12), transparent 60%);
+    }
+    .article-card-media svg {
+      width: 60px; height: 60px;
+      position: relative; z-index: 1;
+    }
+    .article-card-content {
+      padding: 24px;
+      display: flex; flex-direction: column; flex: 1;
+    }
+    .article-card-meta {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 12px; font-weight: 700;
+      color: var(--muted);
+      letter-spacing: 0.04em; text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+    .article-card-tag {
+      padding: 3px 10px;
+      background: rgba(240, 138, 110, 0.1);
+      color: var(--salmon-deep);
+      border-radius: 999px;
+      font-size: 10px;
+    }
+    .article-card-content h2 {
+      font-size: 1.125rem; font-weight: 800;
+      line-height: 1.25; letter-spacing: -0.02em;
+      margin-bottom: 12px; color: var(--ink);
+    }
+    .article-card-content p {
+      font-size: 14px; color: var(--muted);
+      line-height: 1.55; margin-bottom: 20px; flex: 1;
+    }
+    .article-card-link {
+      font-size: 13px; font-weight: 800;
+      color: var(--salmon-deep);
+      display: inline-flex; align-items: center; gap: 6px;
+      transition: gap 0.2s;
+    }
+    .article-card-link:hover { gap: 10px; }
+
+    /* CATEGORIES FILTER */
+    .blog-categories {
+      display: flex; gap: 12px; flex-wrap: wrap;
+      justify-content: center; margin-bottom: 40px;
+    }
+    .blog-categories button {
+      padding: 8px 18px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      font-family: inherit;
+      font-size: 13px; font-weight: 700;
+      color: var(--ink-soft);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .blog-categories button:hover {
+      border-color: var(--salmon);
+      color: var(--salmon-deep);
+    }
+    .blog-categories button.active {
+      background: var(--ink); color: var(--cream);
+      border-color: var(--ink);
+    }
+
+    /* FOOTER */
+    .footer {
+      background: var(--ink); color: rgba(251, 247, 238, 0.7);
+      padding: clamp(3rem, 5vw, 4rem) 0 clamp(2rem, 3vw, 3rem);
+      margin-top: clamp(3rem, 5vw, 5rem);
+    }
+    .footer-inner {
+      display: flex; flex-direction: column;
+      align-items: center; gap: 24px; text-align: center;
+    }
+    .footer-logo svg { width: 48px; height: 48px; }
+    .footer-tagline { font-size: 14px; max-width: 36ch; }
+    .footer-tagline em { color: var(--salmon); font-style: italic; }
+    .footer-links {
+      display: flex; gap: 20px; flex-wrap: wrap;
+      justify-content: center; list-style: none;
+    }
+    .footer-links a {
+      font-size: 13px; color: rgba(251, 247, 238, 0.7);
+      font-weight: 700; transition: color 0.2s;
+    }
+    .footer-links a:hover { color: var(--cream); }
+    .footer-copy {
+      font-size: 12px; color: rgba(251, 247, 238, 0.5);
+      padding-top: 20px;
+      border-top: 1px solid rgba(251, 247, 238, 0.1);
+      width: 100%;
     }
   </style>
 </head>
 <body>
 
-  <!-- NAVBAR -->
+  <!-- NAV -->
   <nav class="nav">
     <div class="container nav-inner">
-      <a href="/" class="logo-link" aria-label="mon-crm-immo, accueil">
-        <svg class="logo-svg" viewBox="0 0 516 96" xmlns="http://www.w3.org/2000/svg">
-          <rect x="4" y="4" width="88" height="88" rx="22" fill="#2A211B"/>
-          <text x="48" y="50" text-anchor="middle" dominant-baseline="central" font-family="Manrope, system-ui, sans-serif" font-weight="800" font-size="30" fill="#FBF7EE">MCI</text>
-          <circle class="dot" cx="72" cy="31" r="3" fill="#F08A6E"/>
-          <text x="124" y="67" font-family="Manrope, system-ui, sans-serif" font-size="56" letter-spacing="-0.025em">
-            <tspan fill="#776659" font-weight="500">mon</tspan><tspan fill="#776659" font-weight="500">-</tspan><tspan fill="#2A211B" font-weight="800">crm</tspan><tspan fill="#776659" font-weight="500">-</tspan><tspan fill="#2A211B" font-weight="800">immo</tspan>
-          </text>
+      <a href="/" class="logo-link" aria-label="mon-crm-immo">
+        <svg class="logo-svg" viewBox="0 0 96 96">
+          <rect x="4" y="4" width="88" height="88" rx="22" fill="#0F0E0D"/>
+          <text x="48" y="50" text-anchor="middle" dominant-baseline="central"
+                font-family="Manrope, sans-serif" font-weight="800" font-size="30" fill="#FBF7EE">MCI</text>
+          <circle cx="72" cy="31" r="3" fill="#F08A6E"/>
         </svg>
       </a>
       <ul class="nav-links">
         <li><a href="/#features">Fonctionnalités</a></li>
-        <li><a href="/tarifs">Tarifs</a></li>
-        <li><a href="/blog" class="current">Blog</a></li>
+        <li><a href="/#pricing">Tarifs</a></li>
+        <li><a href="/blog" class="active">Blog</a></li>
       </ul>
       <div class="nav-actions">
         <a href="/app" class="nav-login">Connexion</a>
-        <a href="/tarifs" class="btn btn-primary">Démarrer</a>
+        <a href="/app#signup" class="btn btn-primary">Démarrer</a>
       </div>
     </div>
   </nav>
 
-  <header class="page-header">
+  <!-- HEADER -->
+  <header class="blog-header">
     <div class="container">
-      <span class="eyebrow"><span class="dot"></span>Le blog</span>
-      <h1>Conseils, méthodes et<br><em>retours du terrain</em>.</h1>
-      <p class="subtitle">
-        Articles courts, sans bullshit, pour les pros de l'immobilier qui veulent
-        gagner du temps et signer plus.
-      </p>
+      <span class="blog-eyebrow"><span class="dot"></span>Le journal de mon-crm-immo</span>
+      <h1>Conseils &amp; bonnes pratiques pour <em>agents et mandataires immobiliers</em>.</h1>
+      <p>Méthodes concrètes, retours d'expérience et astuces pour mieux gérer vos mandats, prospects et signatures. 20 articles pour booster votre activité.</p>
     </div>
   </header>
 
-  <!-- LISTE DES ARTICLES -->
-  <section>
+  <!-- ARTICLES -->
+  <main class="blog-content">
     <div class="container">
-      <div class="blog-grid">
 
-        <!-- Article mis en avant -->
-        <a href="/blog/saisir-mandat-30-secondes" class="blog-card featured">
-          <div>
-            <div class="blog-card-meta">
-              <span class="blog-tag">Productivité</span>
-              <span>· 5 min de lecture</span>
-            </div>
-            <h3>Saisir un mandat en 30 secondes : la méthode des agents qui signent le plus.</h3>
-            <p>Pourquoi vos confrères passent encore 15 minutes à rentrer un mandat dans leur CRM, et comment l'IA peut diviser ce temps par 30 sans rien sacrifier.</p>
-            <span class="read-more">Lire l'article →</span>
+      <div class="blog-categories">
+        <button class="active" data-cat="all">Tous (20)</button>
+        <button data-cat="Productivité">Productivité</button>
+        <button data-cat="Immobilier">Immobilier</button>
+        <button data-cat="IA &amp; marketing">IA &amp; marketing</button>
+      </div>
+
+      <div class="articles-grid" id="articlesGrid">
+        <a href="/blog/email-marketing-immobilier-sequences" class="article-card">
+          <div class="article-card-media">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
           </div>
-          <div class="blog-card-image" data-emoji="📝"></div>
+          <div class="article-card-content">
+            <div class="article-card-meta">
+              <span class="article-card-tag">IA & marketing</span>
+              <span>·</span>
+              <span>10 min de lecture</span>
+            </div>
+            <h2>Email marketing immobilier : 5 séquences qui convertissent</h2>
+            <p>5 séquences d'email marketing immobilier prêtes à l'emploi. Bienvenue, relance acquéreur, après-visite, anniversaire mandat, fidélisation.</p>
+            <span class="article-card-link">Lire l'article →</span>
+          </div>
         </a>
 
-        <!-- Articles à venir (placeholders) -->
-        <div class="blog-empty" style="grid-column: 1 / -1;">
-          <h3>Plus d'articles arrivent bientôt.</h3>
-          <p>Nous publions un nouvel article tous les 15 jours. Revenez vite, ou abonnez-vous à la newsletter pour ne rien rater.</p>
-        </div>
+        <a href="/blog/ia-redaction-annonces-immobilieres" class="article-card">
+          <div class="article-card-media">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          </div>
+          <div class="article-card-content">
+            <div class="article-card-meta">
+              <span class="article-card-tag">IA & marketing</span>
+              <span>·</span>
+              <span>8 min de lecture</span>
+            </div>
+            <h2>Comment utiliser l'IA pour rédiger vos annonces (sans que ça se voie)</h2>
+            <p>La méthode pour rédiger des annonces immobilières avec l'IA tout en gardant votre style. Prompts, relectures et erreurs à éviter.</p>
+            <span class="article-card-link">Lire l'article →</span>
+          </div>
+        </a>
+
+        <a href="/blog/instagram-immobilier-idees-contenus" class="article-card">
+          <div class="article-card-media">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+          </div>
+          <div class="article-card-content">
+            <div class="article-card-meta">
+              <span class="article-card-tag">IA & marketing</span>
+              <span>·</span>
+              <span>9 min de lecture</span>
+            </div>
+            <h2>Instagram immobilier : 7 idées de contenus qui marchent</h2>
+            <p>7 formats de contenus Instagram qui fonctionnent pour les agents immobiliers. Reels, stories, carrousels : avec exemples et templates.</p>
+            <span class="article-card-link">Lire l'article →</span>
+          </div>
+        </a>
+
+        <a href="/blog/google-my-business-checklist-agent" class="article-card">
+          <div class="article-card-media">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
+          </div>
+          <div class="article-card-content">
+            <div class="article-card-meta">
+              <span class="article-card-tag">IA & marketing</span>
+              <span>·</span>
+              <span>8 min de lecture</span>
+            </div>
+            <h2>Google My Business : checklist complète pour agent immobilier</h2>
+            <p>La checklist Google My Business à suivre pour un agent immobilier. Optimisation, photos, avis, posts : tous les leviers pour ranker en local...</p>
+            <span class="article-card-link">Lire l'article →</span>
+          </div>
+        </a>
+
+        <a href="/blog/linkedin-mandataires-strategie" class="article-card">
+          <div class="article-card-media">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+          </div>
+          <div class="article-card-content">
+            <div class="article-card-meta">
+              <span class="article-card-tag">IA & marketing</span>
+              <span>·</span>
+              <span>12 min de lecture</span>
+            </div>
+            <h2>LinkedIn pour mandataires : la méthode 2026 pour gagner des mandats</h2>
+            <p>La stratégie LinkedIn complète pour les mandataires immobiliers. Profil, publications, prospection : le guide pas à pas pour gagner des mand...</p>
+            <span class="article-card-link">Lire l'article →</span>
+          </div>
+        </a>
+
+        <a href="/blog/prompts-chatgpt-agents-immobiliers" class="article-card">
+          <div class="article-card-media">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          </div>
+          <div class="article-card-content">
+            <div class="article-card-meta">
+              <span class="article-card-tag">IA & marketing</span>
+              <span>·</span>
+              <span>7 min de lecture</span>
+            </div>
+            <h2>10 prompts ChatGPT pour agents immobiliers (à copier-coller)</h2>
+            <p>10 prompts ChatGPT prêts à l'emploi pour les agents immobiliers. Annonces, posts LinkedIn, emails de relance, descriptions de mandats.</p>
+            <span class="article-card-link">Lire l'article →</span>
+          </div>
+        </a>
+
+        <a href="/blog/carte-t-procedure-2026" class="article-card">
+          <div class="article-card-media">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          </div>
+          <div class="article-card-content">
+            <div class="article-card-meta">
+              <span class="article-card-tag">Immobilier</span>
+              <span>·</span>
+              <span>10 min de lecture</span>
+            </div>
+            <h2>Carte T : comment l'obtenir en 2026 (procédure complète)</h2>
+            <p>Le guide complet pour obtenir votre carte T d'agent immobilier en 2026. Conditions, dossier, délais, coûts et renouvellement.</p>
+            <span class="article-card-link">Lire l'article →</span>
+          </div>
+        </a>
+
+        <a href="/blog/compromis-vente-clauses-essentielles" class="article-card">
+          <div class="article-card-media">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          </div>
+          <div class="article-card-content">
+            <div class="article-card-meta">
+              <span class="article-card-tag">Immobilier</span>
+              <span>·</span>
+              <span>9 min de lecture</span>
+            </div>
+            <h2>Compromis de vente : les 8 clauses à ne jamais oublier</h2>
+            <p>Les 8 clauses indispensables à inclure dans un compromis de vente. Conditions suspensives, séquestre, délais, pénalités : la check-list pro.</p>
+            <span class="article-card-link">Lire l'article →</span>
+          </div>
+        </a>
+
+        <a href="/blog/mandataire-vs-agent-agence-statut" class="article-card">
+          <div class="article-card-media">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          </div>
+          <div class="article-card-content">
+            <div class="article-card-meta">
+              <span class="article-card-tag">Immobilier</span>
+              <span>·</span>
+              <span>10 min de lecture</span>
+            </div>
+            <h2>Mandataire vs agent en agence : quel statut choisir en 2026 ?</h2>
+            <p>Comparaison détaillée des statuts d'agent immobilier en 2026. Liberté, revenus, protection sociale, formation : ce qui doit guider votre cho...</p>
+            <span class="article-card-link">Lire l'article →</span>
+          </div>
+        </a>
+
+        <a href="/blog/fixer-prix-vente-bien-immobilier" class="article-card">
+          <div class="article-card-media">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          </div>
+          <div class="article-card-content">
+            <div class="article-card-meta">
+              <span class="article-card-tag">Immobilier</span>
+              <span>·</span>
+              <span>11 min de lecture</span>
+            </div>
+            <h2>Comment fixer le prix de vente d'un bien (méthode pro)</h2>
+            <p>La méthode professionnelle pour estimer un bien immobilier au juste prix. Comparables, ajustements, marges de négociation et erreurs à évite...</p>
+            <span class="article-card-link">Lire l'article →</span>
+          </div>
+        </a>
+
+        <a href="/blog/loi-hoguet-obligations-agents" class="article-card">
+          <div class="article-card-media">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
+          <div class="article-card-content">
+            <div class="article-card-meta">
+              <span class="article-card-tag">Immobilier</span>
+              <span>·</span>
+              <span>9 min de lecture</span>
+            </div>
+            <h2>Loi Hoguet : les 5 obligations méconnues des agents</h2>
+            <p>Les 5 obligations légales de la loi Hoguet que beaucoup d'agents immobiliers ignorent ou négligent. Sanctions, exemples et mises en conformi...</p>
+            <span class="article-card-link">Lire l'article →</span>
+          </div>
+        </a>
+
+        <a href="/blog/dpe-2026-changements-agents" class="article-card">
+          <div class="article-card-media">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10z"/><path d="M2 21c0-3 1.85-5.36 5.08-6"/></svg>
+          </div>
+          <div class="article-card-content">
+            <div class="article-card-meta">
+              <span class="article-card-tag">Immobilier</span>
+              <span>·</span>
+              <span>8 min de lecture</span>
+            </div>
+            <h2>DPE 2026 : ce qui change pour les agents immobiliers</h2>
+            <p>Toutes les évolutions du DPE en 2026 : nouvelles règles, calendrier, obligations légales pour les agents et conséquences sur les ventes.</p>
+            <span class="article-card-link">Lire l'article →</span>
+          </div>
+        </a>
+
+        <a href="/blog/mandat-exclusif-vs-simple" class="article-card">
+          <div class="article-card-media">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          </div>
+          <div class="article-card-content">
+            <div class="article-card-meta">
+              <span class="article-card-tag">Immobilier</span>
+              <span>·</span>
+              <span>10 min de lecture</span>
+            </div>
+            <h2>Mandat exclusif vs mandat simple : le guide complet 2026</h2>
+            <p>Tout savoir sur le choix entre mandat exclusif et mandat simple. Avantages, inconvénients, durées légales et stratégies de signature.</p>
+            <span class="article-card-link">Lire l'article →</span>
+          </div>
+        </a>
+
+        <a href="/blog/gerer-50-mandats-sans-eparpiller" class="article-card">
+          <div class="article-card-media">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+          </div>
+          <div class="article-card-content">
+            <div class="article-card-meta">
+              <span class="article-card-tag">Productivité</span>
+              <span>·</span>
+              <span>7 min de lecture</span>
+            </div>
+            <h2>Comment gérer 50+ mandats sans vous éparpiller</h2>
+            <p>Méthode pour gérer un portefeuille de 50 mandats et plus sans perdre le fil. Organisation, priorisation et outils concrets.</p>
+            <span class="article-card-link">Lire l'article →</span>
+          </div>
+        </a>
+
+        <a href="/blog/kpi-agent-immobilier-tableau-bord" class="article-card">
+          <div class="article-card-media">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+          </div>
+          <div class="article-card-content">
+            <div class="article-card-meta">
+              <span class="article-card-tag">Productivité</span>
+              <span>·</span>
+              <span>9 min de lecture</span>
+            </div>
+            <h2>Tableau de bord agent : les 7 KPI à suivre absolument</h2>
+            <p>Les indicateurs clés (KPI) que tout agent immobilier doit suivre pour piloter son activité. Avec exemples chiffrés et benchmarks.</p>
+            <span class="article-card-link">Lire l'article →</span>
+          </div>
+        </a>
+
+        <a href="/blog/qualifier-prospect-3-minutes" class="article-card">
+          <div class="article-card-media">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          </div>
+          <div class="article-card-content">
+            <div class="article-card-meta">
+              <span class="article-card-tag">Productivité</span>
+              <span>·</span>
+              <span>6 min de lecture</span>
+            </div>
+            <h2>La méthode des 3 minutes : qualifier un prospect au téléphone</h2>
+            <p>Comment qualifier un prospect immobilier en 3 minutes au téléphone. Les 7 questions clés et les signaux à détecter.</p>
+            <span class="article-card-link">Lire l'article →</span>
+          </div>
+        </a>
+
+        <a href="/blog/crm-ou-excel-agent-immobilier" class="article-card">
+          <div class="article-card-media">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg>
+          </div>
+          <div class="article-card-content">
+            <div class="article-card-meta">
+              <span class="article-card-tag">Productivité</span>
+              <span>·</span>
+              <span>8 min de lecture</span>
+            </div>
+            <h2>CRM ou Excel ? Pourquoi vous perdez 8 heures par semaine</h2>
+            <p>Comparaison concrète entre Excel et un CRM immobilier. Le calcul du temps perdu et les 7 raisons de passer à un vrai outil.</p>
+            <span class="article-card-link">Lire l'article →</span>
+          </div>
+        </a>
+
+        <a href="/blog/relancer-acquereur-template" class="article-card">
+          <div class="article-card-media">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          </div>
+          <div class="article-card-content">
+            <div class="article-card-meta">
+              <span class="article-card-tag">Productivité</span>
+              <span>·</span>
+              <span>6 min de lecture</span>
+            </div>
+            <h2>Comment relancer un acquéreur sans le saouler (avec templates)</h2>
+            <p>La méthode et les modèles d'emails pour relancer vos acquéreurs efficacement. Bonne fréquence, bons messages, bons résultats.</p>
+            <span class="article-card-link">Lire l'article →</span>
+          </div>
+        </a>
+
+        <a href="/blog/erreurs-pipeline-perdre-ventes" class="article-card">
+          <div class="article-card-media">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          </div>
+          <div class="article-card-content">
+            <div class="article-card-meta">
+              <span class="article-card-tag">Productivité</span>
+              <span>·</span>
+              <span>7 min de lecture</span>
+            </div>
+            <h2>5 erreurs de pipeline qui font perdre des ventes (et comment les éviter)</h2>
+            <p>Les 5 erreurs les plus courantes dans la gestion d'un pipeline d'agent immobilier. Méthodes concrètes pour ne plus laisser filer vos prospec...</p>
+            <span class="article-card-link">Lire l'article →</span>
+          </div>
+        </a>
+
+        <a href="/blog/saisir-mandat-30-secondes" class="article-card">
+          <div class="article-card-media">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          </div>
+          <div class="article-card-content">
+            <div class="article-card-meta">
+              <span class="article-card-tag">Productivité</span>
+              <span>·</span>
+              <span>5 min de lecture</span>
+            </div>
+            <h2>Comment saisir un mandat en moins de 30 secondes</h2>
+            <p>La méthode pour les agents immobiliers qui veulent gagner du temps sur la saisie de leurs mandats. Préparation, raccourcis et templates conc...</p>
+            <span class="article-card-link">Lire l'article →</span>
+          </div>
+        </a>
+
 
       </div>
     </div>
-  </section>
+  </main>
 
   <!-- FOOTER -->
-  <footer>
+  <footer class="footer">
     <div class="container">
-      <div class="footer-grid">
-        <div class="footer-brand">
-          <a href="/" class="logo-link" aria-label="Accueil">
-            <svg class="logo-svg" viewBox="0 0 516 96" xmlns="http://www.w3.org/2000/svg" style="height:32px;width:auto;">
-              <rect x="4" y="4" width="88" height="88" rx="22" fill="#2A211B"/>
-              <text x="48" y="50" text-anchor="middle" dominant-baseline="central" font-family="Manrope, system-ui, sans-serif" font-weight="800" font-size="30" fill="#FBF7EE">MCI</text>
-              <circle cx="72" cy="31" r="3" fill="#F08A6E"/>
-              <text x="124" y="67" font-family="Manrope, system-ui, sans-serif" font-size="56" letter-spacing="-0.025em">
-                <tspan fill="#776659" font-weight="500">mon</tspan><tspan fill="#776659" font-weight="500">-</tspan><tspan fill="#2A211B" font-weight="800">crm</tspan><tspan fill="#776659" font-weight="500">-</tspan><tspan fill="#2A211B" font-weight="800">immo</tspan>
-              </text>
-            </svg>
-          </a>
-          <p>Le CRM immobilier qui vous laisse respirer. Conçu en France, pensé pour le terrain.</p>
-        </div>
-        <div class="footer-col">
-          <h4>Produit</h4>
-          <ul>
-            <li><a href="/#features">Fonctionnalités</a></li>
-            <li><a href="/tarifs">Tarifs</a></li>
-            <li><a href="/app">Connexion</a></li>
-          </ul>
-        </div>
-        <div class="footer-col">
-          <h4>Ressources</h4>
-          <ul>
-            <li><a href="/blog">Blog</a></li>
-            <li><a href="mailto:contact@mon-crm-immo.fr">Contact</a></li>
-          </ul>
-        </div>
-        <div class="footer-col">
-          <h4>Légal</h4>
-          <ul>
-            <li><a href="/legal/cgv">CGV</a></li>
-            <li><a href="/legal/cgu">CGU</a></li>
-            <li><a href="/legal/privacy">Confidentialité</a></li>
-            <li><a href="/legal/mentions">Mentions légales</a></li>
-          </ul>
-        </div>
-      </div>
-      <div class="footer-bottom">
-        <span>© 2026 mon-crm-immo. Tous droits réservés.</span>
-        <span>Conçu en France.</span>
+      <div class="footer-inner">
+        <a href="/" class="footer-logo" aria-label="Accueil">
+          <svg viewBox="0 0 96 96">
+            <rect x="4" y="4" width="88" height="88" rx="22" fill="#FBF7EE"/>
+            <text x="48" y="50" text-anchor="middle" dominant-baseline="central"
+                  font-family="Manrope, sans-serif" font-weight="800" font-size="30" fill="#0F0E0D">MCI</text>
+            <circle cx="72" cy="31" r="3" fill="#F08A6E"/>
+          </svg>
+        </a>
+        <p class="footer-tagline">Le CRM immo qui vous laisse <em>vous concentrer sur le terrain</em>.</p>
+        <ul class="footer-links">
+          <li><a href="/">Accueil</a></li>
+          <li><a href="/#features">Fonctionnalités</a></li>
+          <li><a href="/#pricing">Tarifs</a></li>
+          <li><a href="/blog">Blog</a></li>
+          <li><a href="/legal/mentions">Mentions légales</a></li>
+          <li><a href="/legal/privacy">Confidentialité</a></li>
+        </ul>
+        <p class="footer-copy">© 2026 mon-crm-immo. Tous droits réservés.</p>
       </div>
     </div>
   </footer>
+
+  <script>
+    // Filtres catégories
+    const buttons = document.querySelectorAll('.blog-categories button');
+    const cards = document.querySelectorAll('.article-card');
+
+    buttons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const cat = btn.dataset.cat;
+        buttons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        cards.forEach(card => {
+          const tag = card.querySelector('.article-card-tag').textContent;
+          if (cat === 'all' || tag === cat) {
+            card.style.display = '';
+          } else {
+            card.style.display = 'none';
+          }
+        });
+      });
+    });
+  </script>
+
 </body>
 </html>
