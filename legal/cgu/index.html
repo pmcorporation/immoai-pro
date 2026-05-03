@@ -1,31 +1,199 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Conditions Générales d'Utilisation · mon-crm-immo</title>
-  <meta name="description" content="Conditions Générales d'Utilisation du service mon-crm-immo." />
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'%3E%3Crect x='4' y='4' width='88' height='88' rx='22' fill='%232A211B'/%3E%3Ctext x='48' y='50' text-anchor='middle' dominant-baseline='central' font-family='Manrope,sans-serif' font-weight='800' font-size='30' fill='%23FBF7EE'%3EMCI%3C/text%3E%3Ccircle cx='72' cy='31' r='3' fill='%23F08A6E'/%3E%3C/svg%3E" />
+  <meta name="description" content="CGU du service mon-crm-immo — règles d'usage du logiciel SaaS.">
+  <meta name="robots" content="noindex, follow">
+  <link rel="canonical" href="https://mon-crm-immo.fr/legal/cgu">
 
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/assets/styles.css" />
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'%3E%3Crect x='4' y='4' width='88' height='88' rx='22' fill='%230F0E0D'/%3E%3Ctext x='48' y='50' text-anchor='middle' dominant-baseline='central' font-family='Manrope,sans-serif' font-weight='800' font-size='30' fill='%23FBF7EE'%3EMCI%3C/text%3E%3Ccircle cx='72' cy='31' r='3' fill='%23F08A6E'/%3E%3C/svg%3E">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --ink: #0F0E0D;
+      --ink-soft: #2A211B;
+      --cream: #FBF7EE;
+      --white: #FFFFFF;
+      --salmon: #F08A6E;
+      --salmon-deep: #C26A52;
+      --muted: #776659;
+      --card: #FAFAF7;
+      --border: rgba(15, 14, 13, 0.08);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Manrope', system-ui, sans-serif;
+      font-weight: 500;
+      color: var(--ink);
+      background: var(--white);
+      line-height: 1.7;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: inherit; text-decoration: none; }
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+
+    /* NAV */
+    .nav {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: saturate(180%) blur(20px);
+      -webkit-backdrop-filter: saturate(180%) blur(20px);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 0;
+    }
+    .nav-inner { display: flex; align-items: center; justify-content: space-between; gap: 32px; }
+    .logo-link { display: flex; align-items: center; flex-shrink: 0; transition: transform 0.2s; }
+    .logo-link:hover { transform: scale(1.03); }
+    .logo-svg { width: 40px; height: 40px; }
+    .nav-links { display: flex; align-items: center; gap: 8px; list-style: none; flex: 1; }
+    .nav-links a {
+      position: relative; display: inline-block;
+      padding: 8px 14px; font-size: 14px; font-weight: 700;
+      color: var(--ink-soft); transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--ink); }
+    .nav-actions { display: flex; align-items: center; gap: 12px; }
+    .nav-login { font-size: 14px; font-weight: 700; color: var(--ink-soft); padding: 8px 14px; }
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      padding: 10px 20px; font-size: 14px; font-weight: 700;
+      border-radius: 999px; cursor: pointer; transition: all 0.25s;
+      border: 1.5px solid transparent;
+    }
+    .btn-primary { background: var(--salmon); color: var(--ink); border-color: var(--salmon); }
+    .btn-primary:hover { background: var(--salmon-deep); border-color: var(--salmon-deep); color: var(--white); transform: translateY(-1px); }
+    @media (max-width: 800px) { .nav-links, .nav-login { display: none; } }
+
+    /* PAGE HEADER */
+    .legal-header {
+      padding: clamp(3rem, 5vw, 5rem) 0 clamp(2rem, 3vw, 3rem);
+      text-align: center;
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+    }
+    .legal-back {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 13px; font-weight: 700;
+      color: var(--muted); margin-bottom: 24px;
+      transition: color 0.2s, gap 0.2s;
+    }
+    .legal-back:hover { color: var(--salmon-deep); gap: 10px; }
+    .legal-eyebrow {
+      display: inline-block;
+      padding: 6px 14px;
+      background: rgba(240, 138, 110, 0.08);
+      border: 1px solid rgba(240, 138, 110, 0.2);
+      border-radius: 999px;
+      font-size: 12px; font-weight: 800;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      color: var(--salmon-deep);
+      margin-bottom: 20px;
+    }
+    .legal-header h1 {
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 800;
+      line-height: 1.1;
+      letter-spacing: -0.03em;
+      margin-bottom: 12px;
+    }
+    .legal-meta {
+      font-size: 13px;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    /* CONTENT */
+    .legal-content {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: clamp(2rem, 4vw, 3.5rem) 24px clamp(4rem, 6vw, 6rem);
+      font-size: 16px;
+    }
+    .legal-content h2 {
+      font-size: clamp(1.375rem, 2.2vw, 1.625rem);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin: clamp(2rem, 3vw, 3rem) 0 1rem;
+      color: var(--ink);
+      padding-bottom: 10px;
+      border-bottom: 2px solid var(--border);
+    }
+    .legal-content h2:first-child { margin-top: 0; }
+    .legal-content h3 {
+      font-size: 1.125rem;
+      font-weight: 800;
+      margin: 1.75rem 0 0.75rem;
+      color: var(--ink);
+    }
+    .legal-content p {
+      margin-bottom: 1.25rem;
+      color: var(--ink-soft);
+    }
+    .legal-content strong { color: var(--ink); font-weight: 700; }
+    .legal-content em { color: var(--salmon-deep); font-style: italic; }
+    .legal-content ul, .legal-content ol {
+      margin: 1rem 0 1.5rem 1.5rem;
+      color: var(--ink-soft);
+    }
+    .legal-content li { margin-bottom: 0.5rem; }
+    .legal-content a {
+      color: var(--salmon-deep); font-weight: 700;
+      border-bottom: 1px dashed rgba(194, 106, 82, 0.4);
+      transition: color 0.2s, border-color 0.2s;
+    }
+    .legal-content a:hover { color: var(--salmon); border-bottom-color: var(--salmon); }
+    .legal-content blockquote {
+      border-left: 3px solid var(--salmon);
+      padding: 12px 24px;
+      margin: 1.5rem 0;
+      background: var(--card);
+      border-radius: 0 12px 12px 0;
+      color: var(--muted);
+      font-style: italic;
+    }
+    .info-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px 28px;
+      margin: 2rem 0;
+    }
+    .info-card p { margin-bottom: 0.75rem; }
+    .info-card p:last-child { margin-bottom: 0; }
+
+    /* FOOTER */
+    .footer {
+      background: var(--ink);
+      color: rgba(251, 247, 238, 0.7);
+      padding: clamp(3rem, 5vw, 4rem) 0 clamp(2rem, 3vw, 3rem);
+    }
+    .footer-inner { display: flex; flex-direction: column; align-items: center; gap: 24px; text-align: center; }
+    .footer-logo svg { width: 48px; height: 48px; }
+    .footer-tagline { font-size: 14px; max-width: 36ch; }
+    .footer-tagline em { color: var(--salmon); font-style: italic; }
+    .footer-links { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; list-style: none; }
+    .footer-links a { font-size: 13px; color: rgba(251, 247, 238, 0.7); font-weight: 700; transition: color 0.2s; }
+    .footer-links a:hover { color: var(--cream); }
+    .footer-copy { font-size: 12px; color: rgba(251, 247, 238, 0.5); padding-top: 20px; border-top: 1px solid rgba(251, 247, 238, 0.1); width: 100%; }
+  </style>
 </head>
 <body>
 
-  <!-- NAVBAR -->
   <nav class="nav">
     <div class="container nav-inner">
-      <a href="/" class="logo-link" aria-label="mon-crm-immo, accueil">
-        <svg class="logo-svg" viewBox="0 0 516 96" xmlns="http://www.w3.org/2000/svg">
-          <rect x="4" y="4" width="88" height="88" rx="22" fill="#2A211B"/>
+      <a href="/" class="logo-link" aria-label="mon-crm-immo">
+        <svg class="logo-svg" viewBox="0 0 96 96">
+          <rect x="4" y="4" width="88" height="88" rx="22" fill="#0F0E0D"/>
           <text x="48" y="50" text-anchor="middle" dominant-baseline="central"
-                font-family="Manrope, system-ui, sans-serif" font-weight="800" font-size="30" fill="#FBF7EE">MCI</text>
-          <circle class="dot" cx="72" cy="31" r="3" fill="#F08A6E"/>
-          <text x="124" y="67" font-family="Manrope, system-ui, sans-serif" font-size="56" letter-spacing="-0.025em">
-            <tspan fill="#776659" font-weight="500">mon</tspan><tspan fill="#776659" font-weight="500">-</tspan><tspan fill="#2A211B" font-weight="800">crm</tspan><tspan fill="#776659" font-weight="500">-</tspan><tspan fill="#2A211B" font-weight="800">immo</tspan>
-          </text>
+                font-family="Manrope, sans-serif" font-weight="800" font-size="30" fill="#FBF7EE">MCI</text>
+          <circle cx="72" cy="31" r="3" fill="#F08A6E"/>
         </svg>
       </a>
       <ul class="nav-links">
@@ -35,112 +203,145 @@
       </ul>
       <div class="nav-actions">
         <a href="/app" class="nav-login">Connexion</a>
-        <a href="/tarifs" class="btn btn-primary">Démarrer</a>
+        <a href="/app#signup" class="btn btn-primary">Démarrer</a>
       </div>
     </div>
   </nav>
 
-  <header class="page-header">
+  <header class="legal-header">
     <div class="container">
-      <span class="eyebrow"><span class="dot"></span>Légal</span>
-      <h1>Conditions Générales d'<em>Utilisation</em></h1>
-      <p class="subtitle">Les règles d'usage du service mon-crm-immo.</p>
+      <a href="/" class="legal-back">← Retour à l'accueil</a>
+      <span class="legal-eyebrow">Documents légaux</span>
+      <h1>Conditions Générales d'Utilisation</h1>
+      <p class="legal-meta">Dernière mise à jour : 3 mai 2026</p>
     </div>
   </header>
 
-  <article class="prose container container-narrow">
-    <p class="meta">Dernière mise à jour : à compléter par le cabinet juridique</p>
+  <main class="legal-content">
+    <p>Les présentes Conditions Générales d'Utilisation (ci-après "CGU") régissent l'usage du service <strong>mon-crm-immo</strong>. L'utilisation du service implique l'acceptation pleine et entière des présentes CGU.</p>
 
-    <blockquote>
-      <strong>📝 Document en cours de finalisation</strong><br>
-      Ces Conditions Générales d'Utilisation sont actuellement en cours de rédaction par notre cabinet juridique. La version définitive sera publiée prochainement. En cas de question, vous pouvez nous contacter à <a href="mailto:contact@mon-crm-immo.fr">contact@mon-crm-immo.fr</a>.
-    </blockquote>
-
-    <h2>1. Acceptation des conditions</h2>
-    <p>En créant un compte sur mon-crm-immo et en utilisant ses services, l'utilisateur reconnaît avoir pris connaissance des présentes Conditions Générales d'Utilisation et les accepter sans réserve.</p>
-
-    <h2>2. Accès au service</h2>
-    <p>L'accès au service est réservé aux professionnels de l'immobilier majeurs disposant d'un abonnement actif. L'utilisateur s'engage à fournir des informations exactes lors de son inscription et à les maintenir à jour.</p>
-
-    <h2>3. Compte utilisateur et sécurité</h2>
-    <p>L'utilisateur est seul responsable de la confidentialité de ses identifiants de connexion. Toute action effectuée depuis son compte sera réputée avoir été effectuée par lui-même. En cas de suspicion de compromission, l'utilisateur s'engage à modifier immédiatement son mot de passe et à nous en informer.</p>
-
-    <h2>4. Usages autorisés</h2>
-    <p>L'utilisateur s'engage à utiliser le service conformément à sa destination, dans le respect des lois en vigueur (notamment la loi Hoguet pour les professions immobilières) et des droits des tiers.</p>
-
-    <h2>5. Usages interdits</h2>
-    <p>Sont strictement interdits :</p>
+    <h2>Article 1 — Définitions</h2>
     <ul>
-      <li>Toute utilisation à des fins illégales ou frauduleuses</li>
-      <li>L'envoi de communications non sollicitées (spam) via les fonctionnalités du service</li>
-      <li>Toute tentative d'accès non autorisé aux systèmes</li>
-      <li>La revente, le partage ou la cession du compte à des tiers</li>
-      <li>L'utilisation de robots, scrapers ou outils automatisés</li>
+      <li><strong>Service</strong> : le logiciel SaaS mon-crm-immo, accessible à l'adresse mon-crm-immo.fr</li>
+      <li><strong>Utilisateur</strong> : toute personne ayant souscrit un abonnement au Service</li>
+      <li><strong>Compte</strong> : espace personnel sécurisé de l'Utilisateur, accessible via login/mot de passe</li>
+      <li><strong>Données</strong> : informations saisies par l'Utilisateur dans le Service (mandats, prospects, etc.)</li>
     </ul>
 
-    <h2>6. Propriété intellectuelle</h2>
-    <p>L'ensemble des éléments du service (logiciel, design, marque, contenus) sont la propriété exclusive de l'éditeur. Toute reproduction sans autorisation est interdite.</p>
+    <h2>Article 2 — Création du compte</h2>
+    <p>L'accès au Service nécessite la création d'un compte, qui se fait après souscription à l'un des abonnements payants. L'Utilisateur s'engage à fournir des informations exactes et à les maintenir à jour.</p>
+    <p>Chaque compte est <strong>strictement personnel</strong>. L'Utilisateur s'interdit de partager ses identifiants avec un tiers.</p>
 
-    <h2>7. Disponibilité</h2>
-    <p>L'éditeur s'engage à fournir un service disponible 24h/24 et 7j/7, sous réserve des opérations de maintenance, des incidents techniques ou des cas de force majeure.</p>
+    <h2>Article 3 — Usage autorisé du Service</h2>
 
-    <h2>8. Suspension et résiliation</h2>
-    <p>L'éditeur se réserve le droit de suspendre ou résilier l'accès au service en cas de manquement aux présentes conditions, sans préavis ni indemnité.</p>
+    <h3>3.1 Usage professionnel</h3>
+    <p>Le Service est destiné aux <strong>agents et mandataires immobiliers</strong> dans le cadre de leur activité professionnelle. Il n'est pas conçu pour un usage personnel ou privé.</p>
 
-    <h2>9. Modification des CGU</h2>
-    <p>L'éditeur se réserve le droit de modifier les présentes conditions à tout moment. L'utilisateur sera informé de toute modification par email au moins 30 jours avant son entrée en vigueur.</p>
+    <h3>3.2 Usages interdits</h3>
+    <p>L'Utilisateur s'interdit notamment :</p>
+    <ul>
+      <li>D'utiliser le Service à des fins illégales ou contraires à l'ordre public</li>
+      <li>De tenter d'accéder à des comptes ou données d'autres Utilisateurs</li>
+      <li>D'extraire massivement ou de scraper les données du Service</li>
+      <li>D'introduire des virus, codes malveillants ou tentatives d'intrusion</li>
+      <li>De surcharger le service par des requêtes automatisées</li>
+      <li>De copier, modifier, dériver ou rétro-ingénier le Service</li>
+      <li>De revendre, louer ou prêter l'accès au Service à un tiers</li>
+    </ul>
 
-    <h2>10. Contact</h2>
-    <p>Pour toute question, contactez-nous à <a href="mailto:contact@mon-crm-immo.fr">contact@mon-crm-immo.fr</a>.</p>
-  </article>
+    <h2>Article 4 — Sécurité du compte</h2>
+    <p>L'Utilisateur est seul responsable de la confidentialité de ses identifiants. Il s'engage à :</p>
+    <ul>
+      <li>Choisir un mot de passe robuste (minimum 8 caractères, mixant majuscules, minuscules, chiffres)</li>
+      <li>Ne jamais partager ses identifiants</li>
+      <li>Signaler immédiatement toute utilisation non autorisée à <a href="mailto:contact@mon-crm-immo.fr">contact@mon-crm-immo.fr</a></li>
+    </ul>
+    <p>L'AGENCE PM IMMO ne pourra être tenue responsable d'un usage frauduleux résultant d'une négligence de l'Utilisateur.</p>
 
-  <!-- FOOTER -->
-  <footer>
+    <h2>Article 5 — Données saisies par l'Utilisateur</h2>
+
+    <h3>5.1 Propriété</h3>
+    <p>L'Utilisateur reste <strong>propriétaire exclusif</strong> de toutes les Données qu'il saisit dans le Service. L'AGENCE PM IMMO n'a aucun droit de propriété sur ces Données.</p>
+
+    <h3>5.2 Responsabilité</h3>
+    <p>L'Utilisateur est seul responsable du contenu des Données saisies. Il s'engage notamment :</p>
+    <ul>
+      <li>À ne saisir que des données dont il est légalement autorisé à disposer (notamment vis-à-vis du RGPD)</li>
+      <li>À informer ses propres clients/prospects de la collecte de leurs données</li>
+      <li>À recueillir leur consentement lorsque la loi l'exige</li>
+      <li>À ne pas saisir de données sensibles (santé, opinions politiques, etc.) sauf base légale</li>
+    </ul>
+
+    <h3>5.3 Exportation et suppression</h3>
+    <p>L'Utilisateur peut à tout moment exporter ses Données (format CSV ou JSON) ou demander leur suppression définitive depuis son espace personnel.</p>
+
+    <h2>Article 6 — Disponibilité et maintenance</h2>
+    <p>L'AGENCE PM IMMO s'efforce de maintenir le Service accessible 24h/24, 7j/7, avec un objectif de <strong>disponibilité de 99,5%</strong>.</p>
+    <p>Des opérations de maintenance peuvent occasionner des interruptions de service. L'AGENCE PM IMMO s'engage à les programmer en dehors des heures ouvrées (8h-19h CET) et à en informer les Utilisateurs lorsque possible.</p>
+
+    <h2>Article 7 — Évolutions du Service</h2>
+    <p>L'AGENCE PM IMMO se réserve le droit de faire évoluer le Service à tout moment : ajout de nouvelles fonctionnalités, modifications, suppression de fonctionnalités obsolètes, etc.</p>
+    <p>Les modifications substantielles seront communiquées aux Utilisateurs via email ou notification dans le Service.</p>
+
+    <h2>Article 8 — Propriété intellectuelle</h2>
+    <p>Le Service mon-crm-immo, dans toutes ses composantes (code, interface, design, contenus, marque, logo), est la propriété exclusive de la SAS L'AGENCE PM IMMO. Toute reproduction non autorisée est strictement interdite.</p>
+    <p>L'Utilisateur dispose, dans le cadre de son abonnement, d'un <strong>droit d'usage non exclusif et non transférable</strong> du Service.</p>
+
+    <h2>Article 9 — Suspension et résiliation pour faute</h2>
+    <p>En cas de manquement grave aux présentes CGU (notamment usage frauduleux, non-paiement, violation des droits de tiers), L'AGENCE PM IMMO se réserve le droit de :</p>
+    <ul>
+      <li>Suspendre l'accès au compte sans préavis</li>
+      <li>Résilier le compte de plein droit, sans remboursement</li>
+      <li>Engager des poursuites en cas de dommage</li>
+    </ul>
+
+    <h2>Article 10 — Limitation de responsabilité</h2>
+    <p>L'AGENCE PM IMMO fournit le Service "en l'état" et ne peut garantir qu'il sera exempt d'erreurs ou totalement adapté aux besoins spécifiques de chaque Utilisateur.</p>
+    <p>La responsabilité de L'AGENCE PM IMMO ne pourra être engagée pour :</p>
+    <ul>
+      <li>Les pertes indirectes (manque à gagner, perte de chance, atteinte à l'image)</li>
+      <li>Les dommages résultant d'une mauvaise utilisation du Service</li>
+      <li>Les indisponibilités dues à un cas de force majeure</li>
+    </ul>
+    <p>En tout état de cause, la responsabilité totale de L'AGENCE PM IMMO ne pourra excéder le montant des sommes versées par l'Utilisateur au cours des 12 derniers mois.</p>
+
+    <h2>Article 11 — Modification des CGU</h2>
+    <p>L'AGENCE PM IMMO peut modifier les présentes CGU. Les Utilisateurs seront informés par email <strong>30 jours avant l'entrée en vigueur</strong> de toute modification substantielle.</p>
+
+    <h2>Article 12 — Droit applicable</h2>
+    <p>Les présentes CGU sont régies par le <strong>droit français</strong>. Tout litige sera soumis aux tribunaux compétents du ressort de la cour d'appel de Lyon.</p>
+
+    <h2>Article 13 — Contact</h2>
+    <p>Pour toute question : <a href="mailto:contact@mon-crm-immo.fr">contact@mon-crm-immo.fr</a></p>
+
+  </main>
+
+  <footer class="footer">
     <div class="container">
-      <div class="footer-grid">
-        <div class="footer-brand">
-          <a href="/" class="logo-link" aria-label="Accueil">
-            <svg class="logo-svg" viewBox="0 0 516 96" xmlns="http://www.w3.org/2000/svg" style="height:32px;width:auto;">
-              <rect x="4" y="4" width="88" height="88" rx="22" fill="#2A211B"/>
-              <text x="48" y="50" text-anchor="middle" dominant-baseline="central" font-family="Manrope, system-ui, sans-serif" font-weight="800" font-size="30" fill="#FBF7EE">MCI</text>
-              <circle cx="72" cy="31" r="3" fill="#F08A6E"/>
-              <text x="124" y="67" font-family="Manrope, system-ui, sans-serif" font-size="56" letter-spacing="-0.025em">
-                <tspan fill="#776659" font-weight="500">mon</tspan><tspan fill="#776659" font-weight="500">-</tspan><tspan fill="#2A211B" font-weight="800">crm</tspan><tspan fill="#776659" font-weight="500">-</tspan><tspan fill="#2A211B" font-weight="800">immo</tspan>
-              </text>
-            </svg>
-          </a>
-          <p>Le CRM immobilier qui vous laisse respirer. Conçu en France, pensé pour le terrain.</p>
-        </div>
-        <div class="footer-col">
-          <h4>Produit</h4>
-          <ul>
-            <li><a href="/#features">Fonctionnalités</a></li>
-            <li><a href="/tarifs">Tarifs</a></li>
-            <li><a href="/app">Connexion</a></li>
-          </ul>
-        </div>
-        <div class="footer-col">
-          <h4>Ressources</h4>
-          <ul>
-            <li><a href="/blog">Blog</a></li>
-            <li><a href="mailto:contact@mon-crm-immo.fr">Contact</a></li>
-          </ul>
-        </div>
-        <div class="footer-col">
-          <h4>Légal</h4>
-          <ul>
-            <li><a href="/legal/cgv">CGV</a></li>
-            <li><a href="/legal/cgu">CGU</a></li>
-            <li><a href="/legal/privacy">Confidentialité</a></li>
-            <li><a href="/legal/mentions">Mentions légales</a></li>
-          </ul>
-        </div>
-      </div>
-      <div class="footer-bottom">
-        <span>© 2026 mon-crm-immo. Tous droits réservés.</span>
-        <span>Conçu en France.</span>
+      <div class="footer-inner">
+        <a href="/" class="footer-logo" aria-label="Accueil">
+          <svg viewBox="0 0 96 96">
+            <rect x="4" y="4" width="88" height="88" rx="22" fill="#FBF7EE"/>
+            <text x="48" y="50" text-anchor="middle" dominant-baseline="central"
+                  font-family="Manrope, sans-serif" font-weight="800" font-size="30" fill="#0F0E0D">MCI</text>
+            <circle cx="72" cy="31" r="3" fill="#F08A6E"/>
+          </svg>
+        </a>
+        <p class="footer-tagline">Le CRM immo qui vous laisse <em>vous concentrer sur le terrain</em>.</p>
+        <ul class="footer-links">
+          <li><a href="/">Accueil</a></li>
+          <li><a href="/#features">Fonctionnalités</a></li>
+          <li><a href="/tarifs">Tarifs</a></li>
+          <li><a href="/blog">Blog</a></li>
+          <li><a href="/legal/mentions">Mentions légales</a></li>
+          <li><a href="/legal/cgv">CGV</a></li>
+          <li><a href="/legal/cgu">CGU</a></li>
+          <li><a href="/legal/privacy">Confidentialité</a></li>
+        </ul>
+        <p class="footer-copy">© 2026 L'AGENCE PM IMMO — mon-crm-immo. Tous droits réservés.</p>
       </div>
     </div>
   </footer>
+
 </body>
 </html>

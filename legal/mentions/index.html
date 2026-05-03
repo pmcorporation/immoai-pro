@@ -1,31 +1,199 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Mentions Légales · mon-crm-immo</title>
-  <meta name="description" content="Mentions légales du site mon-crm-immo." />
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'%3E%3Crect x='4' y='4' width='88' height='88' rx='22' fill='%232A211B'/%3E%3Ctext x='48' y='50' text-anchor='middle' dominant-baseline='central' font-family='Manrope,sans-serif' font-weight='800' font-size='30' fill='%23FBF7EE'%3EMCI%3C/text%3E%3Ccircle cx='72' cy='31' r='3' fill='%23F08A6E'/%3E%3C/svg%3E" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mentions légales · mon-crm-immo</title>
+  <meta name="description" content="Mentions légales du site mon-crm-immo.fr — éditeur, hébergeur, propriété intellectuelle.">
+  <meta name="robots" content="noindex, follow">
+  <link rel="canonical" href="https://mon-crm-immo.fr/legal/mentions">
 
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/assets/styles.css" />
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'%3E%3Crect x='4' y='4' width='88' height='88' rx='22' fill='%230F0E0D'/%3E%3Ctext x='48' y='50' text-anchor='middle' dominant-baseline='central' font-family='Manrope,sans-serif' font-weight='800' font-size='30' fill='%23FBF7EE'%3EMCI%3C/text%3E%3Ccircle cx='72' cy='31' r='3' fill='%23F08A6E'/%3E%3C/svg%3E">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --ink: #0F0E0D;
+      --ink-soft: #2A211B;
+      --cream: #FBF7EE;
+      --white: #FFFFFF;
+      --salmon: #F08A6E;
+      --salmon-deep: #C26A52;
+      --muted: #776659;
+      --card: #FAFAF7;
+      --border: rgba(15, 14, 13, 0.08);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Manrope', system-ui, sans-serif;
+      font-weight: 500;
+      color: var(--ink);
+      background: var(--white);
+      line-height: 1.7;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: inherit; text-decoration: none; }
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+
+    /* NAV */
+    .nav {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: saturate(180%) blur(20px);
+      -webkit-backdrop-filter: saturate(180%) blur(20px);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 0;
+    }
+    .nav-inner { display: flex; align-items: center; justify-content: space-between; gap: 32px; }
+    .logo-link { display: flex; align-items: center; flex-shrink: 0; transition: transform 0.2s; }
+    .logo-link:hover { transform: scale(1.03); }
+    .logo-svg { width: 40px; height: 40px; }
+    .nav-links { display: flex; align-items: center; gap: 8px; list-style: none; flex: 1; }
+    .nav-links a {
+      position: relative; display: inline-block;
+      padding: 8px 14px; font-size: 14px; font-weight: 700;
+      color: var(--ink-soft); transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--ink); }
+    .nav-actions { display: flex; align-items: center; gap: 12px; }
+    .nav-login { font-size: 14px; font-weight: 700; color: var(--ink-soft); padding: 8px 14px; }
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      padding: 10px 20px; font-size: 14px; font-weight: 700;
+      border-radius: 999px; cursor: pointer; transition: all 0.25s;
+      border: 1.5px solid transparent;
+    }
+    .btn-primary { background: var(--salmon); color: var(--ink); border-color: var(--salmon); }
+    .btn-primary:hover { background: var(--salmon-deep); border-color: var(--salmon-deep); color: var(--white); transform: translateY(-1px); }
+    @media (max-width: 800px) { .nav-links, .nav-login { display: none; } }
+
+    /* PAGE HEADER */
+    .legal-header {
+      padding: clamp(3rem, 5vw, 5rem) 0 clamp(2rem, 3vw, 3rem);
+      text-align: center;
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+    }
+    .legal-back {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 13px; font-weight: 700;
+      color: var(--muted); margin-bottom: 24px;
+      transition: color 0.2s, gap 0.2s;
+    }
+    .legal-back:hover { color: var(--salmon-deep); gap: 10px; }
+    .legal-eyebrow {
+      display: inline-block;
+      padding: 6px 14px;
+      background: rgba(240, 138, 110, 0.08);
+      border: 1px solid rgba(240, 138, 110, 0.2);
+      border-radius: 999px;
+      font-size: 12px; font-weight: 800;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      color: var(--salmon-deep);
+      margin-bottom: 20px;
+    }
+    .legal-header h1 {
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 800;
+      line-height: 1.1;
+      letter-spacing: -0.03em;
+      margin-bottom: 12px;
+    }
+    .legal-meta {
+      font-size: 13px;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    /* CONTENT */
+    .legal-content {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: clamp(2rem, 4vw, 3.5rem) 24px clamp(4rem, 6vw, 6rem);
+      font-size: 16px;
+    }
+    .legal-content h2 {
+      font-size: clamp(1.375rem, 2.2vw, 1.625rem);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin: clamp(2rem, 3vw, 3rem) 0 1rem;
+      color: var(--ink);
+      padding-bottom: 10px;
+      border-bottom: 2px solid var(--border);
+    }
+    .legal-content h2:first-child { margin-top: 0; }
+    .legal-content h3 {
+      font-size: 1.125rem;
+      font-weight: 800;
+      margin: 1.75rem 0 0.75rem;
+      color: var(--ink);
+    }
+    .legal-content p {
+      margin-bottom: 1.25rem;
+      color: var(--ink-soft);
+    }
+    .legal-content strong { color: var(--ink); font-weight: 700; }
+    .legal-content em { color: var(--salmon-deep); font-style: italic; }
+    .legal-content ul, .legal-content ol {
+      margin: 1rem 0 1.5rem 1.5rem;
+      color: var(--ink-soft);
+    }
+    .legal-content li { margin-bottom: 0.5rem; }
+    .legal-content a {
+      color: var(--salmon-deep); font-weight: 700;
+      border-bottom: 1px dashed rgba(194, 106, 82, 0.4);
+      transition: color 0.2s, border-color 0.2s;
+    }
+    .legal-content a:hover { color: var(--salmon); border-bottom-color: var(--salmon); }
+    .legal-content blockquote {
+      border-left: 3px solid var(--salmon);
+      padding: 12px 24px;
+      margin: 1.5rem 0;
+      background: var(--card);
+      border-radius: 0 12px 12px 0;
+      color: var(--muted);
+      font-style: italic;
+    }
+    .info-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px 28px;
+      margin: 2rem 0;
+    }
+    .info-card p { margin-bottom: 0.75rem; }
+    .info-card p:last-child { margin-bottom: 0; }
+
+    /* FOOTER */
+    .footer {
+      background: var(--ink);
+      color: rgba(251, 247, 238, 0.7);
+      padding: clamp(3rem, 5vw, 4rem) 0 clamp(2rem, 3vw, 3rem);
+    }
+    .footer-inner { display: flex; flex-direction: column; align-items: center; gap: 24px; text-align: center; }
+    .footer-logo svg { width: 48px; height: 48px; }
+    .footer-tagline { font-size: 14px; max-width: 36ch; }
+    .footer-tagline em { color: var(--salmon); font-style: italic; }
+    .footer-links { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; list-style: none; }
+    .footer-links a { font-size: 13px; color: rgba(251, 247, 238, 0.7); font-weight: 700; transition: color 0.2s; }
+    .footer-links a:hover { color: var(--cream); }
+    .footer-copy { font-size: 12px; color: rgba(251, 247, 238, 0.5); padding-top: 20px; border-top: 1px solid rgba(251, 247, 238, 0.1); width: 100%; }
+  </style>
 </head>
 <body>
 
-  <!-- NAVBAR -->
   <nav class="nav">
     <div class="container nav-inner">
-      <a href="/" class="logo-link" aria-label="mon-crm-immo, accueil">
-        <svg class="logo-svg" viewBox="0 0 516 96" xmlns="http://www.w3.org/2000/svg">
-          <rect x="4" y="4" width="88" height="88" rx="22" fill="#2A211B"/>
+      <a href="/" class="logo-link" aria-label="mon-crm-immo">
+        <svg class="logo-svg" viewBox="0 0 96 96">
+          <rect x="4" y="4" width="88" height="88" rx="22" fill="#0F0E0D"/>
           <text x="48" y="50" text-anchor="middle" dominant-baseline="central"
-                font-family="Manrope, system-ui, sans-serif" font-weight="800" font-size="30" fill="#FBF7EE">MCI</text>
-          <circle class="dot" cx="72" cy="31" r="3" fill="#F08A6E"/>
-          <text x="124" y="67" font-family="Manrope, system-ui, sans-serif" font-size="56" letter-spacing="-0.025em">
-            <tspan fill="#776659" font-weight="500">mon</tspan><tspan fill="#776659" font-weight="500">-</tspan><tspan fill="#2A211B" font-weight="800">crm</tspan><tspan fill="#776659" font-weight="500">-</tspan><tspan fill="#2A211B" font-weight="800">immo</tspan>
-          </text>
+                font-family="Manrope, sans-serif" font-weight="800" font-size="30" fill="#FBF7EE">MCI</text>
+          <circle cx="72" cy="31" r="3" fill="#F08A6E"/>
         </svg>
       </a>
       <ul class="nav-links">
@@ -35,110 +203,98 @@
       </ul>
       <div class="nav-actions">
         <a href="/app" class="nav-login">Connexion</a>
-        <a href="/tarifs" class="btn btn-primary">Démarrer</a>
+        <a href="/app#signup" class="btn btn-primary">Démarrer</a>
       </div>
     </div>
   </nav>
 
-  <header class="page-header">
+  <header class="legal-header">
     <div class="container">
-      <span class="eyebrow"><span class="dot"></span>Légal</span>
-      <h1>Mentions <em>Légales</em></h1>
-      <p class="subtitle">Informations légales sur l'éditeur du site mon-crm-immo.</p>
+      <a href="/" class="legal-back">← Retour à l'accueil</a>
+      <span class="legal-eyebrow">Documents légaux</span>
+      <h1>Mentions légales</h1>
+      <p class="legal-meta">Dernière mise à jour : 3 mai 2026</p>
     </div>
   </header>
 
-  <article class="prose container container-narrow">
-    <p class="meta">Dernière mise à jour : à compléter par le cabinet juridique</p>
+  <main class="legal-content">
+    <p>Conformément aux dispositions de la loi n°2004-575 du 21 juin 2004 pour la confiance dans l'économie numérique (LCEN), il est précisé aux utilisateurs du site <strong>mon-crm-immo.fr</strong> l'identité des différents intervenants dans le cadre de sa réalisation et de son suivi.</p>
 
-    <blockquote>
-      <strong>📝 Informations en cours de finalisation</strong><br>
-      Les informations légales définitives (raison sociale, SIRET, capital social, adresse du siège, etc.) seront publiées dès que la structure juridique sera établie. En attendant, voici les informations actuellement disponibles.
-    </blockquote>
+    <h2>1. Éditeur du site</h2>
 
-    <h2>Éditeur du site</h2>
-    <p>
-      <strong>Nom commercial :</strong> mon-crm-immo<br>
-      <strong>Site web :</strong> <a href="https://mon-crm-immo.fr">https://mon-crm-immo.fr</a><br>
-      <strong>Email de contact :</strong> <a href="mailto:contact@mon-crm-immo.fr">contact@mon-crm-immo.fr</a>
-    </p>
-    <p><em>Raison sociale, SIRET, RCS, capital social, adresse du siège social et nom du directeur de la publication : à compléter.</em></p>
+    <div class="info-card">
+      <p><strong>Raison sociale :</strong> L'AGENCE PM IMMO</p>
+      <p><strong>Forme juridique :</strong> SAS (Société par Actions Simplifiée)</p>
+      <p><strong>Capital social :</strong> 1 000 €</p>
+      <p><strong>Siège social :</strong> 127 avenue de la Libération, 42120 Le Coteau, France</p>
+      <p><strong>SIREN :</strong> 934 642 968</p>
+      <p><strong>SIRET :</strong> 934 642 968 00010</p>
+      <p><strong>RCS :</strong> Roanne, immatriculée le 25 octobre 2024</p>
+      <p><strong>N° TVA intracommunautaire :</strong> FR65934642968</p>
+      <p><strong>Code APE :</strong> 70.10Z (Activités des sièges sociaux)</p>
+      <p><strong>Email :</strong> contact@mon-crm-immo.fr</p>
+    </div>
 
-    <h2>Hébergement</h2>
-    <p>
-      <strong>Hébergeur du site :</strong> Vercel Inc.<br>
-      340 S Lemon Ave #4133, Walnut, CA 91789, USA<br>
-      <a href="https://vercel.com">https://vercel.com</a>
-    </p>
-    <p>
-      <strong>Hébergeur des données :</strong> Supabase (infrastructure européenne)<br>
-      <a href="https://supabase.com">https://supabase.com</a>
-    </p>
+    <h2>2. Direction de la publication</h2>
+    <p>Le directeur de la publication du site est M. <strong>Alexis Lacroix</strong>, en qualité de président de la SAS L'AGENCE PM IMMO.</p>
 
-    <h2>Propriété intellectuelle</h2>
-    <p>L'ensemble des éléments présents sur le site mon-crm-immo (textes, images, logos, code, design) sont la propriété exclusive de l'éditeur et sont protégés par les lois françaises et internationales relatives à la propriété intellectuelle.</p>
-    <p>Toute reproduction, représentation, modification, publication, transmission ou exploitation, totale ou partielle, sans autorisation écrite préalable de l'éditeur est strictement interdite.</p>
+    <h2>3. Hébergement du site</h2>
+    <div class="info-card">
+      <p><strong>Hébergeur :</strong> Vercel Inc.</p>
+      <p><strong>Adresse :</strong> 340 S Lemon Ave #4133, Walnut, CA 91789, États-Unis</p>
+      <p><strong>Site web :</strong> <a href="https://vercel.com" target="_blank" rel="noopener">vercel.com</a></p>
+    </div>
 
-    <h2>Données personnelles</h2>
-    <p>Pour tout ce qui concerne le traitement de vos données personnelles, consultez notre <a href="/legal/privacy">Politique de Confidentialité</a>.</p>
+    <p>Les données utilisateurs sont stockées en Europe via Supabase Inc., conformément au Règlement Général sur la Protection des Données (RGPD).</p>
 
-    <h2>Cookies</h2>
-    <p>Le site utilise uniquement des cookies strictement nécessaires à son fonctionnement (session, authentification). Aucun cookie de tracking ou publicitaire tiers n'est déposé sans votre consentement.</p>
+    <h2>4. Propriété intellectuelle</h2>
+    <p>L'ensemble du contenu du site mon-crm-immo.fr (textes, images, vidéos, graphismes, logos, icônes, sons, logiciels) est la propriété exclusive de la SAS L'AGENCE PM IMMO ou de ses partenaires, et est protégé par les lois françaises et internationales relatives à la propriété intellectuelle.</p>
+    <p>Toute reproduction, représentation, modification, publication, transmission, dénaturation, totale ou partielle du site ou de son contenu, par quelque procédé que ce soit, et sur quelque support que ce soit, est interdite sans l'autorisation écrite préalable de la SAS L'AGENCE PM IMMO.</p>
 
-    <h2>Crédits</h2>
-    <p>Conception et développement : équipe mon-crm-immo<br>Police d'écriture : <a href="https://fonts.google.com/specimen/Manrope">Manrope</a> par Mikhail Sharanda (Google Fonts).</p>
+    <h2>5. Responsabilité</h2>
+    <p>Les informations contenues sur le site mon-crm-immo.fr sont aussi précises que possible, et le site est régulièrement mis à jour. Cependant, des erreurs ou omissions peuvent y être présentes. L'utilisateur est invité à signaler toute inexactitude à l'adresse <a href="mailto:contact@mon-crm-immo.fr">contact@mon-crm-immo.fr</a>.</p>
+    <p>L'AGENCE PM IMMO ne pourra être tenue responsable des dommages directs ou indirects causés au matériel de l'utilisateur lors de l'accès au site.</p>
 
-    <h2>Contact</h2>
-    <p>Pour toute question, signalement ou réclamation, contactez-nous à <a href="mailto:contact@mon-crm-immo.fr">contact@mon-crm-immo.fr</a>.</p>
-  </article>
+    <h2>6. Liens hypertextes</h2>
+    <p>Le site mon-crm-immo.fr peut contenir des liens hypertextes vers d'autres sites. L'AGENCE PM IMMO n'a pas la possibilité de vérifier le contenu de ces sites, et ne pourra être tenue responsable du contenu présent sur ces sites tiers.</p>
 
-  <!-- FOOTER -->
-  <footer>
+    <h2>7. Cookies</h2>
+    <p>Le site peut utiliser des cookies à des fins techniques (session utilisateur, sécurité) et statistiques. Pour en savoir plus, consultez notre <a href="/legal/privacy">Politique de Confidentialité</a>.</p>
+
+    <h2>8. Droit applicable et juridiction compétente</h2>
+    <p>Les présentes mentions légales sont régies par le <strong>droit français</strong>. En cas de litige, et après échec d'une tentative de règlement amiable, les <strong>tribunaux français</strong> seront seuls compétents.</p>
+
+    <h2>9. Contact</h2>
+    <p>Pour toute question concernant ces mentions légales, vous pouvez nous contacter à : <a href="mailto:contact@mon-crm-immo.fr">contact@mon-crm-immo.fr</a></p>
+
+  </main>
+
+  <footer class="footer">
     <div class="container">
-      <div class="footer-grid">
-        <div class="footer-brand">
-          <a href="/" class="logo-link" aria-label="Accueil">
-            <svg class="logo-svg" viewBox="0 0 516 96" xmlns="http://www.w3.org/2000/svg" style="height:32px;width:auto;">
-              <rect x="4" y="4" width="88" height="88" rx="22" fill="#2A211B"/>
-              <text x="48" y="50" text-anchor="middle" dominant-baseline="central" font-family="Manrope, system-ui, sans-serif" font-weight="800" font-size="30" fill="#FBF7EE">MCI</text>
-              <circle cx="72" cy="31" r="3" fill="#F08A6E"/>
-              <text x="124" y="67" font-family="Manrope, system-ui, sans-serif" font-size="56" letter-spacing="-0.025em">
-                <tspan fill="#776659" font-weight="500">mon</tspan><tspan fill="#776659" font-weight="500">-</tspan><tspan fill="#2A211B" font-weight="800">crm</tspan><tspan fill="#776659" font-weight="500">-</tspan><tspan fill="#2A211B" font-weight="800">immo</tspan>
-              </text>
-            </svg>
-          </a>
-          <p>Le CRM immobilier qui vous laisse respirer. Conçu en France, pensé pour le terrain.</p>
-        </div>
-        <div class="footer-col">
-          <h4>Produit</h4>
-          <ul>
-            <li><a href="/#features">Fonctionnalités</a></li>
-            <li><a href="/tarifs">Tarifs</a></li>
-            <li><a href="/app">Connexion</a></li>
-          </ul>
-        </div>
-        <div class="footer-col">
-          <h4>Ressources</h4>
-          <ul>
-            <li><a href="/blog">Blog</a></li>
-            <li><a href="mailto:contact@mon-crm-immo.fr">Contact</a></li>
-          </ul>
-        </div>
-        <div class="footer-col">
-          <h4>Légal</h4>
-          <ul>
-            <li><a href="/legal/cgv">CGV</a></li>
-            <li><a href="/legal/cgu">CGU</a></li>
-            <li><a href="/legal/privacy">Confidentialité</a></li>
-            <li><a href="/legal/mentions">Mentions légales</a></li>
-          </ul>
-        </div>
-      </div>
-      <div class="footer-bottom">
-        <span>© 2026 mon-crm-immo. Tous droits réservés.</span>
-        <span>Conçu en France.</span>
+      <div class="footer-inner">
+        <a href="/" class="footer-logo" aria-label="Accueil">
+          <svg viewBox="0 0 96 96">
+            <rect x="4" y="4" width="88" height="88" rx="22" fill="#FBF7EE"/>
+            <text x="48" y="50" text-anchor="middle" dominant-baseline="central"
+                  font-family="Manrope, sans-serif" font-weight="800" font-size="30" fill="#0F0E0D">MCI</text>
+            <circle cx="72" cy="31" r="3" fill="#F08A6E"/>
+          </svg>
+        </a>
+        <p class="footer-tagline">Le CRM immo qui vous laisse <em>vous concentrer sur le terrain</em>.</p>
+        <ul class="footer-links">
+          <li><a href="/">Accueil</a></li>
+          <li><a href="/#features">Fonctionnalités</a></li>
+          <li><a href="/tarifs">Tarifs</a></li>
+          <li><a href="/blog">Blog</a></li>
+          <li><a href="/legal/mentions">Mentions légales</a></li>
+          <li><a href="/legal/cgv">CGV</a></li>
+          <li><a href="/legal/cgu">CGU</a></li>
+          <li><a href="/legal/privacy">Confidentialité</a></li>
+        </ul>
+        <p class="footer-copy">© 2026 L'AGENCE PM IMMO — mon-crm-immo. Tous droits réservés.</p>
       </div>
     </div>
   </footer>
+
 </body>
 </html>
