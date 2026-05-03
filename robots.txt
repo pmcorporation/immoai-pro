@@ -1,0 +1,26 @@
+# robots.txt — mon-crm-immo.fr
+# Mis à jour le 3 mai 2026
+
+User-agent: *
+Allow: /
+
+# Pages à ne pas indexer (espace utilisateur, légal noindex, paiement)
+Disallow: /app
+Disallow: /merci
+Disallow: /api/
+
+# Bloquer les bots agressifs / scrapers
+User-agent: AhrefsBot
+Crawl-delay: 10
+
+User-agent: SemrushBot
+Crawl-delay: 10
+
+User-agent: MJ12bot
+Disallow: /
+
+User-agent: DotBot
+Disallow: /
+
+# Sitemap principal
+Sitemap: https://mon-crm-immo.fr/sitemap.xml
