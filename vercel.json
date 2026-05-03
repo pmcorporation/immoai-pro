@@ -1,7 +1,9 @@
 {
   "version": 2,
-  "routes": [
-    { "src": "/", "dest": "/index.html" },
-    { "src": "/(.*)", "dest": "/index.html" }
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "rewrites": [
+    { "source": "/app/:path*", "destination": "/app/index.html" },
+    { "source": "/app", "destination": "/app/index.html" }
   ]
 }

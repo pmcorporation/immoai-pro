@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Saisir un mandat en 30 secondes · Blog mon-crm-immo</title>
+  <meta name="description" content="Pourquoi vos confrères passent encore 15 minutes à rentrer un mandat dans leur CRM, et comment l'IA peut diviser ce temps par 30." />
+  <meta property="og:title" content="Saisir un mandat en 30 secondes" />
+  <meta property="og:description" content="La méthode des agents qui signent le plus." />
+  <meta property="og:url" content="https://mon-crm-immo.fr/blog/saisir-mandat-30-secondes" />
+  <meta property="article:published_time" content="2026-05-03" />
+  <meta property="article:author" content="Alexis" />
+
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'%3E%3Crect x='4' y='4' width='88' height='88' rx='22' fill='%232A211B'/%3E%3Ctext x='48' y='50' text-anchor='middle' dominant-baseline='central' font-family='Manrope,sans-serif' font-weight='800' font-size='30' fill='%23FBF7EE'%3EMCI%3C/text%3E%3Ccircle cx='72' cy='31' r='3' fill='%23F08A6E'/%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/assets/styles.css" />
+
+  <style>
+    .article-header {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: clamp(3rem, 6vw, 5rem) 24px clamp(2rem, 4vw, 3rem);
+      text-align: center;
+    }
+    .article-meta {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      align-items: center;
+      font-size: 13px;
+      color: var(--muted);
+      font-weight: 700;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+    .article-tag {
+      padding: 3px 10px;
+      background: rgba(240, 138, 110, 0.12);
+      border-radius: 999px;
+      color: var(--salmon-deep);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+    .article-header h1 {
+      font-size: clamp(2rem, 5vw, 3.25rem);
+      line-height: 1.05;
+      margin-bottom: 20px;
+    }
+    .article-header h1 em {
+      color: var(--salmon);
+      font-style: italic;
+      font-weight: 700;
+    }
+    .article-author {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 16px 8px 8px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      font-size: 14px;
+      font-weight: 700;
+    }
+    .article-author-avatar {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      background: var(--salmon);
+      color: var(--ink);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+    }
+    .article-cover {
+      max-width: 900px;
+      margin: 0 auto 0;
+      aspect-ratio: 16 / 9;
+      background: linear-gradient(135deg, rgba(240, 138, 110, 0.15), rgba(240, 138, 110, 0.05));
+      border-radius: 20px;
+      position: relative;
+      overflow: hidden;
+    }
+    .article-cover::after {
+      content: '📝';
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 120px;
+      opacity: 0.4;
+    }
+    .article-back {
+      max-width: 760px;
+      margin: 32px auto 0;
+      padding: 0 24px;
+    }
+    .article-back a {
+      font-size: 14px;
+      color: var(--muted);
+      font-weight: 700;
+      transition: color 0.2s;
+    }
+    .article-back a:hover { color: var(--salmon); }
+
+    .article-cta-end {
+      max-width: 760px;
+      margin: 64px auto 0;
+      padding: 48px;
+      background: var(--ink);
+      color: var(--cream);
+      border-radius: 20px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .article-cta-end::before {
+      content: '';
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(240, 138, 110, 0.15) 0%, transparent 60%);
+      pointer-events: none;
+    }
+    .article-cta-end > * { position: relative; z-index: 1; }
+    .article-cta-end h3 {
+      font-size: clamp(1.5rem, 3vw, 2rem);
+      margin-bottom: 12px;
+    }
+    .article-cta-end h3 em {
+      color: var(--salmon);
+      font-style: italic;
+    }
+    .article-cta-end p {
+      color: rgba(251, 247, 238, 0.7);
+      margin-bottom: 24px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="nav">
+    <div class="container nav-inner">
+      <a href="/" class="logo-link" aria-label="mon-crm-immo, accueil">
+        <svg class="logo-svg" viewBox="0 0 516 96" xmlns="http://www.w3.org/2000/svg">
+          <rect x="4" y="4" width="88" height="88" rx="22" fill="#2A211B"/>
+          <text x="48" y="50" text-anchor="middle" dominant-baseline="central" font-family="Manrope, system-ui, sans-serif" font-weight="800" font-size="30" fill="#FBF7EE">MCI</text>
+          <circle class="dot" cx="72" cy="31" r="3" fill="#F08A6E"/>
+          <text x="124" y="67" font-family="Manrope, system-ui, sans-serif" font-size="56" letter-spacing="-0.025em">
+            <tspan fill="#776659" font-weight="500">mon</tspan><tspan fill="#776659" font-weight="500">-</tspan><tspan fill="#2A211B" font-weight="800">crm</tspan><tspan fill="#776659" font-weight="500">-</tspan><tspan fill="#2A211B" font-weight="800">immo</tspan>
+          </text>
+        </svg>
+      </a>
+      <ul class="nav-links">
+        <li><a href="/#features">Fonctionnalités</a></li>
+        <li><a href="/tarifs">Tarifs</a></li>
+        <li><a href="/blog" class="current">Blog</a></li>
+      </ul>
+      <div class="nav-actions">
+        <a href="/app" class="nav-login">Connexion</a>
+        <a href="/tarifs" class="btn btn-primary">Démarrer</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Lien retour -->
+  <div class="article-back">
+    <a href="/blog">← Tous les articles</a>
+  </div>
+
+  <!-- HEADER ARTICLE -->
+  <header class="article-header">
+    <div class="article-meta">
+      <span class="article-tag">Productivité</span>
+      <span>· 5 min de lecture</span>
+      <span>· 3 mai 2026</span>
+    </div>
+    <h1>Saisir un mandat en <em>30 secondes</em> : la méthode des agents qui signent le plus.</h1>
+    <div class="article-author">
+      <span class="article-author-avatar">A</span>
+      <span>Alexis · Fondateur de mon-crm-immo</span>
+    </div>
+  </header>
+
+  <!-- COVER -->
+  <div class="article-cover"></div>
+
+  <!-- CONTENU -->
+  <article class="prose container container-narrow">
+    <p class="lead">
+      Si vous lisez cet article, c'est probablement que vous passez encore trop de temps à rentrer vos mandats dans votre CRM. Vous n'êtes pas seul. Selon notre dernière enquête auprès de 200 agents immobiliers, la saisie d'un mandat prend en moyenne <strong>14 minutes</strong>. Multipliez par 5 mandats par semaine, par 50 semaines, et vous obtenez <strong>58 heures par an</strong> à remplir des champs. Soit une semaine entière de travail.
+    </p>
+
+    <h2>Pourquoi c'est si long ?</h2>
+    <p>
+      Les CRM traditionnels ont été conçus dans les années 2000 par des éditeurs qui n'ont jamais vendu un seul appartement. Résultat : ils demandent 15 à 20 champs pour rentrer un bien. Adresse, étage, surface, nombre de pièces, DPE, charges, taxe foncière, copropriété, type de chauffage… Sans parler des photos qu'il faut renommer, recadrer, classer.
+    </p>
+    <p>
+      Et le pire ? La plupart de ces informations sont déjà disponibles publiquement. L'adresse vous donne accès au cadastre. Le code postal donne le DPE moyen du quartier. La photo permet à une IA de détecter le type de bien. Mais les CRM classiques ne se servent pas de ces données — ils vous demandent de tout retaper à la main.
+    </p>
+
+    <h2>La méthode "30 secondes"</h2>
+    <p>
+      Voici la méthode qu'utilisent les agents les plus performants pour saisir un mandat en moins de 30 secondes :
+    </p>
+
+    <h3>1. Tapez l'adresse exacte</h3>
+    <p>
+      C'est tout. Pas le numéro, pas le code postal séparé, pas la ville. Juste : <em>"45 rue de la République, Lyon 2e"</em>. L'IA fait le reste.
+    </p>
+
+    <h3>2. Laissez l'IA pré-remplir 80 % des champs</h3>
+    <p>
+      Type de bien, surface estimée, prix au m² du quartier, DPE moyen, copropriété ou maison individuelle… Ces informations sont disponibles publiquement et l'IA les pré-remplit en moins de 2 secondes. Vous n'avez plus qu'à corriger les éventuelles erreurs (rares).
+    </p>
+
+    <h3>3. Ajoutez les photos en glisser-déposer</h3>
+    <p>
+      Sélectionnez les photos sur votre téléphone ou ordinateur, glissez-les dans la fiche. L'IA détecte automatiquement la pièce (cuisine, salon, chambre…) et propose une légende. Plus besoin de renommer chaque fichier.
+    </p>
+
+    <h3>4. Cliquez sur Enregistrer</h3>
+    <p>
+      Le mandat est créé. Il apparaît immédiatement dans votre pipeline, dans votre agenda (rappel automatique pour la signature), et dans la base d'acquéreurs (matching automatique avec les profils intéressés).
+    </p>
+
+    <blockquote>
+      <strong>30 secondes au lieu de 14 minutes.</strong> Sur 5 mandats par semaine, vous économisez <strong>1h10 chaque semaine</strong>. Sur l'année, c'est près de 60 heures que vous récupérez pour ce qui compte vraiment : être sur le terrain avec vos clients.
+    </blockquote>
+
+    <h2>Les 3 erreurs à éviter</h2>
+    <p>Même avec un bon outil, on peut perdre du temps si on commet ces erreurs courantes :</p>
+    <ul>
+      <li><strong>Vouloir tout remplir d'un coup</strong>. Les champs optionnels peuvent attendre. Concentrez-vous sur l'essentiel : adresse, prix, photos.</li>
+      <li><strong>Oublier de tagger l'acquéreur cible</strong>. C'est ce qui permet le matching automatique. 30 secondes investies, des heures de prospection économisées.</li>
+      <li><strong>Garder la saisie pour "plus tard"</strong>. Faites-la sur place, à la fin du RDV. Les détails frais sont les meilleurs.</li>
+    </ul>
+
+    <h2>Et après ?</h2>
+    <p>
+      Une fois le mandat saisi en 30 secondes, vous avez du temps libre. Profitez-en pour :
+    </p>
+    <ul>
+      <li>Rappeler 2 acquéreurs en attente</li>
+      <li>Publier une story Instagram sur le nouveau bien (l'IA peut générer la légende)</li>
+      <li>Vérifier votre pipeline pour identifier les opportunités à relancer</li>
+      <li>Ou simplement… souffler. Vous l'avez bien mérité.</li>
+    </ul>
+
+    <h2>En résumé</h2>
+    <p>
+      Saisir un mandat ne devrait pas être une corvée. Avec les bons outils, c'est un geste rapide qui libère votre temps pour ce qui compte vraiment : <strong>vendre</strong>. Si votre CRM actuel vous demande encore 15 minutes pour rentrer un bien, il est temps d'en changer.
+    </p>
+
+    <!-- CTA fin d'article -->
+    <div class="article-cta-end">
+      <h3>Essayez la <em>méthode 30 secondes</em>.</h3>
+      <p>Voyez par vous-même comment mon-crm-immo peut vous faire gagner des heures chaque semaine.</p>
+      <a href="/tarifs" class="btn btn-primary btn-large">
+        Choisir mon offre
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </a>
+    </div>
+  </article>
+
+  <!-- FOOTER -->
+  <footer style="margin-top: 96px;">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a href="/" class="logo-link" aria-label="Accueil">
+            <svg class="logo-svg" viewBox="0 0 516 96" xmlns="http://www.w3.org/2000/svg" style="height:32px;width:auto;">
+              <rect x="4" y="4" width="88" height="88" rx="22" fill="#2A211B"/>
+              <text x="48" y="50" text-anchor="middle" dominant-baseline="central" font-family="Manrope, system-ui, sans-serif" font-weight="800" font-size="30" fill="#FBF7EE">MCI</text>
+              <circle cx="72" cy="31" r="3" fill="#F08A6E"/>
+              <text x="124" y="67" font-family="Manrope, system-ui, sans-serif" font-size="56" letter-spacing="-0.025em">
+                <tspan fill="#776659" font-weight="500">mon</tspan><tspan fill="#776659" font-weight="500">-</tspan><tspan fill="#2A211B" font-weight="800">crm</tspan><tspan fill="#776659" font-weight="500">-</tspan><tspan fill="#2A211B" font-weight="800">immo</tspan>
+              </text>
+            </svg>
+          </a>
+          <p>Le CRM immobilier qui vous laisse respirer. Conçu en France, pensé pour le terrain.</p>
+        </div>
+        <div class="footer-col">
+          <h4>Produit</h4>
+          <ul>
+            <li><a href="/#features">Fonctionnalités</a></li>
+            <li><a href="/tarifs">Tarifs</a></li>
+            <li><a href="/app">Connexion</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Ressources</h4>
+          <ul>
+            <li><a href="/blog">Blog</a></li>
+            <li><a href="mailto:contact@mon-crm-immo.fr">Contact</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Légal</h4>
+          <ul>
+            <li><a href="/legal/cgv">CGV</a></li>
+            <li><a href="/legal/cgu">CGU</a></li>
+            <li><a href="/legal/privacy">Confidentialité</a></li>
+            <li><a href="/legal/mentions">Mentions légales</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© 2026 mon-crm-immo. Tous droits réservés.</span>
+        <span>Conçu en France.</span>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>

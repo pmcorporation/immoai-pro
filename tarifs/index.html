@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Tarifs · mon-crm-immo</title>
+  <meta name="description" content="Tarifs simples et sans engagement. Starter à 35 €/mois ou Pro à 75 €/mois. Choisissez le plan qui correspond à votre activité." />
+
+  <meta property="og:title" content="Tarifs · mon-crm-immo" />
+  <meta property="og:description" content="Starter 35 €/mois ou Pro 75 €/mois. Sans engagement." />
+  <meta property="og:url" content="https://mon-crm-immo.fr/tarifs" />
+
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'%3E%3Crect x='4' y='4' width='88' height='88' rx='22' fill='%232A211B'/%3E%3Ctext x='48' y='50' text-anchor='middle' dominant-baseline='central' font-family='Manrope,sans-serif' font-weight='800' font-size='30' fill='%23FBF7EE'%3EMCI%3C/text%3E%3Ccircle cx='72' cy='31' r='3' fill='%23F08A6E'/%3E%3C/svg%3E" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/assets/styles.css" />
+
+  <style>
+    /* Styles spécifiques à la page Tarifs */
+    .pricing-cards {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+      max-width: 880px;
+      margin: 0 auto 64px;
+    }
+    .price-card {
+      position: relative;
+      padding: 40px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+    .price-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 32px -8px rgba(42, 33, 27, 0.12);
+    }
+    .price-card.featured {
+      background: var(--ink);
+      color: var(--cream);
+      border-color: var(--ink);
+    }
+    .price-badge {
+      position: absolute;
+      top: -12px;
+      left: 40px;
+      background: var(--salmon);
+      color: var(--ink);
+      padding: 5px 14px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .price-name {
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 16px;
+    }
+    .price-card.featured .price-name { color: var(--salmon); }
+    .price-amount {
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+    .price-amount .num {
+      font-size: 64px;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1;
+    }
+    .price-amount .unit {
+      font-size: 15px;
+      color: var(--muted);
+      font-weight: 700;
+    }
+    .price-card.featured .price-amount .unit { color: rgba(251, 247, 238, 0.6); }
+    .price-desc {
+      font-size: 15px;
+      color: var(--muted);
+      margin-bottom: 28px;
+    }
+    .price-card.featured .price-desc { color: rgba(251, 247, 238, 0.7); }
+    .price-features {
+      list-style: none;
+      margin-bottom: 32px;
+    }
+    .price-features li {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 12px 0;
+      font-size: 15px;
+      border-top: 1px solid var(--border);
+    }
+    .price-card.featured .price-features li {
+      border-color: rgba(251, 247, 238, 0.08);
+    }
+    .price-features li svg {
+      flex-shrink: 0;
+      margin-top: 3px;
+      color: var(--salmon);
+    }
+    .price-card .btn { width: 100%; }
+
+    /* Tableau comparatif */
+    .compare {
+      max-width: 880px;
+      margin: 0 auto;
+      padding: 64px 0;
+    }
+    .compare h2 {
+      text-align: center;
+      font-size: clamp(1.5rem, 3vw, 2rem);
+      margin-bottom: 32px;
+    }
+    .compare-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+    .compare-table th,
+    .compare-table td {
+      padding: 14px 20px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+      font-size: 15px;
+    }
+    .compare-table th {
+      background: var(--cream);
+      font-weight: 800;
+      color: var(--ink);
+      font-size: 13px;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+    .compare-table td:nth-child(2),
+    .compare-table th:nth-child(2),
+    .compare-table td:nth-child(3),
+    .compare-table th:nth-child(3) {
+      text-align: center;
+      width: 130px;
+    }
+    .compare-table tr:last-child td { border-bottom: none; }
+    .compare-table .check {
+      color: var(--salmon);
+      font-weight: 800;
+      font-size: 18px;
+    }
+    .compare-table .x {
+      color: rgba(42, 33, 27, 0.25);
+      font-size: 18px;
+    }
+    .compare-section {
+      background: var(--ink);
+      color: var(--cream);
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      font-size: 12px;
+    }
+
+    /* FAQ courte */
+    .pricing-faq {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 64px 0 96px;
+    }
+    .pricing-faq h2 {
+      text-align: center;
+      font-size: clamp(1.5rem, 3vw, 2rem);
+      margin-bottom: 32px;
+    }
+    .faq-item {
+      border-bottom: 1px solid var(--border);
+    }
+    .faq-q {
+      width: 100%;
+      padding: 20px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 24px;
+      text-align: left;
+      font-size: 17px;
+      font-weight: 800;
+      transition: color 0.2s;
+    }
+    .faq-q:hover { color: var(--salmon); }
+    .faq-q span:last-child {
+      flex-shrink: 0;
+      color: var(--salmon);
+      transition: transform 0.3s;
+      font-size: 22px;
+    }
+    .faq-item.open .faq-q span:last-child { transform: rotate(45deg); }
+    .faq-a {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.4s ease;
+      color: var(--muted);
+      font-size: 16px;
+      line-height: 1.6;
+    }
+    .faq-item.open .faq-a { max-height: 300px; }
+    .faq-a-inner { padding: 0 0 20px; }
+
+    @media (max-width: 700px) {
+      .pricing-cards { grid-template-columns: 1fr; }
+      .compare-table th, .compare-table td { padding: 10px 12px; font-size: 13px; }
+      .compare-table td:nth-child(2),
+      .compare-table th:nth-child(2),
+      .compare-table td:nth-child(3),
+      .compare-table th:nth-child(3) { width: auto; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="nav">
+    <div class="container nav-inner">
+      <a href="/" class="logo-link" aria-label="mon-crm-immo, accueil">
+        <svg class="logo-svg" viewBox="0 0 516 96" xmlns="http://www.w3.org/2000/svg">
+          <rect x="4" y="4" width="88" height="88" rx="22" fill="#2A211B"/>
+          <text x="48" y="50" text-anchor="middle" dominant-baseline="central"
+                font-family="Manrope, system-ui, sans-serif" font-weight="800" font-size="30" fill="#FBF7EE">MCI</text>
+          <circle class="dot" cx="72" cy="31" r="3" fill="#F08A6E"/>
+          <text x="124" y="67" font-family="Manrope, system-ui, sans-serif" font-size="56" letter-spacing="-0.025em">
+            <tspan fill="#776659" font-weight="500">mon</tspan><tspan fill="#776659" font-weight="500">-</tspan><tspan fill="#2A211B" font-weight="800">crm</tspan><tspan fill="#776659" font-weight="500">-</tspan><tspan fill="#2A211B" font-weight="800">immo</tspan>
+          </text>
+        </svg>
+      </a>
+      <ul class="nav-links">
+        <li><a href="/#features">Fonctionnalités</a></li>
+        <li><a href="/tarifs" class="current">Tarifs</a></li>
+        <li><a href="/blog">Blog</a></li>
+      </ul>
+      <div class="nav-actions">
+        <a href="/app" class="nav-login">Connexion</a>
+        <a href="#cta" class="btn btn-primary">Démarrer</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HEADER PAGE -->
+  <header class="page-header">
+    <div class="container">
+      <span class="eyebrow"><span class="dot"></span>Tarifs</span>
+      <h1>Choisissez le plan<br>qui vous fait <em>respirer</em>.</h1>
+      <p class="subtitle">
+        Sans engagement de durée. Annulation en un clic depuis votre espace,
+        à tout moment.
+      </p>
+    </div>
+  </header>
+
+  <!-- 2 CARTES TARIFS -->
+  <section id="cta">
+    <div class="container">
+      <div class="pricing-cards">
+
+        <!-- Starter -->
+        <div class="price-card">
+          <div class="price-name">Starter</div>
+          <div class="price-amount">
+            <span class="num">35 €</span>
+            <span class="unit">/ mois</span>
+          </div>
+          <p class="price-desc">Pour l'agent indépendant qui démarre.</p>
+          <ul class="price-features">
+            <li><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8l3 3 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Pipeline de prospects illimité</li>
+            <li><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8l3 3 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Gestion des mandats et acquéreurs</li>
+            <li><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8l3 3 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Agenda intégré + rappels</li>
+            <li><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8l3 3 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Application mobile</li>
+            <li><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8l3 3 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Support par email</li>
+          </ul>
+          <a href="/app#signup?plan=starter" class="btn btn-secondary">Commencer avec Starter</a>
+        </div>
+
+        <!-- Pro -->
+        <div class="price-card featured">
+          <span class="price-badge">Recommandé</span>
+          <div class="price-name">Pro</div>
+          <div class="price-amount">
+            <span class="num">75 €</span>
+            <span class="unit">/ mois</span>
+          </div>
+          <p class="price-desc">Pour l'agent expérimenté ou les équipes.</p>
+          <ul class="price-features">
+            <li><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8l3 3 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Tout le plan Starter, sans limites</li>
+            <li><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8l3 3 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>IA Google My Business</li>
+            <li><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8l3 3 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>IA LinkedIn pour la prospection</li>
+            <li><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8l3 3 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Studio Visuel illimité</li>
+            <li><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8l3 3 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Cercle Pro — communauté privée + features en avant-première</li>
+            <li><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8l3 3 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Support prioritaire (réponse &lt; 2 h)</li>
+          </ul>
+          <a href="/app#signup?plan=pro" class="btn btn-primary">Commencer avec Pro</a>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- TABLEAU COMPARATIF DÉTAILLÉ -->
+  <section class="compare">
+    <div class="container">
+      <h2>Comparatif détaillé</h2>
+      <table class="compare-table">
+        <thead>
+          <tr>
+            <th>Fonctionnalité</th>
+            <th>Starter</th>
+            <th>Pro</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td colspan="3" class="compare-section">CRM &amp; Gestion</td></tr>
+          <tr><td>Pipeline de prospects illimité</td><td><span class="check">✓</span></td><td><span class="check">✓</span></td></tr>
+          <tr><td>Mandats centralisés</td><td><span class="check">✓</span></td><td><span class="check">✓</span></td></tr>
+          <tr><td>Acquéreurs &amp; matching automatique</td><td><span class="check">✓</span></td><td><span class="check">✓</span></td></tr>
+          <tr><td>Agenda intégré + Google Calendar</td><td><span class="check">✓</span></td><td><span class="check">✓</span></td></tr>
+          <tr><td>Application mobile</td><td><span class="check">✓</span></td><td><span class="check">✓</span></td></tr>
+          <tr><td>Tableau de bord des ventes</td><td><span class="check">✓</span></td><td><span class="check">✓</span></td></tr>
+
+          <tr><td colspan="3" class="compare-section">Assistants IA</td></tr>
+          <tr><td>IA Google My Business</td><td><span class="x">—</span></td><td><span class="check">✓</span></td></tr>
+          <tr><td>IA LinkedIn (posts &amp; messages)</td><td><span class="x">—</span></td><td><span class="check">✓</span></td></tr>
+          <tr><td>IA Instagram (captions &amp; reels)</td><td><span class="x">—</span></td><td><span class="check">✓</span></td></tr>
+          <tr><td>IA Facebook (posts communautaires)</td><td><span class="x">—</span></td><td><span class="check">✓</span></td></tr>
+          <tr><td>IA Prospection &amp; Annonces</td><td><span class="x">—</span></td><td><span class="check">✓</span></td></tr>
+
+          <tr><td colspan="3" class="compare-section">Outils &amp; Ressources</td></tr>
+          <tr><td>Studio Visuel</td><td>Basique</td><td>Illimité</td></tr>
+          <tr><td>Partenariats inter-agents</td><td><span class="x">—</span></td><td><span class="check">✓</span></td></tr>
+          <tr><td>Cercle Pro (communauté privée)</td><td><span class="x">—</span></td><td><span class="check">✓</span></td></tr>
+          <tr><td>Accès aux nouvelles fonctionnalités en avant-première</td><td><span class="x">—</span></td><td><span class="check">✓</span></td></tr>
+
+          <tr><td colspan="3" class="compare-section">Support</td></tr>
+          <tr><td>Support par email</td><td><span class="check">✓</span></td><td><span class="check">✓</span></td></tr>
+          <tr><td>Support prioritaire (&lt; 2 h)</td><td><span class="x">—</span></td><td><span class="check">✓</span></td></tr>
+
+          <tr><td colspan="3" class="compare-section">Conditions</td></tr>
+          <tr><td>Engagement</td><td>Aucun</td><td>Aucun</td></tr>
+          <tr><td>Annulation</td><td>En 1 clic</td><td>En 1 clic</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- FAQ COURTE -->
+  <section class="pricing-faq">
+    <div class="container">
+      <h2>Questions sur la facturation</h2>
+
+      <div class="faq-item">
+        <button class="faq-q" onclick="this.parentElement.classList.toggle('open')">
+          <span>Comment se passe le paiement ?</span>
+          <span>+</span>
+        </button>
+        <div class="faq-a"><div class="faq-a-inner">
+          Vous choisissez votre plan, vous renseignez votre carte bancaire via Stripe (paiement 100 % sécurisé), et votre abonnement démarre immédiatement. Le prélèvement est mensuel automatique.
+        </div></div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-q" onclick="this.parentElement.classList.toggle('open')">
+          <span>Puis-je changer de plan plus tard ?</span>
+          <span>+</span>
+        </button>
+        <div class="faq-a"><div class="faq-a-inner">
+          Bien sûr. Vous pouvez passer de Starter à Pro (ou inversement) à tout moment depuis votre espace, en un clic. Le changement est immédiat et la facturation ajustée au prorata.
+        </div></div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-q" onclick="this.parentElement.classList.toggle('open')">
+          <span>Comment résilier mon abonnement ?</span>
+          <span>+</span>
+        </button>
+        <div class="faq-a"><div class="faq-a-inner">
+          En un clic depuis votre espace personnel. Aucune justification, aucune pénalité. L'accès reste actif jusqu'à la fin du mois en cours, puis vos données sont conservées 30 jours au cas où vous voudriez revenir.
+        </div></div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-q" onclick="this.parentElement.classList.toggle('open')">
+          <span>Ces tarifs sont-ils HT ou TTC ?</span>
+          <span>+</span>
+        </button>
+        <div class="faq-a"><div class="faq-a-inner">
+          Les tarifs affichés sont en HT. Si vous êtes assujetti à la TVA, celle-ci sera ajoutée lors du paiement. Une facture conforme vous est envoyée chaque mois par email.
+        </div></div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-q" onclick="this.parentElement.classList.toggle('open')">
+          <span>Mes données sont-elles en sécurité ?</span>
+          <span>+</span>
+        </button>
+        <div class="faq-a"><div class="faq-a-inner">
+          Absolument. Hébergement en Europe, conforme RGPD, données chiffrées. Vous pouvez les exporter ou les supprimer à tout moment depuis votre espace.
+        </div></div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a href="/" class="logo-link" aria-label="Accueil">
+            <svg class="logo-svg" viewBox="0 0 516 96" xmlns="http://www.w3.org/2000/svg" style="height:32px;width:auto;">
+              <rect x="4" y="4" width="88" height="88" rx="22" fill="#2A211B"/>
+              <text x="48" y="50" text-anchor="middle" dominant-baseline="central"
+                    font-family="Manrope, system-ui, sans-serif" font-weight="800" font-size="30" fill="#FBF7EE">MCI</text>
+              <circle cx="72" cy="31" r="3" fill="#F08A6E"/>
+              <text x="124" y="67" font-family="Manrope, system-ui, sans-serif" font-size="56" letter-spacing="-0.025em">
+                <tspan fill="#776659" font-weight="500">mon</tspan><tspan fill="#776659" font-weight="500">-</tspan><tspan fill="#2A211B" font-weight="800">crm</tspan><tspan fill="#776659" font-weight="500">-</tspan><tspan fill="#2A211B" font-weight="800">immo</tspan>
+              </text>
+            </svg>
+          </a>
+          <p>Le CRM immobilier qui vous laisse respirer. Conçu en France, pensé pour le terrain.</p>
+        </div>
+        <div class="footer-col">
+          <h4>Produit</h4>
+          <ul>
+            <li><a href="/#features">Fonctionnalités</a></li>
+            <li><a href="/tarifs">Tarifs</a></li>
+            <li><a href="/app">Connexion</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Ressources</h4>
+          <ul>
+            <li><a href="/blog">Blog</a></li>
+            <li><a href="mailto:contact@mon-crm-immo.fr">Contact</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Légal</h4>
+          <ul>
+            <li><a href="/legal/cgv">CGV</a></li>
+            <li><a href="/legal/cgu">CGU</a></li>
+            <li><a href="/legal/privacy">Confidentialité</a></li>
+            <li><a href="/legal/mentions">Mentions légales</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© 2026 mon-crm-immo. Tous droits réservés.</span>
+        <span>Conçu en France.</span>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    function toggleMenu() {
+      alert('Le menu mobile sera ajouté prochainement.');
+    }
+  </script>
+</body>
+</html>

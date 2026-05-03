@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Blog · mon-crm-immo</title>
+  <meta name="description" content="Articles, conseils et actualités pour les pros de l'immobilier qui veulent travailler mieux." />
+  <meta property="og:title" content="Blog · mon-crm-immo" />
+  <meta property="og:url" content="https://mon-crm-immo.fr/blog" />
+
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'%3E%3Crect x='4' y='4' width='88' height='88' rx='22' fill='%232A211B'/%3E%3Ctext x='48' y='50' text-anchor='middle' dominant-baseline='central' font-family='Manrope,sans-serif' font-weight='800' font-size='30' fill='%23FBF7EE'%3EMCI%3C/text%3E%3Ccircle cx='72' cy='31' r='3' fill='%23F08A6E'/%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/assets/styles.css" />
+
+  <style>
+    .blog-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 24px;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 0 96px;
+    }
+    .blog-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 32px;
+      transition: transform 0.3s, box-shadow 0.3s, border-color 0.3s;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      cursor: pointer;
+    }
+    .blog-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(240, 138, 110, 0.3);
+      box-shadow: 0 12px 32px -8px rgba(42, 33, 27, 0.1);
+    }
+    .blog-card.featured {
+      grid-column: 1 / -1;
+      padding: 48px;
+      background: var(--ink);
+      color: var(--cream);
+      border-color: var(--ink);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+      align-items: center;
+    }
+    .blog-card-meta {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      font-size: 13px;
+      color: var(--muted);
+      font-weight: 700;
+    }
+    .blog-card.featured .blog-card-meta { color: rgba(251, 247, 238, 0.6); }
+    .blog-tag {
+      display: inline-block;
+      padding: 3px 10px;
+      background: rgba(240, 138, 110, 0.12);
+      border-radius: 999px;
+      color: var(--salmon-deep);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+    .blog-card.featured .blog-tag {
+      background: rgba(240, 138, 110, 0.18);
+      color: var(--salmon);
+    }
+    .blog-card h3 {
+      font-size: clamp(1.25rem, 2vw, 1.75rem);
+      line-height: 1.2;
+    }
+    .blog-card.featured h3 { font-size: clamp(1.75rem, 3vw, 2.5rem); color: var(--cream); }
+    .blog-card p {
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.5;
+    }
+    .blog-card.featured p { color: rgba(251, 247, 238, 0.7); font-size: 17px; }
+    .blog-card .read-more {
+      margin-top: auto;
+      font-weight: 700;
+      color: var(--salmon);
+      font-size: 14px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .blog-card-image {
+      width: 100%;
+      aspect-ratio: 16 / 10;
+      background: linear-gradient(135deg, rgba(240, 138, 110, 0.1), rgba(240, 138, 110, 0.05));
+      border-radius: 12px;
+      position: relative;
+      overflow: hidden;
+    }
+    .blog-card-image::after {
+      content: attr(data-emoji);
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 64px;
+      opacity: 0.6;
+    }
+    .blog-empty {
+      text-align: center;
+      padding: 80px 24px;
+      color: var(--muted);
+    }
+    .blog-empty h3 { color: var(--ink); margin-bottom: 12px; }
+
+    @media (max-width: 700px) {
+      .blog-grid { grid-template-columns: 1fr; }
+      .blog-card.featured { grid-template-columns: 1fr; padding: 32px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="nav">
+    <div class="container nav-inner">
+      <a href="/" class="logo-link" aria-label="mon-crm-immo, accueil">
+        <svg class="logo-svg" viewBox="0 0 516 96" xmlns="http://www.w3.org/2000/svg">
+          <rect x="4" y="4" width="88" height="88" rx="22" fill="#2A211B"/>
+          <text x="48" y="50" text-anchor="middle" dominant-baseline="central" font-family="Manrope, system-ui, sans-serif" font-weight="800" font-size="30" fill="#FBF7EE">MCI</text>
+          <circle class="dot" cx="72" cy="31" r="3" fill="#F08A6E"/>
+          <text x="124" y="67" font-family="Manrope, system-ui, sans-serif" font-size="56" letter-spacing="-0.025em">
+            <tspan fill="#776659" font-weight="500">mon</tspan><tspan fill="#776659" font-weight="500">-</tspan><tspan fill="#2A211B" font-weight="800">crm</tspan><tspan fill="#776659" font-weight="500">-</tspan><tspan fill="#2A211B" font-weight="800">immo</tspan>
+          </text>
+        </svg>
+      </a>
+      <ul class="nav-links">
+        <li><a href="/#features">Fonctionnalités</a></li>
+        <li><a href="/tarifs">Tarifs</a></li>
+        <li><a href="/blog" class="current">Blog</a></li>
+      </ul>
+      <div class="nav-actions">
+        <a href="/app" class="nav-login">Connexion</a>
+        <a href="/tarifs" class="btn btn-primary">Démarrer</a>
+      </div>
+    </div>
+  </nav>
+
+  <header class="page-header">
+    <div class="container">
+      <span class="eyebrow"><span class="dot"></span>Le blog</span>
+      <h1>Conseils, méthodes et<br><em>retours du terrain</em>.</h1>
+      <p class="subtitle">
+        Articles courts, sans bullshit, pour les pros de l'immobilier qui veulent
+        gagner du temps et signer plus.
+      </p>
+    </div>
+  </header>
+
+  <!-- LISTE DES ARTICLES -->
+  <section>
+    <div class="container">
+      <div class="blog-grid">
+
+        <!-- Article mis en avant -->
+        <a href="/blog/saisir-mandat-30-secondes" class="blog-card featured">
+          <div>
+            <div class="blog-card-meta">
+              <span class="blog-tag">Productivité</span>
+              <span>· 5 min de lecture</span>
+            </div>
+            <h3>Saisir un mandat en 30 secondes : la méthode des agents qui signent le plus.</h3>
+            <p>Pourquoi vos confrères passent encore 15 minutes à rentrer un mandat dans leur CRM, et comment l'IA peut diviser ce temps par 30 sans rien sacrifier.</p>
+            <span class="read-more">Lire l'article →</span>
+          </div>
+          <div class="blog-card-image" data-emoji="📝"></div>
+        </a>
+
+        <!-- Articles à venir (placeholders) -->
+        <div class="blog-empty" style="grid-column: 1 / -1;">
+          <h3>Plus d'articles arrivent bientôt.</h3>
+          <p>Nous publions un nouvel article tous les 15 jours. Revenez vite, ou abonnez-vous à la newsletter pour ne rien rater.</p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a href="/" class="logo-link" aria-label="Accueil">
+            <svg class="logo-svg" viewBox="0 0 516 96" xmlns="http://www.w3.org/2000/svg" style="height:32px;width:auto;">
+              <rect x="4" y="4" width="88" height="88" rx="22" fill="#2A211B"/>
+              <text x="48" y="50" text-anchor="middle" dominant-baseline="central" font-family="Manrope, system-ui, sans-serif" font-weight="800" font-size="30" fill="#FBF7EE">MCI</text>
+              <circle cx="72" cy="31" r="3" fill="#F08A6E"/>
+              <text x="124" y="67" font-family="Manrope, system-ui, sans-serif" font-size="56" letter-spacing="-0.025em">
+                <tspan fill="#776659" font-weight="500">mon</tspan><tspan fill="#776659" font-weight="500">-</tspan><tspan fill="#2A211B" font-weight="800">crm</tspan><tspan fill="#776659" font-weight="500">-</tspan><tspan fill="#2A211B" font-weight="800">immo</tspan>
+              </text>
+            </svg>
+          </a>
+          <p>Le CRM immobilier qui vous laisse respirer. Conçu en France, pensé pour le terrain.</p>
+        </div>
+        <div class="footer-col">
+          <h4>Produit</h4>
+          <ul>
+            <li><a href="/#features">Fonctionnalités</a></li>
+            <li><a href="/tarifs">Tarifs</a></li>
+            <li><a href="/app">Connexion</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Ressources</h4>
+          <ul>
+            <li><a href="/blog">Blog</a></li>
+            <li><a href="mailto:contact@mon-crm-immo.fr">Contact</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Légal</h4>
+          <ul>
+            <li><a href="/legal/cgv">CGV</a></li>
+            <li><a href="/legal/cgu">CGU</a></li>
+            <li><a href="/legal/privacy">Confidentialité</a></li>
+            <li><a href="/legal/mentions">Mentions légales</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© 2026 mon-crm-immo. Tous droits réservés.</span>
+        <span>Conçu en France.</span>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>

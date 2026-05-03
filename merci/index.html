@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Merci · mon-crm-immo</title>
+  <meta name="description" content="Bienvenue sur mon-crm-immo ! Votre abonnement est confirmé." />
+  <meta name="robots" content="noindex" />
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'%3E%3Crect x='4' y='4' width='88' height='88' rx='22' fill='%232A211B'/%3E%3Ctext x='48' y='50' text-anchor='middle' dominant-baseline='central' font-family='Manrope,sans-serif' font-weight='800' font-size='30' fill='%23FBF7EE'%3EMCI%3C/text%3E%3Ccircle cx='72' cy='31' r='3' fill='%23F08A6E'/%3E%3C/svg%3E" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/assets/styles.css" />
+
+  <style>
+    .thanks-wrap {
+      min-height: 80vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 60px 24px;
+      text-align: center;
+    }
+    .thanks-card {
+      max-width: 600px;
+      padding: clamp(2rem, 6vw, 4rem);
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      box-shadow: 0 20px 60px -20px rgba(42, 33, 27, 0.15);
+    }
+    .thanks-icon {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto 24px;
+      background: var(--salmon);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: thanksPop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    @keyframes thanksPop {
+      from { transform: scale(0); }
+      to   { transform: scale(1); }
+    }
+    .thanks-icon svg { color: var(--ink); }
+    .thanks-card h1 {
+      font-size: clamp(2rem, 4vw, 2.75rem);
+      margin-bottom: 16px;
+      line-height: 1.1;
+    }
+    .thanks-card h1 em {
+      color: var(--salmon);
+      font-style: italic;
+      font-weight: 700;
+    }
+    .thanks-card p {
+      font-size: 17px;
+      color: var(--muted);
+      line-height: 1.6;
+      margin-bottom: 32px;
+    }
+    .thanks-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .thanks-next {
+      margin-top: 40px;
+      padding-top: 32px;
+      border-top: 1px solid var(--border);
+      text-align: left;
+    }
+    .thanks-next h3 {
+      font-size: 14px;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 16px;
+    }
+    .thanks-next ol {
+      list-style: none;
+      counter-reset: step;
+    }
+    .thanks-next li {
+      counter-increment: step;
+      padding: 8px 0 8px 36px;
+      position: relative;
+      color: var(--ink);
+      font-weight: 600;
+    }
+    .thanks-next li::before {
+      content: counter(step);
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 24px;
+      height: 24px;
+      background: var(--salmon);
+      color: var(--ink);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 800;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAVBAR (allégée pour cette page de confirmation) -->
+  <nav class="nav">
+    <div class="container nav-inner">
+      <a href="/" class="logo-link" aria-label="mon-crm-immo, accueil">
+        <svg class="logo-svg" viewBox="0 0 516 96" xmlns="http://www.w3.org/2000/svg">
+          <rect x="4" y="4" width="88" height="88" rx="22" fill="#2A211B"/>
+          <text x="48" y="50" text-anchor="middle" dominant-baseline="central"
+                font-family="Manrope, system-ui, sans-serif" font-weight="800" font-size="30" fill="#FBF7EE">MCI</text>
+          <circle class="dot" cx="72" cy="31" r="3" fill="#F08A6E"/>
+          <text x="124" y="67" font-family="Manrope, system-ui, sans-serif" font-size="56" letter-spacing="-0.025em">
+            <tspan fill="#776659" font-weight="500">mon</tspan><tspan fill="#776659" font-weight="500">-</tspan><tspan fill="#2A211B" font-weight="800">crm</tspan><tspan fill="#776659" font-weight="500">-</tspan><tspan fill="#2A211B" font-weight="800">immo</tspan>
+          </text>
+        </svg>
+      </a>
+    </div>
+  </nav>
+
+  <main class="thanks-wrap">
+    <div class="thanks-card">
+
+      <div class="thanks-icon">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+      </div>
+
+      <h1>Bienvenue chez <em>mon-crm-immo</em>&nbsp;!</h1>
+      <p>
+        Votre abonnement est confirmé. Un email de confirmation vous a été envoyé
+        avec votre facture et le lien d'accès à votre espace.
+      </p>
+
+      <div class="thanks-actions">
+        <a href="/app" class="btn btn-primary btn-large">
+          Accéder à mon espace
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </a>
+        <a href="/" class="btn btn-secondary btn-large">Retour à l'accueil</a>
+      </div>
+
+      <div class="thanks-next">
+        <h3>Vos premières étapes</h3>
+        <ol>
+          <li>Connectez-vous à votre espace personnel</li>
+          <li>Importez vos premiers contacts (Excel, CSV ou Gmail)</li>
+          <li>Configurez votre agenda et vos préférences</li>
+          <li>Commencez à travailler sereinement</li>
+        </ol>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Pas de footer sur cette page : on veut que l'utilisateur clique sur le bouton -->
+</body>
+</html>
