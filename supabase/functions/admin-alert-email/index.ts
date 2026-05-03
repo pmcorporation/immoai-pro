@@ -1,14 +1,16 @@
-// ════════════════════════════════════════════════════════════════════
-// Edge Function: admin-alert-email
-// Envoie un email d'alerte à l'admin propriétaire à chaque login admin
-// ════════════════════════════════════════════════════════════════════
-
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 
 const BREVO_API_KEY = Deno.env.get("BREVO_API_KEY")!;
 const BREVO_FROM_EMAIL = Deno.env.get("BREVO_FROM_EMAIL") || "contact@mon-crm-immo.fr";
 const BREVO_FROM_NAME = Deno.env.get("BREVO_FROM_NAME") || "mon-crm-immo Sécurité";
 const ALERT_TO_EMAIL = Deno.env.get("ADMIN_ALERT_EMAIL") || "alexis@pmcorp.fr";
+
+const CORS_HEADERS = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Max-Age": "86400"
+};
 
 interface AlertPayload {
   type: "login_success" | "login_failed" | "rate_limit_hit" | "new_admin_added";
@@ -89,7 +91,6 @@ function buildEmailHtml(payload: AlertPayload): { subject: string; html: string 
       <div style="margin-top:22px;padding:14px;background:#FEF3C7;border-left:3px solid #D97706;border-radius:4px">
         <p style="margin:0;color:#92400E;font-size:13px;line-height:1.5">
           ℹ️ Vous recevez cet email car votre adresse est configurée comme destinataire des alertes admin.
-          Pour gérer ces alertes, allez dans <strong>Backoffice → Sécurité</strong>.
         </p>
       </div>
       <div style="margin-top:22px;text-align:center">
@@ -108,8 +109,12 @@ function buildEmailHtml(payload: AlertPayload): { subject: string; html: string 
 }
 
 Deno.serve(async (req: Request) => {
+  if (req.method === "OPTIONS") {
+    return new Response(null, { status: 204, headers: CORS_HEADERS });
+  }
+
   if (req.method !== "POST") {
-    return new Response("Method not allowed", { status: 405 });
+    return new Response("Method not allowed", { status: 405, headers: CORS_HEADERS });
   }
 
   try {
@@ -118,7 +123,7 @@ Deno.serve(async (req: Request) => {
     if (!payload.type || !payload.email) {
       return new Response(JSON.stringify({ error: "missing_fields" }), {
         status: 400,
-        headers: { "Content-Type": "application/json" }
+        headers: { ...CORS_HEADERS, "Content-Type": "application/json" }
       });
     }
 
@@ -144,19 +149,19 @@ Deno.serve(async (req: Request) => {
       console.error("Brevo error:", brevoRes.status, errText);
       return new Response(JSON.stringify({ error: "brevo_failed", detail: errText }), {
         status: 502,
-        headers: { "Content-Type": "application/json" }
+        headers: { ...CORS_HEADERS, "Content-Type": "application/json" }
       });
     }
 
     return new Response(JSON.stringify({ ok: true }), {
       status: 200,
-      headers: { "Content-Type": "application/json" }
+      headers: { ...CORS_HEADERS, "Content-Type": "application/json" }
     });
   } catch (e) {
     console.error("Error:", e);
     return new Response(JSON.stringify({ error: "internal", detail: String(e) }), {
       status: 500,
-      headers: { "Content-Type": "application/json" }
+      headers: { ...CORS_HEADERS, "Content-Type": "application/json" }
     });
   }
 });
