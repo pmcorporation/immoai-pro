@@ -10415,18 +10415,28 @@ function copyAffiliateLink(){
     },2500);
   });
 }
-// Affiche la carte uniquement pour les abonnés actifs
+// Affiche la carte (l'app est protégée par auth donc safe)
 function refreshAffiliateCard(){
   const card=document.getElementById('sb-affiliate-card');
   if(!card)return;
+  card.style.display='block';
+  // Récupère l'email depuis le localStorage Supabase
   try{
-    const u=window.currentUser||{};
-    const isActive=u.subscription_status==='active'||u.is_admin===true;
-    card.style.display=isActive?'block':'none';
-    // Génère un lien personnalisé basé sur l'email/uid
     const input=document.getElementById('aff-link-input');
-    if(input&&u.email){
-      const slug=(u.email.split('@')[0]||'agent').toLowerCase().replace(/[^a-z0-9]/g,'');
+    if(!input)return;
+    let email=null;
+    for(let i=0;i<localStorage.length;i++){
+      const k=localStorage.key(i);
+      if(k&&k.includes('supabase')&&k.includes('auth')){
+        try{
+          const v=JSON.parse(localStorage.getItem(k));
+          email=v?.user?.email||v?.currentSession?.user?.email||v?.access_token&&v?.user?.email;
+          if(email)break;
+        }catch(e){}
+      }
+    }
+    if(email){
+      const slug=(email.split('@')[0]||'agent').toLowerCase().replace(/[^a-z0-9]/g,'');
       input.value=`https://mon-crm-immo.fr?fpr=${slug}`;
     }
   }catch(e){console.warn('refreshAffiliateCard',e);}
