@@ -10189,12 +10189,11 @@ function emailBienvenue(prenom, email, plan) {
     </div>
   </div>
 
-<!-- ===== MODALE AFFILIATION ===== -->
+<!-- MODALE AFFILIATION -->
 <style>
 .aff-modal{position:fixed;inset:0;z-index:9999;background:rgba(20,16,14,.78);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;padding:20px;}
 .aff-modal.open{display:flex;}
-.aff-modal-box{background:#FBF7EE;color:#2A211B;border-radius:24px;width:100%;max-width:560px;max-height:90vh;overflow-y:auto;box-shadow:0 32px 80px rgba(0,0,0,.4);position:relative;animation:affSlide .3s ease;}
-@keyframes affSlide{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+.aff-modal-box{background:#FBF7EE;color:#2A211B;border-radius:24px;width:100%;max-width:560px;max-height:90vh;overflow-y:auto;box-shadow:0 32px 80px rgba(0,0,0,.4);position:relative;}
 .aff-modal-close{position:absolute;top:16px;right:16px;width:36px;height:36px;border-radius:50%;border:none;background:rgba(42,33,27,.08);cursor:pointer;font-size:18px;color:#2A211B;display:flex;align-items:center;justify-content:center;z-index:2;}
 .aff-modal-close:hover{background:rgba(42,33,27,.16);}
 .aff-modal-header{padding:32px 32px 16px;text-align:center;background:linear-gradient(180deg,rgba(240,138,110,.12),transparent);border-radius:24px 24px 0 0;}
@@ -10211,28 +10210,24 @@ function emailBienvenue(prenom, email, plan) {
 .aff-step-text{font-size:13px;line-height:1.45;color:#2A211B;font-weight:500;}
 .aff-step-text strong{color:#F08A6E;}
 .aff-link-box{display:flex;gap:8px;margin-bottom:12px;background:#fff;border:1px solid rgba(42,33,27,.12);border-radius:12px;padding:6px;}
-.aff-link-input{flex:1;border:none;background:transparent;padding:10px 12px;font-size:13px;color:#2A211B;font-family:'SF Mono','Menlo',monospace;outline:none;min-width:0;}
-.aff-copy-btn{background:#2A211B;color:#fff;border:none;padding:10px 18px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;white-space:nowrap;transition:background .2s;}
+.aff-link-input{flex:1;border:none;background:transparent;padding:10px 12px;font-size:13px;color:#2A211B;font-family:monospace;outline:none;min-width:0;}
+.aff-copy-btn{background:#2A211B;color:#fff;border:none;padding:10px 18px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;}
 .aff-copy-btn:hover{background:#1a1410;}
-.aff-copy-btn.copied{background:#10b981;}
-.aff-stats-btn{display:block;width:100%;text-align:center;background:transparent;color:#776659;border:1px solid rgba(42,33,27,.15);padding:12px;border-radius:12px;font-size:13px;font-weight:600;cursor:pointer;text-decoration:none;transition:all .2s;}
-.aff-stats-btn:hover{background:rgba(42,33,27,.04);color:#2A211B;border-color:rgba(42,33,27,.3);}
-.aff-toast{position:fixed;bottom:32px;left:50%;transform:translateX(-50%);background:#10b981;color:#fff;padding:12px 20px;border-radius:12px;font-size:14px;font-weight:600;z-index:10000;box-shadow:0 12px 32px rgba(16,185,129,.4);animation:affToast 2.5s ease forwards;display:none;}
-.aff-toast.show{display:block;}
-@keyframes affToast{0%{opacity:0;transform:translate(-50%,20px)}10%,80%{opacity:1;transform:translate(-50%,0)}100%{opacity:0;transform:translate(-50%,-10px)}}
+.aff-stats-btn{display:block;width:100%;text-align:center;background:transparent;color:#776659;border:1px solid rgba(42,33,27,.15);padding:12px;border-radius:12px;font-size:13px;font-weight:600;cursor:pointer;text-decoration:none;}
+.aff-stats-btn:hover{background:rgba(42,33,27,.04);color:#2A211B;}
 </style>
-<div class="aff-modal" id="affiliate-modal" onclick="if(event.target===this)closeAffiliateModal()">
+<div class="aff-modal" id="affiliate-modal">
   <div class="aff-modal-box">
-    <button class="aff-modal-close" onclick="closeAffiliateModal()">✕</button>
+    <button type="button" class="aff-modal-close" id="aff-close-btn">X</button>
     <div class="aff-modal-header">
-      <span class="aff-modal-emoji">🎁</span>
+      <span class="aff-modal-emoji">GIFT</span>
       <h2 class="aff-modal-title">Gagnez 20% à vie</h2>
       <p class="aff-modal-subtitle">Commission récurrente non plafonnée sur chaque agent que vous parrainez</p>
     </div>
     <div class="aff-modal-body">
       <div class="aff-video-wrap">
         <div class="aff-video-placeholder">
-          <strong>📹 Vidéo de présentation à venir</strong>
+          <strong>Vidéo de présentation à venir</strong>
           <span>Découvrez le programme en 2 minutes</span>
         </div>
       </div>
@@ -10243,55 +10238,65 @@ function emailBienvenue(prenom, email, plan) {
       </ul>
       <div class="aff-link-box">
         <input type="text" class="aff-link-input" id="aff-link-input" readonly value="https://mon-crm-immo.fr">
-        <button class="aff-copy-btn" id="aff-copy-btn" onclick="copyAffiliateLink()"><span>📋</span><span>Copier</span></button>
+        <button type="button" class="aff-copy-btn" id="aff-copy-btn">Copier</button>
       </div>
-      <a class="aff-stats-btn" href="https://mon-crm-immo.firstpromoter.com" target="_blank" rel="noopener">📊 Voir mes statistiques sur FirstPromoter</a>
+      <a class="aff-stats-btn" href="https://mon-crm-immo.firstpromoter.com" target="_blank" rel="noopener">Voir mes statistiques sur FirstPromoter</a>
     </div>
   </div>
 </div>
-<div class="aff-toast" id="aff-toast">✅ Lien copié !</div>
 <script>
-function openAffiliateModal(){
-  // Met à jour le lien personnalisé avant d'ouvrir
-  try{
-    const input=document.getElementById('aff-link-input');
-    let email=null;
-    for(let i=0;i<localStorage.length;i++){
-      const k=localStorage.key(i);
-      if(k&&k.includes('supabase')&&k.includes('auth')){
+window.openAffiliateModal = function(){
+  var input = document.getElementById('aff-link-input');
+  if(input){
+    var email = null;
+    for(var i = 0; i < localStorage.length; i++){
+      var k = localStorage.key(i);
+      if(k && k.indexOf('supabase') !== -1 && k.indexOf('auth') !== -1){
         try{
-          const v=JSON.parse(localStorage.getItem(k));
-          email=v?.user?.email||v?.currentSession?.user?.email;
-          if(email)break;
+          var v = JSON.parse(localStorage.getItem(k));
+          if(v && v.user && v.user.email){ email = v.user.email; break; }
+          if(v && v.currentSession && v.currentSession.user && v.currentSession.user.email){ email = v.currentSession.user.email; break; }
         }catch(e){}
       }
     }
-    if(email&&input){
-      const slug=email.split('@')[0].toLowerCase().replace(/[^a-z0-9]/g,'');
-      input.value="https://mon-crm-immo.fr?fpr="+slug;
+    if(email){
+      var slug = email.split('@')[0].toLowerCase().replace(/[^a-z0-9]/g,'');
+      input.value = 'https://mon-crm-immo.fr?fpr=' + slug;
     }
-  }catch(e){}
-  document.getElementById('affiliate-modal').classList.add('open');
-}
-function closeAffiliateModal(){
-  document.getElementById('affiliate-modal').classList.remove('open');
-}
-function copyAffiliateLink(){
-  const input=document.getElementById('aff-link-input');
-  const btn=document.getElementById('aff-copy-btn');
-  const toast=document.getElementById('aff-toast');
-  navigator.clipboard.writeText(input.value).then(()=>{
-    btn.classList.add('copied');
-    btn.innerHTML='<span>✓</span><span>Copié</span>';
-    toast.classList.add('show');
-    setTimeout(()=>{
-      btn.classList.remove('copied');
-      btn.innerHTML='<span>📋</span><span>Copier</span>';
-      toast.classList.remove('show');
-    },2500);
+  }
+  var modal = document.getElementById('affiliate-modal');
+  if(modal) modal.classList.add('open');
+};
+window.closeAffiliateModal = function(){
+  var modal = document.getElementById('affiliate-modal');
+  if(modal) modal.classList.remove('open');
+};
+window.copyAffiliateLink = function(){
+  var input = document.getElementById('aff-link-input');
+  var btn = document.getElementById('aff-copy-btn');
+  if(!input) return;
+  navigator.clipboard.writeText(input.value).then(function(){
+    btn.textContent = 'Copié !';
+    btn.style.background = '#10b981';
+    setTimeout(function(){
+      btn.textContent = 'Copier';
+      btn.style.background = '#2A211B';
+    }, 2000);
   });
-}
-document.addEventListener('keydown',(e)=>{if(e.key==='Escape')closeAffiliateModal();});
+};
+document.addEventListener('DOMContentLoaded', function(){
+  var closeBtn = document.getElementById('aff-close-btn');
+  if(closeBtn) closeBtn.addEventListener('click', window.closeAffiliateModal);
+  var copyBtn = document.getElementById('aff-copy-btn');
+  if(copyBtn) copyBtn.addEventListener('click', window.copyAffiliateLink);
+  var modal = document.getElementById('affiliate-modal');
+  if(modal) modal.addEventListener('click', function(e){
+    if(e.target === modal) window.closeAffiliateModal();
+  });
+});
+document.addEventListener('keydown', function(e){
+  if(e.key === 'Escape') window.closeAffiliateModal();
+});
 </script>
 
 </body>
