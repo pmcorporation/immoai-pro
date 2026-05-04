@@ -1533,6 +1533,320 @@ body{font-family:var(--fb);background:#FAFAFA;color:var(--g900);min-height:100vh
 .gcal-event-google{background:#EFF6FF;border-left:3px solid #3B82F6;border-radius:4px;padding:2px 6px;font-size:.7rem;color:#1D4ED8;margin-left:6px;font-weight:600}
 .gcal-conflict-warn{background:#FEF3C7;border:1px solid #FCD34D;border-radius:8px;padding:8px 12px;font-size:.76rem;color:#92400E;display:flex;align-items:center;gap:7px;margin-bottom:10px}
 
+
+/* ===== AFFILIATE MODULE ===== */
+.sb-btn-affiliate{
+  background: linear-gradient(135deg, #F08A6E 0%, #e57558 100%) !important;
+  color: #fff !important;
+  margin: 8px 10px !important;
+  border-radius: 12px !important;
+  font-weight: 700 !important;
+  box-shadow: 0 6px 16px rgba(240,138,110,.3) !important;
+  transition: all .25s ease !important;
+  text-decoration: none !important;
+}
+.sb-btn-affiliate:hover{
+  transform: translateY(-1px);
+  box-shadow: 0 10px 24px rgba(240,138,110,.45) !important;
+  background: linear-gradient(135deg, #e57558 0%, #d66645 100%) !important;
+}
+.sb-btn-affiliate .sb-icon{ color: #fff !important; opacity: 1 !important; font-size: 16px !important; }
+.sb-btn-affiliate .sb-label{ color: #fff !important; font-weight: 700 !important; }
+.sb-btn-affiliate .sb-badge-aff{
+  background: rgba(255,255,255,.25);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 800;
+  padding: 2px 7px;
+  border-radius: 8px;
+  margin-left: auto;
+}
+.sidebar.collapsed .sb-btn-affiliate{ padding: 8px !important; justify-content: center !important; }
+.sidebar.collapsed .sb-btn-affiliate .sb-badge-aff{ display: none; }
+
+/* ===== AFFILIATE PAGE ===== */
+#v-affiliate .aff-hero{
+  background: linear-gradient(135deg, #F08A6E 0%, #e57558 100%);
+  color: #fff;
+  border-radius: 24px;
+  padding: 48px 40px;
+  text-align: center;
+  margin-bottom: 28px;
+  box-shadow: 0 16px 40px rgba(240,138,110,.25);
+  position: relative;
+  overflow: hidden;
+}
+#v-affiliate .aff-hero::before{
+  content: "";
+  position: absolute;
+  top: -60px; right: -60px;
+  width: 200px; height: 200px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,255,255,.18), transparent 70%);
+  pointer-events: none;
+}
+#v-affiliate .aff-hero::after{
+  content: "";
+  position: absolute;
+  bottom: -80px; left: -40px;
+  width: 240px; height: 240px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,255,255,.1), transparent 70%);
+  pointer-events: none;
+}
+#v-affiliate .aff-hero-emoji{
+  font-size: 56px;
+  display: block;
+  margin-bottom: 12px;
+  position: relative;
+  z-index: 2;
+}
+#v-affiliate .aff-hero-title{
+  font-size: 36px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin: 0 0 10px;
+  position: relative;
+  z-index: 2;
+}
+#v-affiliate .aff-hero-sub{
+  font-size: 16px;
+  opacity: .95;
+  max-width: 540px;
+  margin: 0 auto;
+  line-height: 1.55;
+  position: relative;
+  z-index: 2;
+}
+#v-affiliate .aff-grid{
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+  margin-bottom: 24px;
+}
+@media (min-width: 900px){
+  #v-affiliate .aff-grid-2{ grid-template-columns: 1.4fr 1fr; }
+}
+#v-affiliate .aff-card{
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 20px;
+  padding: 28px;
+}
+#v-affiliate .aff-card-title{
+  font-size: 18px;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+#v-affiliate .aff-card-sub{
+  font-size: 13px;
+  color: rgba(255,255,255,.55);
+  margin: 0 0 20px;
+}
+#v-affiliate .aff-video-wrap{
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16/9;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #1a1410;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255,255,255,.08);
+}
+#v-affiliate .aff-video-ph{
+  text-align: center;
+  color: rgba(255,255,255,.55);
+  padding: 24px;
+}
+#v-affiliate .aff-video-ph .play{
+  width: 64px; height: 64px;
+  border-radius: 50%;
+  background: rgba(240,138,110,.2);
+  border: 2px solid rgba(240,138,110,.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 14px;
+  font-size: 22px;
+  color: #F08A6E;
+}
+#v-affiliate .aff-video-ph strong{
+  color: #fff;
+  font-size: 15px;
+  display: block;
+  margin-bottom: 4px;
+}
+#v-affiliate .aff-stats-row{
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-bottom: 24px;
+}
+#v-affiliate .aff-stat{
+  background: rgba(240,138,110,.08);
+  border: 1px solid rgba(240,138,110,.2);
+  border-radius: 14px;
+  padding: 18px;
+  text-align: center;
+}
+#v-affiliate .aff-stat-val{
+  font-size: 26px;
+  font-weight: 800;
+  color: #F08A6E;
+  margin-bottom: 2px;
+  letter-spacing: -0.02em;
+}
+#v-affiliate .aff-stat-lbl{
+  font-size: 11px;
+  color: rgba(255,255,255,.55);
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  font-weight: 600;
+}
+#v-affiliate .aff-steps{
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+@media (min-width: 760px){ #v-affiliate .aff-steps{ grid-template-columns: repeat(3,1fr); } }
+#v-affiliate .aff-step{
+  background: rgba(240,138,110,.08);
+  border: 1px solid rgba(240,138,110,.2);
+  border-radius: 14px;
+  padding: 22px;
+  position: relative;
+}
+#v-affiliate .aff-step-num{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px; height: 38px;
+  border-radius: 50%;
+  background: #F08A6E;
+  color: #fff;
+  font-weight: 800;
+  font-size: 16px;
+  margin-bottom: 14px;
+  box-shadow: 0 4px 12px rgba(240,138,110,.3);
+}
+#v-affiliate .aff-step h4{
+  font-size: 15px;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 6px;
+}
+#v-affiliate .aff-step p{
+  font-size: 13px;
+  color: rgba(255,255,255,.65);
+  line-height: 1.55;
+  margin: 0;
+}
+#v-affiliate .aff-link-box{
+  display: flex;
+  gap: 10px;
+  background: rgba(0,0,0,.25);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 12px;
+  padding: 8px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+#v-affiliate .aff-link-input{
+  flex: 1;
+  min-width: 240px;
+  border: none;
+  background: transparent;
+  padding: 12px 14px;
+  font-size: 14px;
+  color: #fff;
+  font-family: 'SF Mono', 'Menlo', monospace;
+  outline: none;
+}
+#v-affiliate .aff-copy-btn{
+  background: #F08A6E;
+  color: #fff;
+  border: none;
+  padding: 12px 22px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all .2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+#v-affiliate .aff-copy-btn:hover{ background: #e57558; transform: translateY(-1px); }
+#v-affiliate .aff-copy-btn.copied{ background: #10b981; }
+#v-affiliate .aff-actions{
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+@media (min-width: 600px){ #v-affiliate .aff-actions{ grid-template-columns: 1fr 1fr; } }
+#v-affiliate .aff-action-btn{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: transparent;
+  color: rgba(255,255,255,.85);
+  border: 1px solid rgba(255,255,255,.15);
+  padding: 13px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all .2s;
+}
+#v-affiliate .aff-action-btn:hover{
+  background: rgba(255,255,255,.06);
+  color: #fff;
+  border-color: rgba(255,255,255,.3);
+}
+#v-affiliate .aff-action-btn.primary{
+  background: rgba(240,138,110,.15);
+  border-color: rgba(240,138,110,.4);
+  color: #F08A6E;
+}
+#v-affiliate .aff-action-btn.primary:hover{
+  background: rgba(240,138,110,.25);
+  border-color: rgba(240,138,110,.6);
+  color: #fff;
+}
+#v-affiliate .aff-share-row{
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+#v-affiliate .aff-share-btn{
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.1);
+  color: rgba(255,255,255,.85);
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all .2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+#v-affiliate .aff-share-btn:hover{ background: rgba(255,255,255,.12); color: #fff; }
+
 </style>
 </head>
 <body>
@@ -1932,6 +2246,9 @@ body{font-family:var(--fb);background:#FAFAFA;color:var(--g900);min-height:100vh
 
     <!-- Settings -->
     <div class="sb-section-label">Compte</div>
+    <button class="sb-btn sb-btn-affiliate" onclick="nav(this,'affiliate')" data-tip="Gagnez 20% à vie">
+      <span class="sb-icon">★</span><span class="sb-label">Gagnez 20% à vie</span><span class="sb-badge-aff">20%</span>
+    </button>
     <button class="sb-btn" onclick="nav(this,'profile')" data-tip="Profil & Paramètres">
       <span class="sb-icon">◌</span><span class="sb-label">Profil & Paramètres</span>
     </button>
@@ -3006,6 +3323,127 @@ body{font-family:var(--fb);background:#FAFAFA;color:var(--g900);min-height:100vh
     <div class="product-card"><div class="prod-img">🎙️<div class="amz-badge">Amazon</div></div><div class="prod-name">DJI Mic 2</div><div class="prod-desc">Micro sans fil pro pour vidéos de présentation. Son studio, portée 250m, clip magnétique.</div><div class="prod-price">299 € <small>Prix indicatif Amazon</small></div><a href="https://www.amazon.fr/s?k=DJI+Mic+2&tag=immoaipro-21" target="_blank" class="amz-btn">🛒 Voir sur Amazon</a></div>
   </div>
   <div style="background:var(--g100);border:1px solid var(--g200);border-radius:var(--r);padding:14px 18px;font-size:.76rem;color:var(--g500);line-height:1.7"><strong style="color:var(--g700)">ℹ️ Mention légale</strong> — Liens affiliés Amazon. En tant que Partenaire Amazon, nous réalisons un bénéfice sur les achats. Prix identique pour l'acheteur.</div>
+</div>
+
+<!-- AFFILIATE -->
+<div id="v-affiliate" class="view">
+  <div class="ph"><div class="ph-tag">PROGRAMME D AFFILIATION</div><h1>Gagnez <em>20%</em> à vie</h1><p>Recommandez mon-crm-immo et touchez 20% de commission récurrente non plafonnée</p></div>
+
+  <div class="aff-hero">
+    <span class="aff-hero-emoji">GIFT</span>
+    <h2 class="aff-hero-title">Transformez votre réseau en revenu passif</h2>
+    <p class="aff-hero-sub">Pour chaque agent immobilier qui s abonne via votre lien personnel, vous touchez 20% de commission tous les mois, à vie. Aucun plafond, aucune limite.</p>
+  </div>
+
+  <div class="aff-stats-row">
+    <div class="aff-stat">
+      <div class="aff-stat-val">20%</div>
+      <div class="aff-stat-lbl">Commission à vie</div>
+    </div>
+    <div class="aff-stat">
+      <div class="aff-stat-val">60j</div>
+      <div class="aff-stat-lbl">Cookie tracking</div>
+    </div>
+    <div class="aff-stat">
+      <div class="aff-stat-val">∞</div>
+      <div class="aff-stat-lbl">Filleuls illimités</div>
+    </div>
+  </div>
+
+  <div class="aff-grid aff-grid-2">
+    <div class="aff-card">
+      <h3 class="aff-card-title">Découvrez le programme en vidéo</h3>
+      <p class="aff-card-sub">Tout ce que vous devez savoir en moins de 3 minutes</p>
+      <div class="aff-video-wrap">
+        <div class="aff-video-ph">
+          <div class="play">PLAY</div>
+          <strong>Vidéo de présentation à venir</strong>
+          <span>Disponible très prochainement</span>
+        </div>
+      </div>
+    </div>
+    <div class="aff-card">
+      <h3 class="aff-card-title">Pourquoi devenir ambassadeur ?</h3>
+      <p class="aff-card-sub">Les avantages exclusifs du programme</p>
+      <ul style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:14px;">
+        <li style="display:flex;gap:12px;align-items:flex-start;">
+          <span style="flex-shrink:0;width:28px;height:28px;border-radius:50%;background:rgba(240,138,110,.2);color:#F08A6E;display:flex;align-items:center;justify-content:center;font-weight:800;">+</span>
+          <div>
+            <div style="color:#fff;font-weight:700;font-size:14px;margin-bottom:2px;">Revenu passif récurrent</div>
+            <div style="color:rgba(255,255,255,.6);font-size:13px;line-height:1.45;">Touchez 20% chaque mois tant que votre filleul reste abonné</div>
+          </div>
+        </li>
+        <li style="display:flex;gap:12px;align-items:flex-start;">
+          <span style="flex-shrink:0;width:28px;height:28px;border-radius:50%;background:rgba(240,138,110,.2);color:#F08A6E;display:flex;align-items:center;justify-content:center;font-weight:800;">+</span>
+          <div>
+            <div style="color:#fff;font-weight:700;font-size:14px;margin-bottom:2px;">Aucun plafond de gains</div>
+            <div style="color:rgba(255,255,255,.6);font-size:13px;line-height:1.45;">Parrainez 5, 50 ou 500 agents — vos commissions cumulent sans limite</div>
+          </div>
+        </li>
+        <li style="display:flex;gap:12px;align-items:flex-start;">
+          <span style="flex-shrink:0;width:28px;height:28px;border-radius:50%;background:rgba(240,138,110,.2);color:#F08A6E;display:flex;align-items:center;justify-content:center;font-weight:800;">+</span>
+          <div>
+            <div style="color:#fff;font-weight:700;font-size:14px;margin-bottom:2px;">Suivi en temps réel</div>
+            <div style="color:rgba(255,255,255,.6);font-size:13px;line-height:1.45;">Dashboard FirstPromoter pour visualiser clics, conversions et gains</div>
+          </div>
+        </li>
+        <li style="display:flex;gap:12px;align-items:flex-start;">
+          <span style="flex-shrink:0;width:28px;height:28px;border-radius:50%;background:rgba(240,138,110,.2);color:#F08A6E;display:flex;align-items:center;justify-content:center;font-weight:800;">+</span>
+          <div>
+            <div style="color:#fff;font-weight:700;font-size:14px;margin-bottom:2px;">Paiement automatique</div>
+            <div style="color:rgba(255,255,255,.6);font-size:13px;line-height:1.45;">Vos commissions sont versées chaque mois sans démarche</div>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="aff-card" style="margin-bottom:24px;">
+    <h3 class="aff-card-title">Comment ça marche ?</h3>
+    <p class="aff-card-sub">3 étapes simples pour commencer à gagner dès aujourd hui</p>
+    <ul class="aff-steps">
+      <li class="aff-step">
+        <span class="aff-step-num">1</span>
+        <h4>Copiez votre lien</h4>
+        <p>Récupérez votre lien de parrainage personnel ci-dessous, unique à votre compte.</p>
+      </li>
+      <li class="aff-step">
+        <span class="aff-step-num">2</span>
+        <h4>Partagez-le</h4>
+        <p>Envoyez-le à vos collègues agents par email, WhatsApp, LinkedIn ou tout autre canal.</p>
+      </li>
+      <li class="aff-step">
+        <span class="aff-step-num">3</span>
+        <h4>Touchez 20% à vie</h4>
+        <p>Pour chaque inscription, vous touchez 20% de commission récurrente, sans limite de durée.</p>
+      </li>
+    </ul>
+  </div>
+
+  <div class="aff-card">
+    <h3 class="aff-card-title">Votre lien de parrainage personnel</h3>
+    <p class="aff-card-sub">Partagez ce lien pour commencer à gagner des commissions</p>
+    <div class="aff-link-box">
+      <input type="text" class="aff-link-input" id="aff-link-input" readonly value="https://mon-crm-immo.fr">
+      <button type="button" class="aff-copy-btn" id="aff-copy-btn" onclick="copyAffiliateLink()">
+        <span>COPY</span><span>Copier le lien</span>
+      </button>
+    </div>
+    <div class="aff-share-row" style="margin-bottom:18px;">
+      <a class="aff-share-btn" href="#" id="aff-share-wa" target="_blank" rel="noopener">WhatsApp</a>
+      <a class="aff-share-btn" href="#" id="aff-share-em" target="_blank" rel="noopener">Email</a>
+      <a class="aff-share-btn" href="#" id="aff-share-li" target="_blank" rel="noopener">LinkedIn</a>
+      <a class="aff-share-btn" href="#" id="aff-share-tw" target="_blank" rel="noopener">Twitter / X</a>
+    </div>
+    <div class="aff-actions">
+      <a class="aff-action-btn primary" href="https://mon-crm-immo.firstpromoter.com" target="_blank" rel="noopener">
+        Voir mes statistiques sur FirstPromoter
+      </a>
+      <a class="aff-action-btn" href="mailto:alexis@pmcorp.fr?subject=Question sur le programme d affiliation">
+        Une question ? Contactez-nous
+      </a>
+    </div>
+  </div>
 </div>
 
 <!-- ══ PROFIL ══ -->
@@ -4352,7 +4790,7 @@ function toggleSidebar(){
 }
 
 // ══════════ NAVIGATION ══════════
-const ALL_VIEWS=['dashboard','crm','pipeline','mandats','agenda','finance','gmb','linkedin','prosp','instagram','facebook','juridique','visual','partners','products','profile'];
+const ALL_VIEWS=['dashboard','crm','pipeline','mandats','agenda','finance','gmb','linkedin','prosp','instagram','facebook','juridique','visual','partners','products','affiliate','profile'];
 const TB_TITLES={
   dashboard:['Tableau de <em>bord</em>','Dashboard'],
   crm:['Mes <em>Prospects</em>','Prospects'],
@@ -4369,6 +4807,7 @@ const TB_TITLES={
   visual:['Studio <em>Visuel</em>','Studio Visuel'],
   partners:['Nos <em>Partenaires</em>','Partenaires'],
   products:['Nos <em>Produits</em>','Produits'],
+  affiliate:['Programme <em>Affiliation</em>','Gagnez 20% à vie'],
   profile:['Mon <em>Profil</em>','Profil & Paramètres'],
 };
 function nav(btn,id){
@@ -9086,6 +9525,71 @@ document.addEventListener('keydown', e => {
   if(e.ctrlKey && e.shiftKey && e.key === 'A'){ e.preventDefault(); openAdmin(); }
 });
 if(window.location.hash === '#admin') setTimeout(openAdmin, 500);
+
+
+// ===== AFFILIATE LINK MANAGEMENT =====
+function getAffiliateEmail(){
+  for(var i = 0; i < localStorage.length; i++){
+    var k = localStorage.key(i);
+    if(k && k.indexOf('supabase') !== -1 && k.indexOf('auth') !== -1){
+      try{
+        var v = JSON.parse(localStorage.getItem(k));
+        if(v && v.user && v.user.email) return v.user.email;
+        if(v && v.currentSession && v.currentSession.user && v.currentSession.user.email) return v.currentSession.user.email;
+      }catch(e){}
+    }
+  }
+  return null;
+}
+function refreshAffiliateLink(){
+  var input = document.getElementById('aff-link-input');
+  if(!input) return;
+  var email = getAffiliateEmail();
+  if(email){
+    var slug = email.split('@')[0].toLowerCase().replace(/[^a-z0-9]/g, '');
+    var url = 'https://mon-crm-immo.fr?fpr=' + slug;
+    input.value = url;
+    var msg = encodeURIComponent('Salut ! Je te recommande mon-crm-immo, le CRM IA pour agents immobiliers. Voici mon lien : ' + url);
+    var subj = encodeURIComponent('Je te recommande mon-crm-immo');
+    var wa = document.getElementById('aff-share-wa');
+    var em = document.getElementById('aff-share-em');
+    var li = document.getElementById('aff-share-li');
+    var tw = document.getElementById('aff-share-tw');
+    if(wa) wa.href = 'https://wa.me/?text=' + msg;
+    if(em) em.href = 'mailto:?subject=' + subj + '&body=' + msg;
+    if(li) li.href = 'https://www.linkedin.com/sharing/share-offsite/?url=' + encodeURIComponent(url);
+    if(tw) tw.href = 'https://twitter.com/intent/tweet?text=' + msg;
+  }
+}
+function copyAffiliateLink(){
+  var input = document.getElementById('aff-link-input');
+  var btn = document.getElementById('aff-copy-btn');
+  if(!input || !btn) return;
+  navigator.clipboard.writeText(input.value).then(function(){
+    btn.classList.add('copied');
+    btn.innerHTML = '<span>OK</span><span>Lien copié !</span>';
+    setTimeout(function(){
+      btn.classList.remove('copied');
+      btn.innerHTML = '<span>COPY</span><span>Copier le lien</span>';
+    }, 2000);
+  });
+}
+document.addEventListener('DOMContentLoaded', function(){
+  setTimeout(refreshAffiliateLink, 500);
+  setTimeout(refreshAffiliateLink, 2000);
+});
+// Hook sur nav() pour rafraichir le lien quand on arrive sur la page affiliate
+(function(){
+  var origNav = window.nav;
+  if(typeof origNav === 'function'){
+    window.nav = function(btn, id){
+      var r = origNav.apply(this, arguments);
+      if(id === 'affiliate'){ setTimeout(refreshAffiliateLink, 100); }
+      return r;
+    };
+  }
+})();
+
 </script>
 </div><!-- /app-root -->
 <!-- ══════════════ BACKOFFICE ADMIN ══════════════ -->
