@@ -2085,20 +2085,7 @@ body{font-family:var(--fb);background:#FAFAFA;color:var(--g900);min-height:100vh
 
   </div>
 
-        <!-- Carte Affiliation -->
-      <div class="sb-affiliate-card" id="sb-affiliate-card" onclick="openAffiliateModal()" style="display:none;">
-        <div class="sb-aff-title">
-          <span class="sb-aff-title-emoji">🎁</span>
-          <span class="sb-aff-title-text">Gagnez 20% à vie</span>
-        </div>
-        <div class="sb-aff-sub">Commission récurrente non plafonnée</div>
-        <button class="sb-aff-cta" type="button">
-          <span>🔗</span>
-          <span class="sb-aff-cta-text">Partagez maintenant</span>
-        </button>
-      </div>
-
-      <!-- Agent bas -->
+        <!-- Agent bas -->
   <div class="sb-agent">
     <div class="sb-agent-inner" onclick="nav(document.querySelector('.sb-btn[onclick*=\'profile\']'),'profile')">
       <div class="sb-agent-av" id="sb-av">AP</div>
@@ -10415,12 +10402,37 @@ function copyAffiliateLink(){
     },2500);
   });
 }
-// Affiche la carte (l'app est protégée par auth donc safe)
-function refreshAffiliateCard(){
-  const card=document.getElementById('sb-affiliate-card');
-  if(!card)return;
-  card.style.display='block';
-  // Récupère l'email depuis le localStorage Supabase
+// Injecte la carte d'affiliation dans la sidebar (résiste aux re-renders)
+function injectAffiliateCard(){
+  // Si déjà présente, on ne fait rien
+  if(document.getElementById('sb-affiliate-card'))return;
+  // Cherche la sidebar et le bloc agent (pour insérer juste avant)
+  const sidebar=document.querySelector('.sidebar, #sidebar, nav.sidebar');
+  if(!sidebar)return;
+  const sbAgent=sidebar.querySelector('.sb-agent');
+  // Crée la carte
+  const card=document.createElement('div');
+  card.className='sb-affiliate-card';
+  card.id='sb-affiliate-card';
+  card.onclick=function(){openAffiliateModal();};
+  card.innerHTML=`
+    <div class="sb-aff-title">
+      <span class="sb-aff-title-emoji">🎁</span>
+      <span class="sb-aff-title-text">Gagnez 20% à vie</span>
+    </div>
+    <div class="sb-aff-sub">Commission récurrente non plafonnée</div>
+    <button class="sb-aff-cta" type="button">
+      <span>🔗</span>
+      <span class="sb-aff-cta-text">Partagez maintenant</span>
+    </button>
+  `;
+  // Insère juste avant le bloc agent (ou en fin de sidebar)
+  if(sbAgent){sbAgent.parentNode.insertBefore(card,sbAgent);}
+  else{sidebar.appendChild(card);}
+  // Met à jour le lien personnalisé dans la modale
+  refreshAffiliateLink();
+}
+function refreshAffiliateLink(){
   try{
     const input=document.getElementById('aff-link-input');
     if(!input)return;
@@ -10430,7 +10442,7 @@ function refreshAffiliateCard(){
       if(k&&k.includes('supabase')&&k.includes('auth')){
         try{
           const v=JSON.parse(localStorage.getItem(k));
-          email=v?.user?.email||v?.currentSession?.user?.email||v?.access_token&&v?.user?.email;
+          email=v?.user?.email||v?.currentSession?.user?.email;
           if(email)break;
         }catch(e){}
       }
@@ -10439,15 +10451,31 @@ function refreshAffiliateCard(){
       const slug=(email.split('@')[0]||'agent').toLowerCase().replace(/[^a-z0-9]/g,'');
       input.value=`https://mon-crm-immo.fr?fpr=${slug}`;
     }
-  }catch(e){console.warn('refreshAffiliateCard',e);}
+  }catch(e){console.warn('refreshAffiliateLink',e);}
 }
-// Hook: rafraîchir après le chargement du user
-document.addEventListener('DOMContentLoaded',()=>{
-  setTimeout(refreshAffiliateCard,500);
-  setTimeout(refreshAffiliateCard,2000);
-  setTimeout(refreshAffiliateCard,5000);
+// Garde de l'ancien nom pour compatibilité
+function refreshAffiliateCard(){injectAffiliateCard();}
+// Observer pour réinjecter la carte si la sidebar est re-render
+const affiliateObserver=new MutationObserver(()=>{
+  if(!document.getElementById('sb-affiliate-card')){injectAffiliateCard();}
 });
-window.refreshAffiliateCard=refreshAffiliateCard;
+function startAffiliateObserver(){
+  const sidebar=document.querySelector('.sidebar, #sidebar, nav.sidebar');
+  if(sidebar){
+    affiliateObserver.observe(sidebar,{childList:true,subtree:true});
+    injectAffiliateCard();
+  }else{
+    setTimeout(startAffiliateObserver,500);
+  }
+}
+// Hook: démarrer l'observer + injection initiale
+document.addEventListener('DOMContentLoaded',()=>{
+  setTimeout(startAffiliateObserver,300);
+  setTimeout(startAffiliateObserver,1500);
+  setTimeout(injectAffiliateCard,3000);
+});
+window.refreshAffiliateCard=injectAffiliateCard;
+window.injectAffiliateCard=injectAffiliateCard;
 // ESC pour fermer la modale
 document.addEventListener('keydown',(e)=>{
   if(e.key==='Escape')closeAffiliateModal();
