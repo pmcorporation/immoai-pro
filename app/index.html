@@ -10268,7 +10268,7 @@ function openAffiliateModal(){
     }
     if(email&&input){
       const slug=email.split('@')[0].toLowerCase().replace(/[^a-z0-9]/g,'');
-      input.value=`https://mon-crm-immo.fr?fpr=${slug}`;
+      input.value="https://mon-crm-immo.fr?fpr="+slug;
     }
   }catch(e){}
   document.getElementById('affiliate-modal').classList.add('open');
