@@ -1932,7 +1932,7 @@ body{font-family:var(--fb);background:#FAFAFA;color:var(--g900);min-height:100vh
 
     <!-- Settings -->
     <div class="sb-section-label">Compte</div>
-    <button class="sb-btn" onclick="openAffiliateModal()" data-tip="Gagnez 20% à vie">
+    <button class="sb-btn" onclick="nav(this,'affiliate')" data-tip="Gagnez 20% à vie">
         <span class="sb-icon">🎁</span><span class="sb-label">Gagnez 20% à vie</span>
         <span class="sb-badge" style="background:rgba(240,138,110,.2);color:#F08A6E">20%</span>
       </button>
@@ -4356,7 +4356,7 @@ function toggleSidebar(){
 }
 
 // ══════════ NAVIGATION ══════════
-const ALL_VIEWS=['dashboard','crm','pipeline','mandats','agenda','finance','gmb','linkedin','prosp','instagram','facebook','juridique','visual','partners','products','profile'];
+const ALL_VIEWS=['dashboard','crm','pipeline','mandats','agenda','finance','gmb','linkedin','prosp','instagram','facebook','juridique','visual','partners','products','affiliate','profile'];
 const TB_TITLES={
   dashboard:['Tableau de <em>bord</em>','Dashboard'],
   crm:['Mes <em>Prospects</em>','Prospects'],
@@ -4373,7 +4373,7 @@ const TB_TITLES={
   visual:['Studio <em>Visuel</em>','Studio Visuel'],
   partners:['Nos <em>Partenaires</em>','Partenaires'],
   products:['Nos <em>Produits</em>','Produits'],
-  profile:['Mon <em>Profil</em>','Profil & Paramètres'],
+  affiliate:['Gagnez <em>20%</em> à vie','Programme d\'affiliation'],profile:['Mon <em>Profil</em>','Profil & Paramètres'],
 };
 function nav(btn,id){
   ALL_VIEWS.forEach(v=>{const el=document.getElementById('v-'+v);if(el)el.classList.remove('active');});
@@ -10189,65 +10189,89 @@ function emailBienvenue(prenom, email, plan) {
     </div>
   </div>
 
-<!-- MODALE AFFILIATION -->
+
+
+
+<!-- ===== PAGE AFFILIATION ===== -->
 <style>
-.aff-modal{position:fixed;inset:0;z-index:9999;background:rgba(20,16,14,.78);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;padding:20px;}
-.aff-modal.open{display:flex;}
-.aff-modal-box{background:#FBF7EE;color:#2A211B;border-radius:24px;width:100%;max-width:560px;max-height:90vh;overflow-y:auto;box-shadow:0 32px 80px rgba(0,0,0,.4);position:relative;}
-.aff-modal-close{position:absolute;top:16px;right:16px;width:36px;height:36px;border-radius:50%;border:none;background:rgba(42,33,27,.08);cursor:pointer;font-size:18px;color:#2A211B;display:flex;align-items:center;justify-content:center;z-index:2;}
-.aff-modal-close:hover{background:rgba(42,33,27,.16);}
-.aff-modal-header{padding:32px 32px 16px;text-align:center;background:linear-gradient(180deg,rgba(240,138,110,.12),transparent);border-radius:24px 24px 0 0;}
-.aff-modal-emoji{font-size:42px;margin-bottom:8px;display:block;}
-.aff-modal-title{font-size:22px;font-weight:800;letter-spacing:-0.02em;margin-bottom:6px;color:#2A211B;}
-.aff-modal-subtitle{font-size:14px;color:#776659;line-height:1.5;}
-.aff-modal-body{padding:8px 32px 32px;}
-.aff-video-wrap{position:relative;width:100%;aspect-ratio:16/9;border-radius:16px;overflow:hidden;background:#2A211B;margin-bottom:20px;display:flex;align-items:center;justify-content:center;border:1px solid rgba(42,33,27,.08);}
-.aff-video-placeholder{text-align:center;color:rgba(255,255,255,.6);padding:20px;}
-.aff-video-placeholder strong{color:#fff;font-size:15px;display:block;margin-bottom:4px;}
-.aff-steps{margin:0 0 20px;padding:0;list-style:none;}
-.aff-step{display:flex;gap:14px;align-items:flex-start;padding:12px;margin-bottom:8px;background:rgba(240,138,110,.07);border-radius:12px;border:1px solid rgba(240,138,110,.15);}
-.aff-step-num{flex-shrink:0;width:28px;height:28px;border-radius:50%;background:#F08A6E;color:#fff;font-weight:800;font-size:13px;display:flex;align-items:center;justify-content:center;}
-.aff-step-text{font-size:13px;line-height:1.45;color:#2A211B;font-weight:500;}
-.aff-step-text strong{color:#F08A6E;}
-.aff-link-box{display:flex;gap:8px;margin-bottom:12px;background:#fff;border:1px solid rgba(42,33,27,.12);border-radius:12px;padding:6px;}
-.aff-link-input{flex:1;border:none;background:transparent;padding:10px 12px;font-size:13px;color:#2A211B;font-family:monospace;outline:none;min-width:0;}
-.aff-copy-btn{background:#2A211B;color:#fff;border:none;padding:10px 18px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;}
-.aff-copy-btn:hover{background:#1a1410;}
-.aff-stats-btn{display:block;width:100%;text-align:center;background:transparent;color:#776659;border:1px solid rgba(42,33,27,.15);padding:12px;border-radius:12px;font-size:13px;font-weight:600;cursor:pointer;text-decoration:none;}
-.aff-stats-btn:hover{background:rgba(42,33,27,.04);color:#2A211B;}
+.aff-page{padding:24px;max-width:920px;margin:0 auto;}
+.aff-hero{background:linear-gradient(135deg,#F08A6E 0%,#e57558 100%);color:#fff;border-radius:24px;padding:40px;text-align:center;margin-bottom:24px;box-shadow:0 12px 32px rgba(240,138,110,.25);}
+.aff-hero-emoji{font-size:56px;display:block;margin-bottom:12px;}
+.aff-hero-title{font-size:32px;font-weight:800;letter-spacing:-0.02em;margin-bottom:8px;}
+.aff-hero-sub{font-size:16px;opacity:.95;max-width:520px;margin:0 auto;line-height:1.5;}
+.aff-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:28px;margin-bottom:20px;}
+.aff-card-title{font-size:18px;font-weight:700;color:#fff;margin-bottom:6px;}
+.aff-card-sub{font-size:13px;color:rgba(255,255,255,.55);margin-bottom:20px;}
+.aff-video-page{position:relative;width:100%;aspect-ratio:16/9;border-radius:16px;overflow:hidden;background:#1a1410;margin-bottom:8px;display:flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,.08);}
+.aff-video-ph{text-align:center;color:rgba(255,255,255,.55);padding:24px;}
+.aff-video-ph strong{color:#fff;font-size:16px;display:block;margin-bottom:6px;}
+.aff-steps-page{margin:0;padding:0;list-style:none;display:grid;grid-template-columns:1fr;gap:12px;}
+@media(min-width:720px){.aff-steps-page{grid-template-columns:repeat(3,1fr);}}
+.aff-step-card{background:rgba(240,138,110,.08);border:1px solid rgba(240,138,110,.2);border-radius:14px;padding:20px;}
+.aff-step-num-big{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;background:#F08A6E;color:#fff;font-weight:800;font-size:16px;margin-bottom:12px;}
+.aff-step-card h4{font-size:15px;font-weight:700;color:#fff;margin-bottom:6px;}
+.aff-step-card p{font-size:13px;color:rgba(255,255,255,.65);line-height:1.5;}
+.aff-link-page{display:flex;gap:10px;background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:8px;margin-bottom:14px;}
+.aff-link-page-input{flex:1;border:none;background:transparent;padding:12px 14px;font-size:14px;color:#fff;font-family:monospace;outline:none;min-width:0;}
+.aff-link-page-btn{background:#F08A6E;color:#fff;border:none;padding:12px 20px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;white-space:nowrap;transition:background .2s;}
+.aff-link-page-btn:hover{background:#e57558;}
+.aff-stats-page-btn{display:block;width:100%;text-align:center;background:transparent;color:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.15);padding:14px;border-radius:12px;font-size:14px;font-weight:600;cursor:pointer;text-decoration:none;transition:all .2s;}
+.aff-stats-page-btn:hover{background:rgba(255,255,255,.06);color:#fff;border-color:rgba(255,255,255,.3);}
 </style>
-<div class="aff-modal" id="affiliate-modal">
-  <div class="aff-modal-box">
-    <button type="button" class="aff-modal-close" id="aff-close-btn">X</button>
-    <div class="aff-modal-header">
-      <span class="aff-modal-emoji">GIFT</span>
-      <h2 class="aff-modal-title">Gagnez 20% à vie</h2>
-      <p class="aff-modal-subtitle">Commission récurrente non plafonnée sur chaque agent que vous parrainez</p>
+<div id="v-affiliate" class="view">
+  <div class="aff-page">
+    <div class="aff-hero">
+      <span class="aff-hero-emoji">🎁</span>
+      <h1 class="aff-hero-title">Gagnez 20% à vie</h1>
+      <p class="aff-hero-sub">Recommandez mon-crm-immo à vos collègues agents immobiliers et touchez 20% de commission récurrente non plafonnée sur chacun de leurs abonnements.</p>
     </div>
-    <div class="aff-modal-body">
-      <div class="aff-video-wrap">
-        <div class="aff-video-placeholder">
-          <strong>Vidéo de présentation à venir</strong>
-          <span>Découvrez le programme en 2 minutes</span>
+    <div class="aff-card">
+      <h3 class="aff-card-title">Découvrez le programme</h3>
+      <p class="aff-card-sub">Une présentation rapide pour comprendre comment maximiser vos gains</p>
+      <div class="aff-video-page">
+        <div class="aff-video-ph">
+          <strong>📹 Vidéo de présentation à venir</strong>
+          <span>Je tourne la vidéo cette semaine</span>
         </div>
       </div>
-      <ul class="aff-steps">
-        <li class="aff-step"><span class="aff-step-num">1</span><span class="aff-step-text"><strong>Copiez</strong> votre lien de parrainage personnel.</span></li>
-        <li class="aff-step"><span class="aff-step-num">2</span><span class="aff-step-text"><strong>Partagez-le</strong> à vos collègues agents immobiliers.</span></li>
-        <li class="aff-step"><span class="aff-step-num">3</span><span class="aff-step-text">Touchez <strong>20% de commission récurrente</strong> à vie.</span></li>
+    </div>
+    <div class="aff-card">
+      <h3 class="aff-card-title">Comment ça marche ?</h3>
+      <p class="aff-card-sub">3 étapes simples pour commencer à gagner</p>
+      <ul class="aff-steps-page">
+        <li class="aff-step-card">
+          <span class="aff-step-num-big">1</span>
+          <h4>Copiez votre lien</h4>
+          <p>Récupérez votre lien de parrainage personnel ci-dessous.</p>
+        </li>
+        <li class="aff-step-card">
+          <span class="aff-step-num-big">2</span>
+          <h4>Partagez-le</h4>
+          <p>Envoyez-le à vos collègues agents immobiliers par email, WhatsApp ou réseaux sociaux.</p>
+        </li>
+        <li class="aff-step-card">
+          <span class="aff-step-num-big">3</span>
+          <h4>Touchez 20% à vie</h4>
+          <p>Pour chaque agent qui s'inscrit, vous touchez 20% de commission tant qu'il est abonné.</p>
+        </li>
       </ul>
-      <div class="aff-link-box">
-        <input type="text" class="aff-link-input" id="aff-link-input" readonly value="https://mon-crm-immo.fr">
-        <button type="button" class="aff-copy-btn" id="aff-copy-btn">Copier</button>
+    </div>
+    <div class="aff-card">
+      <h3 class="aff-card-title">Votre lien de parrainage personnel</h3>
+      <p class="aff-card-sub">Partagez ce lien pour commencer à gagner des commissions</p>
+      <div class="aff-link-page">
+        <input type="text" class="aff-link-page-input" id="aff-page-input" readonly value="https://mon-crm-immo.fr">
+        <button type="button" class="aff-link-page-btn" id="aff-page-copy">Copier le lien</button>
       </div>
-      <a class="aff-stats-btn" href="https://mon-crm-immo.firstpromoter.com" target="_blank" rel="noopener">Voir mes statistiques sur FirstPromoter</a>
+      <a class="aff-stats-page-btn" href="https://mon-crm-immo.firstpromoter.com" target="_blank" rel="noopener">📊 Voir mes statistiques sur FirstPromoter</a>
     </div>
   </div>
 </div>
 <script>
-window.openAffiliateModal = function(){
-  var input = document.getElementById('aff-link-input');
-  if(input){
+(function(){
+  function refreshAffiliateLink(){
+    var input = document.getElementById('aff-page-input');
+    if(!input) return;
     var email = null;
     for(var i = 0; i < localStorage.length; i++){
       var k = localStorage.key(i);
@@ -10264,39 +10288,35 @@ window.openAffiliateModal = function(){
       input.value = 'https://mon-crm-immo.fr?fpr=' + slug;
     }
   }
-  var modal = document.getElementById('affiliate-modal');
-  if(modal) modal.classList.add('open');
-};
-window.closeAffiliateModal = function(){
-  var modal = document.getElementById('affiliate-modal');
-  if(modal) modal.classList.remove('open');
-};
-window.copyAffiliateLink = function(){
-  var input = document.getElementById('aff-link-input');
-  var btn = document.getElementById('aff-copy-btn');
-  if(!input) return;
-  navigator.clipboard.writeText(input.value).then(function(){
-    btn.textContent = 'Copié !';
-    btn.style.background = '#10b981';
-    setTimeout(function(){
-      btn.textContent = 'Copier';
-      btn.style.background = '#2A211B';
-    }, 2000);
+  function setupCopyBtn(){
+    var btn = document.getElementById('aff-page-copy');
+    var input = document.getElementById('aff-page-input');
+    if(!btn || !input) return;
+    btn.addEventListener('click', function(){
+      navigator.clipboard.writeText(input.value).then(function(){
+        var orig = btn.textContent;
+        btn.textContent = '✓ Copié !';
+        btn.style.background = '#10b981';
+        setTimeout(function(){
+          btn.textContent = orig;
+          btn.style.background = '#F08A6E';
+        }, 2000);
+      });
+    });
+  }
+  document.addEventListener('DOMContentLoaded', function(){
+    setTimeout(function(){ refreshAffiliateLink(); setupCopyBtn(); }, 500);
+    setTimeout(refreshAffiliateLink, 2000);
   });
-};
-document.addEventListener('DOMContentLoaded', function(){
-  var closeBtn = document.getElementById('aff-close-btn');
-  if(closeBtn) closeBtn.addEventListener('click', window.closeAffiliateModal);
-  var copyBtn = document.getElementById('aff-copy-btn');
-  if(copyBtn) copyBtn.addEventListener('click', window.copyAffiliateLink);
-  var modal = document.getElementById('affiliate-modal');
-  if(modal) modal.addEventListener('click', function(e){
-    if(e.target === modal) window.closeAffiliateModal();
-  });
-});
-document.addEventListener('keydown', function(e){
-  if(e.key === 'Escape') window.closeAffiliateModal();
-});
+  // Aussi rafraîchir quand on navigue vers cette page
+  var origNav = window.nav;
+  if(typeof origNav === 'function'){
+    window.nav = function(btn, id){
+      origNav.apply(this, arguments);
+      if(id === 'affiliate'){ setTimeout(refreshAffiliateLink, 100); setTimeout(setupCopyBtn, 100); }
+    };
+  }
+})();
 </script>
 
 </body>
