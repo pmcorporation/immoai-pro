@@ -3698,7 +3698,7 @@ body{font-family:var(--fb);background:#FAFAFA;color:var(--g900);min-height:100vh
 <!-- ══ ADD MANDAT MODAL ══ -->
 <div class="modal-overlay hidden" id="add-mandat-overlay" onclick="if(event.target===this)this.classList.add('hidden')">
   <div class="modal" onclick="event.stopPropagation()" style="max-width:580px">
-    <div class="modal-title">📋 Nouveau mandat</div>
+    <div class="modal-title" id="add-mandat-title">📋 Nouveau mandat</div>
 
     <!-- Numéro de mandat -->
     <div style="background:#FAFAFA;border:1px solid var(--g200);border-radius:var(--r);padding:10px 13px;margin-bottom:14px;display:flex;align-items:center;gap:10px">
@@ -3718,7 +3718,7 @@ body{font-family:var(--fb);background:#FAFAFA;color:var(--g900);min-height:100vh
     <div class="frow"><div class="fg"><label>DPE Classe</label><select class="fsel" id="m-dpe"><option value="">— DPE —</option><option>A</option><option>B</option><option>C</option><option>D</option><option>E</option><option>F</option><option>G</option></select></div><div class="fg"><label>Nb pièces</label><input class="finput" id="m-pieces" placeholder="4" type="number" min="1"></div></div>
     <div class="fg"><label>Description / Annonce</label><textarea class="ftxt" id="m-desc" placeholder="Belle maison de caractère avec jardin, 4 pièces, garage double..."></textarea></div>
     <div style="display:flex;gap:8px;margin-top:6px">
-      <button class="btn btn-brand" style="flex:1" onclick="saveMandat()">✓ Créer le mandat</button>
+      <button class="btn btn-brand" id="m-save-btn" style="flex:1" onclick="saveMandat()">✓ Créer le mandat</button>
       <button class="btn btn-outline" onclick="document.getElementById('add-mandat-overlay').classList.add('hidden')">Annuler</button>
     </div>
   </div>
@@ -4511,7 +4511,7 @@ function nav(btn,id){
   document.getElementById('tb-sub').textContent=t[1];
   document.getElementById('global-search').value='';
   if(id==='mandats')renderMandats();
-  if(id==='agenda')renderAgenda();
+  if(id==='agenda'){renderAgenda();if(typeof gcalFetchEvents==='function'&&gcalState&&gcalState.connected)gcalFetchEvents();}
   if(id==='profile')loadProfile();
   if(id==='affiliate')refreshAffiliateLink();
   if(id==='dashboard')updateDashKPIs();
@@ -5477,9 +5477,49 @@ function mTab(btn,view){
   document.getElementById('m-regl-v').style.display=view==='regl'?'block':'none';
   if(view==='shared')renderSharedMandats();
 }
+// État global : mode du formulaire (création ou édition)
+let editingMandatId = null;
+
 function openAddMandat(){
+  editingMandatId = null;
+  document.getElementById('add-mandat-title').innerHTML = '📋 Nouveau mandat';
+  document.getElementById('m-save-btn').innerHTML = '✓ Créer le mandat';
+  // Reset tous les champs
+  ['m-vendeur','m-tel','m-adresse','m-surface','m-prix','m-hono','m-desc','m-pieces','m-num-mandat','m-date-sign','m-date-exp'].forEach(id=>{
+    const el=document.getElementById(id);if(el)el.value='';
+  });
+  const t=document.getElementById('m-type');if(t)t.value='simple';
+  const b=document.getElementById('m-bien');if(b)b.value='Appartement';
+  const d=document.getElementById('m-dpe');if(d)d.value='';
   // Générer un numéro automatique par défaut
   generateNumMandat();
+  document.getElementById('add-mandat-overlay').classList.remove('hidden');
+}
+
+function editMandatFromDet(id){
+  const m = mandats.find(x => x.id === id);
+  if(!m){toast('⚠️ Mandat introuvable');return;}
+  editingMandatId = m.id;
+  document.getElementById('add-mandat-title').innerHTML = '✏️ Modifier le mandat';
+  document.getElementById('m-save-btn').innerHTML = '💾 Enregistrer les modifications';
+  // Préremplir tous les champs
+  const fill=(id,val)=>{const el=document.getElementById(id);if(el)el.value=val||'';};
+  fill('m-num-mandat', m.numMandat);
+  fill('m-vendeur', m.vendeur);
+  fill('m-tel', m.tel);
+  fill('m-adresse', m.adresse);
+  fill('m-surface', m.surface);
+  fill('m-prix', m.prix);
+  fill('m-hono', m.hono);
+  fill('m-pieces', m.pieces);
+  fill('m-desc', m.desc);
+  fill('m-date-sign', m.dateSign);
+  fill('m-date-exp', m.dateExp);
+  fill('m-type', m.type || 'simple');
+  fill('m-bien', m.bien || 'Appartement');
+  fill('m-dpe', m.dpe);
+  // Fermer le panneau de détail et ouvrir le modal
+  closeMandatDet();
   document.getElementById('add-mandat-overlay').classList.remove('hidden');
 }
 function generateNumMandat(){
@@ -5494,6 +5534,40 @@ function saveMandat(){
   const numMandat=document.getElementById('m-num-mandat')?.value.trim()||('M-'+new Date().getFullYear()+'-'+String(mandats.length+1).padStart(3,'0'));
   if(!vendeur||!adresse){toast('⚠️ Vendeur et adresse obligatoires');return;}
   if(!numMandat){toast('⚠️ Numéro de mandat obligatoire');return;}
+
+  // ═══ MODE ÉDITION ═══
+  if(editingMandatId){
+    const m = mandats.find(x => x.id === editingMandatId);
+    if(!m){toast('⚠️ Mandat introuvable');editingMandatId=null;return;}
+    // Vérifier unicité du numéro (sauf si c'est le sien)
+    if(mandats.find(x => x.numMandat === numMandat && x.id !== m.id)){
+      toast('⚠️ Ce numéro de mandat existe déjà');return;
+    }
+    // Mise à jour des champs (on préserve id, photos, portals, createdAt, status)
+    m.numMandat=numMandat;
+    m.type=document.getElementById('m-type').value;
+    m.vendeur=vendeur;
+    m.tel=document.getElementById('m-tel').value.trim();
+    m.adresse=adresse;
+    m.bien=document.getElementById('m-bien').value;
+    m.surface=document.getElementById('m-surface').value.trim();
+    m.prix=document.getElementById('m-prix').value.trim();
+    m.hono=document.getElementById('m-hono').value.trim();
+    m.dateSign=document.getElementById('m-date-sign').value;
+    m.dateExp=document.getElementById('m-date-exp').value;
+    m.dpe=document.getElementById('m-dpe').value;
+    m.pieces=document.getElementById('m-pieces').value;
+    m.desc=document.getElementById('m-desc').value.trim();
+    m.updatedAt=today_();
+    saveM_();renderMandats();
+    document.getElementById('add-mandat-overlay').classList.add('hidden');
+    editingMandatId = null;
+    buildNotifs();
+    toast('✅ Mandat '+numMandat+' mis à jour !');
+    return;
+  }
+
+  // ═══ MODE CRÉATION ═══
   // Vérifier unicité du numéro
   if(mandats.find(m=>m.numMandat===numMandat)){toast('⚠️ Ce numéro de mandat existe déjà');return;}
   const m={id:'m'+Date.now(),numMandat,type:document.getElementById('m-type').value,vendeur,tel:document.getElementById('m-tel').value.trim(),adresse,bien:document.getElementById('m-bien').value,surface:document.getElementById('m-surface').value.trim(),prix:document.getElementById('m-prix').value.trim(),hono:document.getElementById('m-hono').value.trim(),dateSign:document.getElementById('m-date-sign').value,dateExp:document.getElementById('m-date-exp').value,dpe:document.getElementById('m-dpe').value,pieces:document.getElementById('m-pieces').value,desc:document.getElementById('m-desc').value.trim(),portals:{},photos:[],createdAt:today_(),status:'actif'};
@@ -5896,7 +5970,6 @@ function deleteMandatFromDet(id){
   if(!confirm('Supprimer ce mandat définitivement ?'))return;
   mandats=mandats.filter(x=>x.id!==id);saveM_();closeMandatDet();renderMandats();toast('🗑️ Mandat supprimé');
 }
-function editMandatFromDet(id){closeMandatDet();toast('✏️ Modifiez via le formulaire — bientôt disponible');}
 // Photos mandats (compatibilité ancienne version)
 async function addMandatPhotos(mid,e){
   const m=mandats.find(x=>x.id===mid);if(!m)return;
@@ -10229,7 +10302,12 @@ function gcalDisconnect() {
 
 // ── Récupérer les événements Google Calendar ──
 async function gcalFetchEvents() {
-  if(!gcalState || !gcalState.accessToken) return;
+  console.log('🔍 GCal: gcalFetchEvents() appelée');
+  if(!gcalState || !gcalState.accessToken) {
+    console.warn('⚠️ GCal: pas de token, abort fetch');
+    return;
+  }
+  console.log('✅ GCal: token présent, lancement fetch...');
   
   try {
     const dot = document.getElementById('gcal-sync-dot');
@@ -10244,11 +10322,15 @@ async function gcalFetchEvents() {
       '&timeMax=' + encodeURIComponent(future.toISOString()) +
       '&singleEvents=true&orderBy=startTime&maxResults=100';
     
+    console.log('🌐 GCal: GET', url);
     const resp = await fetch(url, {
       headers: { 'Authorization': 'Bearer ' + gcalState.accessToken }
     });
     
+    console.log('📡 GCal: réponse status', resp.status);
     if(!resp.ok) {
+      const errBody = await resp.text();
+      console.error('❌ GCal: erreur API', resp.status, errBody);
       if(resp.status === 401) {
         gcalState.connected = false;
         saveGcalState();
@@ -10256,11 +10338,16 @@ async function gcalFetchEvents() {
         toast('⚠️ Session Google expirée. Reconnectez Google Calendar.');
         return;
       }
-      throw new Error('HTTP ' + resp.status);
+      if(resp.status === 403) {
+        toast('❌ API Google Calendar non activée. Voir Google Cloud Console.');
+        return;
+      }
+      throw new Error('HTTP ' + resp.status + ' : ' + errBody);
     }
     
     const data = await resp.json();
     const events = data.items || [];
+    console.log('✅ GCal: ' + events.length + ' événements reçus');
     
     // Importer les événements Google dans les RDVs
     var imported = 0;
@@ -10291,6 +10378,10 @@ async function gcalFetchEvents() {
       saveR_();
       renderAgenda();
       toast('📅 ' + imported + ' événement(s) Google Calendar importé(s)');
+    } else if(events.length === 0){
+      toast('ℹ️ Aucun événement dans les 30 prochains jours sur ton agenda Google');
+    } else {
+      toast('ℹ️ Tous les événements sont déjà importés (' + events.length + ' déjà sync)');
     }
     
     // Mettre à jour l'état
