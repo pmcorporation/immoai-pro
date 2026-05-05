@@ -192,7 +192,6 @@ body{font-family:var(--fb);background:#FAFAFA;color:var(--g900);min-height:100vh
 .sidebar.collapsed .sb-badge{display:none}
 .sb-badge-new{background:rgba(22,163,74,.15)!important;color:#6EE7B7!important}
 .sb-badge-lock{background:rgba(255,255,255,.04)!important;color:rgba(255,255,255,.2)!important}
-.sb-badge-aff{background:rgba(240,138,110,.18)!important;color:var(--brand-l)!important;font-weight:800!important}
 
 /* Tooltip collapse */
 .sidebar.collapsed .sb-btn:hover::after{
@@ -1933,8 +1932,9 @@ body{font-family:var(--fb);background:#FAFAFA;color:var(--g900);min-height:100vh
 
     <!-- Settings -->
     <div class="sb-section-label">Compte</div>
-    <button class="sb-btn" onclick="nav(this,'affiliate')" data-tip="Programme d'affiliation">
-      <span class="sb-icon">★</span><span class="sb-label">Affiliation</span><span class="sb-badge sb-badge-aff">20%</span>
+    <button class="sb-btn" onclick="nav(this,'affiliate')" data-tip="Programme Affiliation">
+      <span class="sb-icon">★</span><span class="sb-label">Affiliation</span>
+      <span class="sb-badge" style="background:rgba(243,106,31,.15);color:#F5A48E">20%</span>
     </button>
     <button class="sb-btn" onclick="nav(this,'profile')" data-tip="Profil & Paramètres">
       <span class="sb-icon">◌</span><span class="sb-label">Profil & Paramètres</span>
@@ -3012,108 +3012,129 @@ body{font-family:var(--fb);background:#FAFAFA;color:var(--g900);min-height:100vh
   <div style="background:var(--g100);border:1px solid var(--g200);border-radius:var(--r);padding:14px 18px;font-size:.76rem;color:var(--g500);line-height:1.7"><strong style="color:var(--g700)">ℹ️ Mention légale</strong> — Liens affiliés Amazon. En tant que Partenaire Amazon, nous réalisons un bénéfice sur les achats. Prix identique pour l'acheteur.</div>
 </div>
 
-<!-- ══ PROFIL ══ -->
-<!-- ══ AFFILIATION ══ -->
+<!-- ══ AFFILIATE ══ -->
 <div id="v-affiliate" class="view">
+  <!-- Page header (style standard de l'app) -->
   <div class="ph">
     <div class="ph-tag">★ Programme d'affiliation</div>
-    <h1>Gagnez <em>20% à vie</em> sur chaque parrainage</h1>
-    <p>Recommandez mon-crm-immo à vos collègues agents et touchez 20% de commission récurrente, sans limite de durée. Paiement automatique chaque mois.</p>
+    <h1>Gagnez 20% à <em>vie</em></h1>
+    <p>Recommandez mon-crm-immo à vos collègues agents et touchez 20% de commission récurrente sur leur abonnement, sans limite de durée.</p>
   </div>
 
-  <!-- KPIs : 4 chiffres clés -->
-  <div class="kpi-grid">
+  <!-- Tip banner (composant existant de l'app) -->
+  <div class="tip-banner" style="margin-bottom:20px">
+    <div class="tip-banner-icon">💰</div>
+    <div style="flex:1">
+      <strong class="tip-banner-title">Comment ça marche ?</strong>
+      <span class="tip-banner-text">Pour chaque agent qui s'inscrit avec votre lien, vous touchez 20% de son abonnement chaque mois, à vie. Paiement automatique chaque mois.</span>
+    </div>
+    <button class="tip-banner-btn" onclick="window.open('https://mon-crm-immo.firstpromoter.com','_blank')">Mes statistiques →</button>
+  </div>
+
+  <!-- 3 KPI cards (composant standard de l'app) -->
+  <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr)">
     <div class="kpi-card">
       <div class="kpi-card-accent"></div>
-      <div class="kpi-icon"><div class="kpi-icon-badge">%</div></div>
+      <div class="kpi-icon"><div class="kpi-icon-badge">💸</div></div>
       <div class="kpi-val">20%</div>
-      <div class="kpi-label">Commission par filleul</div>
+      <div class="kpi-label">Commission récurrente</div>
     </div>
     <div class="kpi-card">
       <div class="kpi-card-accent"></div>
-      <div class="kpi-icon"><div class="kpi-icon-badge">∞</div></div>
-      <div class="kpi-val">À vie</div>
-      <div class="kpi-label">Tant que le filleul reste abonné</div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-card-accent"></div>
-      <div class="kpi-icon"><div class="kpi-icon-badge">⏱</div></div>
+      <div class="kpi-icon"><div class="kpi-icon-badge">🍪</div></div>
       <div class="kpi-val">60j</div>
       <div class="kpi-label">Cookie de tracking</div>
     </div>
     <div class="kpi-card">
       <div class="kpi-card-accent"></div>
-      <div class="kpi-icon"><div class="kpi-icon-badge">€</div></div>
-      <div class="kpi-val">Auto</div>
-      <div class="kpi-label">Paiement Stripe mensuel</div>
+      <div class="kpi-icon"><div class="kpi-icon-badge">∞</div></div>
+      <div class="kpi-val" style="font-size:1.9rem">À vie</div>
+      <div class="kpi-label">Sans limite de durée</div>
     </div>
   </div>
 
-  <!-- Comment ça marche -->
-  <div class="sec-hd">
-    <div class="sec-title">⚡ Comment ça marche ?</div>
-  </div>
-  <div class="tools-grid" style="margin-bottom:24px">
-    <div class="tool-card">
-      <div class="tc-icon">1</div>
-      <div class="tc-name">Copiez votre lien</div>
-      <div class="tc-desc">Récupérez votre lien d'affiliation personnel ci-dessous, unique à votre compte.</div>
+  <!-- Lien d'affiliation personnel (panel standard) -->
+  <div class="panel" style="margin-bottom:18px">
+    <div class="panel-title">🔗 Votre lien de parrainage personnel</div>
+    <p style="font-size:.78rem;color:var(--g500);margin-bottom:14px;line-height:1.6">Partagez ce lien à vos collègues. Quand ils s'inscrivent et passent en plan payant, vous touchez automatiquement 20% de leur abonnement chaque mois.</p>
+    <div style="display:flex;gap:8px;align-items:stretch;margin-bottom:12px">
+      <input class="finput" id="affiliate-link-input" readonly value="https://mon-crm-immo.fr" style="flex:1;font-family:'SF Mono',Monaco,Consolas,monospace;font-size:.78rem;background:#FAFAFA;color:var(--g700)">
+      <button class="btn btn-brand" onclick="copyAffiliateLink()" id="affiliate-copy-btn" style="padding:8px 18px;flex-shrink:0">📋 Copier</button>
     </div>
-    <div class="tool-card">
-      <div class="tc-icon">2</div>
-      <div class="tc-name">Partagez-le</div>
-      <div class="tc-desc">Envoyez-le à vos collègues agents par email, WhatsApp, LinkedIn ou tout autre canal.</div>
-    </div>
-    <div class="tool-card">
-      <div class="tc-icon">3</div>
-      <div class="tc-name">Touchez 20% à vie</div>
-      <div class="tc-desc">Pour chaque inscription, vous touchez 20% de commission récurrente, sans limite de durée.</div>
+    <div style="display:flex;gap:7px;flex-wrap:wrap">
+      <span style="font-size:.68rem;color:var(--g400);margin-right:4px;align-self:center">Partager via :</span>
+      <button class="btn btn-outline" onclick="shareAff('whatsapp')" style="font-size:.72rem;padding:6px 11px">💬 WhatsApp</button>
+      <button class="btn btn-outline" onclick="shareAff('email')" style="font-size:.72rem;padding:6px 11px">✉️ Email</button>
+      <button class="btn btn-outline" onclick="shareAff('linkedin')" style="font-size:.72rem;padding:6px 11px">🔗 LinkedIn</button>
+      <button class="btn btn-outline" onclick="shareAff('twitter')" style="font-size:.72rem;padding:6px 11px">𝕏 Twitter</button>
     </div>
   </div>
 
-  <!-- Lien personnel -->
-  <div class="card card-p" style="margin-bottom:18px">
-    <div class="card-title">🔗 Votre lien de parrainage personnel</div>
-    <p style="font-size:.78rem;color:var(--g500);line-height:1.6;margin-bottom:14px">Partagez ce lien pour commencer à gagner des commissions. Il est unique à votre compte.</p>
-    <div style="display:flex;gap:8px;align-items:stretch;flex-wrap:wrap">
-      <input type="text" id="aff-link-input" class="finput" readonly value="https://mon-crm-immo.fr" style="flex:1;min-width:240px;font-family:'SF Mono',Monaco,monospace;font-size:.82rem;color:var(--g700);background:#FAFAFA;cursor:text">
-      <button class="btn btn-brand" onclick="copyAffiliateLink()" id="aff-copy-btn" style="padding:10px 18px;font-size:.82rem">📋 Copier le lien</button>
-    </div>
-  </div>
-
-  <!-- Partager rapidement -->
-  <div class="card card-p" style="margin-bottom:18px">
-    <div class="card-title">📤 Partager rapidement</div>
-    <p style="font-size:.78rem;color:var(--g500);line-height:1.6;margin-bottom:14px">Cliquez pour partager directement avec un message pré-rédigé.</p>
-    <div style="display:flex;gap:8px;flex-wrap:wrap">
-      <a href="#" id="aff-share-wa" class="btn btn-outline" style="text-decoration:none">💬 WhatsApp</a>
-      <a href="#" id="aff-share-email" class="btn btn-outline" style="text-decoration:none">✉️ Email</a>
-      <a href="#" id="aff-share-linkedin" class="btn btn-outline" style="text-decoration:none">💼 LinkedIn</a>
-      <a href="#" id="aff-share-twitter" class="btn btn-outline" style="text-decoration:none">𝕏 Twitter</a>
-    </div>
-  </div>
-
-  <!-- Stats + contact -->
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-    <div class="card card-p" style="display:flex;align-items:center;gap:14px">
-      <div style="width:40px;height:40px;border-radius:10px;background:var(--brand-ghost);display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0">📊</div>
-      <div style="flex:1;min-width:0">
-        <div style="font-family:var(--fd);font-weight:700;font-size:.85rem;color:var(--g900);margin-bottom:2px">Voir mes statistiques</div>
-        <div style="font-size:.74rem;color:var(--g500);line-height:1.5">Consultez vos clics, conversions et gains.</div>
+  <!-- 3 étapes (panel standard) -->
+  <div class="panel" style="margin-bottom:18px">
+    <div class="panel-title">🚀 3 étapes simples pour commencer</div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px">
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <div style="width:32px;height:32px;border-radius:8px;background:var(--brand-ghost);color:var(--brand);display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-weight:800;font-size:.9rem">1</div>
+        <div style="font-family:var(--fd);font-weight:700;font-size:.83rem;color:var(--g900);letter-spacing:-.02em">Copiez votre lien</div>
+        <div style="font-size:.74rem;color:var(--g500);line-height:1.5">Récupérez votre lien de parrainage unique ci-dessus.</div>
       </div>
-      <a href="https://firstpromoter.com/login" target="_blank" class="btn btn-outline" style="text-decoration:none;flex-shrink:0">→ Accéder</a>
-    </div>
-    <div class="card card-p" style="display:flex;align-items:center;gap:14px">
-      <div style="width:40px;height:40px;border-radius:10px;background:var(--brand-ghost);display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0">💬</div>
-      <div style="flex:1;min-width:0">
-        <div style="font-family:var(--fd);font-weight:700;font-size:.85rem;color:var(--g900);margin-bottom:2px">Une question ?</div>
-        <div style="font-size:.74rem;color:var(--g500);line-height:1.5">Contactez-nous, on répond sous 24h.</div>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <div style="width:32px;height:32px;border-radius:8px;background:var(--brand-ghost);color:var(--brand);display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-weight:800;font-size:.9rem">2</div>
+        <div style="font-family:var(--fd);font-weight:700;font-size:.83rem;color:var(--g900);letter-spacing:-.02em">Partagez-le</div>
+        <div style="font-size:.74rem;color:var(--g500);line-height:1.5">Envoyez-le à vos collègues agents (WhatsApp, email, LinkedIn...).</div>
       </div>
-      <a href="mailto:contact@mon-crm-immo.fr?subject=Programme%20d%27affiliation" class="btn btn-outline" style="text-decoration:none;flex-shrink:0">→ Contact</a>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <div style="width:32px;height:32px;border-radius:8px;background:var(--brand-ghost);color:var(--brand);display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-weight:800;font-size:.9rem">3</div>
+        <div style="font-family:var(--fd);font-weight:700;font-size:.83rem;color:var(--g900);letter-spacing:-.02em">Touchez 20% à vie</div>
+        <div style="font-size:.74rem;color:var(--g500);line-height:1.5">Pour chaque inscription, vous touchez 20% de commission récurrente.</div>
+      </div>
     </div>
+  </div>
+
+  <!-- Avantages (panel standard) -->
+  <div class="panel" style="margin-bottom:18px">
+    <div class="panel-title">✨ Les avantages du programme</div>
+    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px">
+      <div style="display:flex;gap:10px;padding:12px;background:#FAFAFA;border:1px solid var(--g100);border-radius:var(--rsm)">
+        <div style="font-size:1.1rem;flex-shrink:0">💎</div>
+        <div>
+          <div style="font-family:var(--fd);font-weight:700;font-size:.78rem;color:var(--g900);margin-bottom:2px">Commission à vie</div>
+          <div style="font-size:.71rem;color:var(--g500);line-height:1.5">Tant que votre filleul est abonné, vous touchez votre commission chaque mois.</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;padding:12px;background:#FAFAFA;border:1px solid var(--g100);border-radius:var(--rsm)">
+        <div style="font-size:1.1rem;flex-shrink:0">⚡</div>
+        <div>
+          <div style="font-family:var(--fd);font-weight:700;font-size:.78rem;color:var(--g900);margin-bottom:2px">Paiement automatique</div>
+          <div style="font-size:.71rem;color:var(--g500);line-height:1.5">Vos commissions sont versées chaque mois via Stripe ou PayPal.</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;padding:12px;background:#FAFAFA;border:1px solid var(--g100);border-radius:var(--rsm)">
+        <div style="font-size:1.1rem;flex-shrink:0">📊</div>
+        <div>
+          <div style="font-family:var(--fd);font-weight:700;font-size:.78rem;color:var(--g900);margin-bottom:2px">Tableau de bord pro</div>
+          <div style="font-size:.71rem;color:var(--g500);line-height:1.5">Suivez vos clics, conversions et gains en temps réel sur FirstPromoter.</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;padding:12px;background:#FAFAFA;border:1px solid var(--g100);border-radius:var(--rsm)">
+        <div style="font-size:1.1rem;flex-shrink:0">🎯</div>
+        <div>
+          <div style="font-family:var(--fd);font-weight:700;font-size:.78rem;color:var(--g900);margin-bottom:2px">Cookie 60 jours</div>
+          <div style="font-size:.71rem;color:var(--g500);line-height:1.5">Si votre filleul s'inscrit dans les 60 jours après le clic, c'est crédité.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Actions footer -->
+  <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end">
+    <button class="btn btn-outline" onclick="window.location.href='mailto:contact@mon-crm-immo.fr?subject=Question sur le programme d affiliation'">✉️ Une question ?</button>
+    <button class="btn btn-brand" onclick="window.open('https://mon-crm-immo.firstpromoter.com','_blank')">📊 Tableau de bord FirstPromoter →</button>
   </div>
 </div>
 
+<!-- ══ PROFIL ══ -->
 <div id="v-profile" class="view">
   <div class="ph"><div class="ph-tag">⚙️ Profil & Paramètres</div><h1>Mon <em>Profil</em> Agent</h1><p>Personnalisez vos informations professionnelles, secteur géographique et objectifs</p></div>
 
@@ -3483,7 +3504,8 @@ body{font-family:var(--fb);background:#FAFAFA;color:var(--g900);min-height:100vh
     <div class="dp-footer">
       <button class="btn btn-brand" style="flex:1" onclick="switchDpTab('act')">＋ Activité</button>
       <button class="btn" style="flex:1;background:var(--navy);color:#fff;border:none" onclick="switchDpTab('fu')">🔔 Follow-up</button>
-      <button class="btn btn-outline" onclick="delProspect()" style="padding:9px 12px">🗑️</button>
+      <button class="btn btn-outline" onclick="editProspect()" style="padding:9px 12px" title="Modifier">✏️</button>
+      <button class="btn btn-outline" onclick="delProspect()" style="padding:9px 12px" title="Supprimer">🗑️</button>
     </div>
   </div>
 </div>
@@ -3492,6 +3514,8 @@ body{font-family:var(--fb);background:#FAFAFA;color:var(--g900);min-height:100vh
 <!-- ══ FORMULAIRE PROSPECT COMPLET ══ -->
 <div class="modal-overlay hidden" id="add-overlay" onclick="if(event.target===this)this.classList.add('hidden')">
   <div class="modal" onclick="event.stopPropagation()" style="max-width:660px;max-height:90vh;overflow-y:auto">
+
+    <div class="modal-title" id="add-modal-title">＋ Nouveau prospect</div>
 
     <!-- Type prospect -->
     <div style="display:flex;gap:0;margin-bottom:20px;border-radius:var(--r);overflow:hidden;border:1.5px solid var(--g200)">
@@ -3665,7 +3689,7 @@ body{font-family:var(--fb);background:#FAFAFA;color:var(--g900);min-height:100vh
     </div>
 
     <div style="display:flex;gap:8px">
-      <button class="btn btn-brand" type="button" style="flex:1" onclick="saveP()">✓ Créer le prospect</button>
+      <button class="btn btn-brand" type="button" id="add-save-btn" style="flex:1" onclick="saveP()">✓ Créer le prospect</button>
       <button class="btn btn-outline" type="button" onclick="document.getElementById('add-overlay').classList.add('hidden')">Annuler</button>
     </div>
   </div>
@@ -4474,7 +4498,7 @@ const TB_TITLES={
   visual:['Studio <em>Visuel</em>','Studio Visuel'],
   partners:['Nos <em>Partenaires</em>','Partenaires'],
   products:['Nos <em>Produits</em>','Produits'],
-  affiliate:['Programme d\u2019<em>Affiliation</em>','Gagnez 20% \u00e0 vie'],
+  affiliate:['Programme <em>Affiliation</em>','Gagnez 20%'],
   profile:['Mon <em>Profil</em>','Profil & Paramètres'],
 };
 function nav(btn,id){
@@ -4489,6 +4513,7 @@ function nav(btn,id){
   if(id==='mandats')renderMandats();
   if(id==='agenda')renderAgenda();
   if(id==='profile')loadProfile();
+  if(id==='affiliate')refreshAffiliateLink();
   if(id==='dashboard')updateDashKPIs();
   if(id==='pipeline')renderPipeline();
   if(id==='finance'){/* coming soon — no render needed */}
@@ -5002,7 +5027,77 @@ function renderPipeline(){
 }
 
 // ADD PROSPECT
-function openAdd(){document.getElementById('add-overlay').classList.remove('hidden');}
+// État global : mode du formulaire (création ou édition)
+let editingProspectId=null;
+
+function openAdd(){
+  // Mode CRÉATION — reset complet du formulaire
+  editingProspectId=null;
+  document.getElementById('add-modal-title').innerHTML='＋ Nouveau prospect';
+  document.getElementById('add-save-btn').innerHTML='✓ Créer le prospect';
+  // Reset tous les champs
+  ['a-prenom','a-nom','a-tel','a-email','a-profession','a-budget','a-bien','a-note','a-adresse','a-adresse-client','a-apport','a-commission','a-rendement','a-travaux-vendeur','a-motivation','a-objectif-invest'].forEach(id=>{const el=document.getElementById(id);if(el){el.value='';el.style.borderColor='';}});
+  ['a-financement','a-source','a-type-bien','a-horizon','a-rayon','a-dpe-vendeur','a-invest-type','a-invest-structure','a-accord-banque','a-deja-proprio','a-experience-invest'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  ['parking','cave','terrasse','jardin','ascenseur','lumineux','calme','ecoles','transports','rdc','travaux','dpe'].forEach(id=>{const el=document.getElementById('c-'+id);if(el)el.checked=false;});
+  const r=document.getElementById('a-rayon');if(r)r.value='10';
+  if(document.getElementById('pt-acheteur'))setProspectType('acheteur');
+  document.getElementById('add-overlay').classList.remove('hidden');
+}
+
+function editProspect(){
+  // Mode ÉDITION — préremplit le form avec les données du prospect en cours
+  const p=prospects.find(x=>x.id===currentId);
+  if(!p){toast('⚠️ Prospect introuvable');return;}
+  editingProspectId=p.id;
+  document.getElementById('add-modal-title').innerHTML='✏️ Modifier le prospect';
+  document.getElementById('add-save-btn').innerHTML='💾 Enregistrer les modifications';
+  // Préremplir le type d'abord (pour afficher les bons champs)
+  if(typeof setProspectType==='function')setProspectType(p.prospectType||'acheteur');
+  // Préremplir tous les champs
+  const fill=(id,val)=>{const el=document.getElementById(id);if(el)el.value=val||'';};
+  fill('a-prenom',p.prenom);
+  fill('a-nom',p.nom);
+  fill('a-tel',p.tel);
+  fill('a-email',p.email);
+  fill('a-profession',p.profession);
+  fill('a-budget',p.budget);
+  fill('a-bien',p.bien);
+  fill('a-adresse',p.adresse);
+  fill('a-adresse-client',p.adresseClient);
+  fill('a-apport',p.apport);
+  fill('a-commission',p.commission);
+  fill('a-rayon',p.rayon||'10');
+  fill('a-source',p.source);
+  fill('a-financement',p.financement);
+  fill('a-type-bien',p.typeBien);
+  fill('a-horizon',p.horizon);
+  fill('a-accord-banque',p.accordBanque);
+  // Champs vendeur
+  fill('a-motivation',p.motivationVendeur);
+  fill('a-dpe-vendeur',p.dpeVendeur);
+  fill('a-travaux-vendeur',p.travauxVendeur);
+  // Champs investisseur
+  fill('a-invest-type',p.investType);
+  fill('a-invest-structure',p.investStructure);
+  fill('a-rendement',p.rendementVise);
+  fill('a-deja-proprio',p.dejaProprietaire);
+  fill('a-experience-invest',p.experienceInvest);
+  fill('a-objectif-invest',p.objectifInvest);
+  // SCI régime (radio)
+  if(p.sciRegime){const radio=document.querySelector('input[name="sci-regime"][value="'+p.sciRegime+'"]');if(radio)radio.checked=true;}
+  // Critères (checkboxes)
+  ['parking','cave','terrasse','jardin','ascenseur','lumineux','calme','ecoles','transports','rdc','travaux','dpe'].forEach(id=>{
+    const el=document.getElementById('c-'+id);
+    if(el)el.checked=(p.criteres||[]).some(c=>c.toLowerCase().includes(id));
+  });
+  // Note (on n'édite pas l'ancienne, on permet d'ajouter une nouvelle)
+  fill('a-note','');
+  // Reset erreurs
+  const errEl=document.getElementById('a-form-error');if(errEl)errEl.style.display='none';
+  // Fermer le panneau de détail et ouvrir le modal
+  const det=document.getElementById('det-overlay');if(det)det.classList.add('hidden');
+  document.getElementById('add-overlay').classList.remove('hidden');
+}
 function openAddInStage(s){openAdd();document.getElementById('a-stage').value=s;}
 function setProspectType(type){
   const hidden=document.getElementById('a-prospect-type');if(hidden)hidden.value=type;
@@ -5118,6 +5213,56 @@ function saveP(){
   const experienceInvest=document.getElementById('a-experience-invest')?.value||'';
   const objectifInvest=document.getElementById('a-objectif-invest')?.value||'';
   const note=document.getElementById('a-note').value.trim();
+
+  // ═══ MODE ÉDITION ═══
+  if(editingProspectId){
+    const p=prospects.find(x=>x.id===editingProspectId);
+    if(!p){toast('⚠️ Prospect introuvable');editingProspectId=null;return;}
+    // Mise à jour des champs (on garde id, createdAt, notes existantes, activities, followups, documents, mandatRef, assignedMandats, stage)
+    p.prenom=prenom;p.nom=nom;p.prospectType=prospectType;
+    p.tel=tel;p.email=email;
+    p.adresseClient=adresseClient;
+    p.profession=document.getElementById('a-profession')?.value.trim()||'';
+    p.motivationVendeur=motivationVendeur;
+    p.dpeVendeur=dpeVendeur;
+    p.travauxVendeur=travauxVendeur;
+    p.investType=investType;
+    p.investStructure=investStructure;
+    p.sciRegime=sciRegime;
+    p.rendementVise=rendementVise;
+    p.dejaProprietaire=dejaProprietaire;
+    p.experienceInvest=experienceInvest;
+    p.objectifInvest=objectifInvest;
+    p.budget=budget;
+    p.commission=parseFloat(document.getElementById('a-commission')?.value)||0;
+    p.source=document.getElementById('a-source').value;
+    p.adresse=document.getElementById('a-adresse').value.trim();
+    p.rayon=document.getElementById('a-rayon')?.value||'10';
+    p.typeBien=document.getElementById('a-type-bien')?.value||'';
+    p.bien=document.getElementById('a-bien').value.trim();
+    p.financement=document.getElementById('a-financement')?.value||'';
+    p.apport=document.getElementById('a-apport')?.value||'';
+    p.accordBanque=document.getElementById('a-accord-banque')?.value||'';
+    p.horizon=document.getElementById('a-horizon')?.value||'';
+    p.criteres=getCriteres();
+    p.mandat=mandat;
+    p.updatedAt=today_();
+    // Si l'utilisateur a saisi une nouvelle note, on l'ajoute (sans écraser les anciennes)
+    if(note){
+      if(!p.notes)p.notes=[];
+      p.notes.push({text:note,date:today_(),author:'Agent Pro'});
+    }
+    saveP_();
+    renderList();
+    if(isPipeline(p))renderPipeline();
+    document.getElementById('add-overlay').classList.add('hidden');
+    editingProspectId=null;
+    buildNotifs();
+    toast('✅ Prospect mis à jour !');
+    return;
+  }
+
+  // ═══ MODE CRÉATION ═══
   const p={
     id:'p'+Date.now(),prenom,nom,prospectType,
     tel,email,
@@ -5480,17 +5625,144 @@ function mandDetJumpPhoto(i){
   _mandatPhotoIdx=i;
   const m=mandats.find(x=>x.id===_currentMandatId);if(m)renderMandatDetPhotos(m);
 }
-function addMandatPhotosFromDet(e){
+// ══════════════════════════════════════
+// PHOTOS MANDATS — Supabase Storage
+// ══════════════════════════════════════
+
+/**
+ * Compresse une image avant upload :
+ * - Redimensionne si > 1920px de large
+ * - Convertit en JPEG qualité 0.85
+ * - Réduit drastiquement la taille (8 MB → ~200-400 KB)
+ */
+async function compressImage(file, maxWidth=1920, quality=0.85){
+  return new Promise((resolve, reject)=>{
+    const reader = new FileReader();
+    reader.onerror = ()=>reject(new Error('Lecture du fichier impossible'));
+    reader.onload = (e)=>{
+      const img = new Image();
+      img.onerror = ()=>reject(new Error('Image invalide'));
+      img.onload = ()=>{
+        // Calculer les nouvelles dimensions
+        let w = img.width, h = img.height;
+        if(w > maxWidth){
+          h = Math.round(h * (maxWidth/w));
+          w = maxWidth;
+        }
+        // Redessiner en canvas
+        const canvas = document.createElement('canvas');
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, w, h);
+        // Exporter en JPEG compressé
+        canvas.toBlob((blob)=>{
+          if(!blob) return reject(new Error('Compression échouée'));
+          resolve(blob);
+        }, 'image/jpeg', quality);
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+/**
+ * Upload une photo vers Supabase Storage.
+ * Retourne l'URL publique de la photo.
+ * Le chemin est : {user_id}/{mandat_id}/{timestamp}.jpg
+ */
+async function uploadMandatPhoto(file, mandatId){
+  const sb = getSB();
+  if(!sb) throw new Error('Supabase non disponible');
+  const userId = currentUser?.sbId || currentUser?.id;
+  if(!userId || !userId.includes('-')) throw new Error('Utilisateur non connecté ou compte local');
+  // Compression
+  const compressed = await compressImage(file);
+  // Vérif taille après compression (max 5 MB de sécurité)
+  if(compressed.size > 5 * 1024 * 1024) throw new Error('Image trop lourde même après compression');
+  // Nom du fichier unique : {user_id}/{mandat_id}/{timestamp}-{random}.jpg
+  const timestamp = Date.now();
+  const random = Math.random().toString(36).substring(2, 8);
+  const filename = `${userId}/${mandatId}/${timestamp}-${random}.jpg`;
+  // Upload
+  const { data, error } = await sb.storage
+    .from('mandats-photos')
+    .upload(filename, compressed, {
+      contentType: 'image/jpeg',
+      cacheControl: '3600',
+      upsert: false
+    });
+  if(error) throw error;
+  // Récupérer l'URL publique
+  const { data: urlData } = sb.storage
+    .from('mandats-photos')
+    .getPublicUrl(filename);
+  return urlData.publicUrl;
+}
+
+/**
+ * Supprime une photo de Supabase Storage à partir de son URL publique.
+ * Si l'URL n'est pas une URL Storage (ex: ancienne photo en base64), ne fait rien.
+ */
+async function deleteMandatPhotoFromStorage(photoUrl){
+  if(!photoUrl || typeof photoUrl !== 'string') return;
+  if(!photoUrl.includes('/storage/v1/object/public/mandats-photos/')) return;
+  try {
+    const sb = getSB();
+    if(!sb) return;
+    // Extraire le chemin depuis l'URL : .../mandats-photos/{path}
+    const path = photoUrl.split('/storage/v1/object/public/mandats-photos/')[1];
+    if(!path) return;
+    await sb.storage.from('mandats-photos').remove([path]);
+  } catch(e) {
+    console.warn('Storage delete failed:', e.message);
+  }
+}
+
+/**
+ * Ajout de photos depuis le panneau de détail mandat (Supabase Storage).
+ */
+async function addMandatPhotosFromDet(e){
   if(!_currentMandatId)return;
   const m=mandats.find(x=>x.id===_currentMandatId);if(!m)return;
   if(!m.photos)m.photos=[];
-  const files=Array.from(e.target.files);let loaded=0;
-  files.forEach(f=>{
-    if(!f.type.startsWith('image/'))return;
-    const r=new FileReader();
-    r.onload=ev=>{m.photos.push(ev.target.result);loaded++;if(loaded===files.length){saveM_();renderMandatDetPhotos(m);renderMandats();toast('📸 '+loaded+' photo'+(loaded>1?'s':'')+' ajoutée'+(loaded>1?'s':''));}};
-    r.readAsDataURL(f);
-  });
+  const files=Array.from(e.target.files).filter(f=>f.type.startsWith('image/'));
+  if(!files.length){toast('⚠️ Aucune image valide');return;}
+  // Reset l'input pour permettre de re-sélectionner les mêmes fichiers
+  e.target.value = '';
+  // Vérifier que l'utilisateur est bien connecté à Supabase
+  const userId = currentUser?.sbId || currentUser?.id;
+  if(!userId || !userId.includes('-')){
+    toast('⚠️ Connexion requise pour uploader des photos');
+    return;
+  }
+  // Toast de progression
+  toast('📤 Upload en cours... 0/'+files.length, 30000);
+  let uploaded = 0, errors = 0;
+  for(const f of files){
+    try {
+      const url = await uploadMandatPhoto(f, m.id);
+      m.photos.push(url);
+      uploaded++;
+      toast('📤 Upload en cours... '+uploaded+'/'+files.length, 30000);
+      // Sauvegarder à chaque photo (au cas où l'utilisateur ferme la page)
+      saveM_();
+      renderMandatDetPhotos(m);
+      renderMandats();
+    } catch(err) {
+      errors++;
+      console.error('Upload failed for', f.name, ':', err.message);
+    }
+  }
+  // Toast final
+  if(uploaded > 0 && errors === 0){
+    toast('✅ '+uploaded+' photo'+(uploaded>1?'s':'')+' uploadée'+(uploaded>1?'s':''));
+  } else if(uploaded > 0 && errors > 0){
+    toast('⚠️ '+uploaded+' OK, '+errors+' échec'+(errors>1?'s':''));
+  } else {
+    toast('❌ Upload échoué — vérifiez votre connexion');
+  }
 }
 function renderMandatDetContent(m){
   const el=document.getElementById('mand-det-content');if(!el)return;
@@ -5610,10 +5882,15 @@ function publishAllPortalsDet(mid){
   PORTALS.forEach(p=>{m.portals[p.id]='published';});
   saveM_();renderMandatDetContent(m);renderMandats();toast('📢 Publié sur tous les portails !');
 }
-function deleteMandatPhotoDet(idx){
+async function deleteMandatPhotoDet(idx){
   const m=mandats.find(x=>x.id===_currentMandatId);if(!m||!m.photos)return;
   if(!confirm('Supprimer cette photo ?'))return;
+  const photoUrl = m.photos[idx];
+  // Suppression côté Supabase Storage (en arrière-plan, on n'attend pas)
+  deleteMandatPhotoFromStorage(photoUrl);
+  // Retirer du tableau
   m.photos.splice(idx,1);_mandatPhotoIdx=0;saveM_();renderMandatDetPhotos(m);renderMandatDetContent(m);renderMandats();
+  toast('🗑️ Photo supprimée');
 }
 function deleteMandatFromDet(id){
   if(!confirm('Supprimer ce mandat définitivement ?'))return;
@@ -5621,12 +5898,41 @@ function deleteMandatFromDet(id){
 }
 function editMandatFromDet(id){closeMandatDet();toast('✏️ Modifiez via le formulaire — bientôt disponible');}
 // Photos mandats (compatibilité ancienne version)
-function addMandatPhotos(mid,e){
+async function addMandatPhotos(mid,e){
   const m=mandats.find(x=>x.id===mid);if(!m)return;
-  if(!m.photos)m.photos=[];const files=Array.from(e.target.files);let loaded=0;
-  files.forEach(f=>{if(!f.type.startsWith('image/'))return;const r=new FileReader();r.onload=ev=>{m.photos.push(ev.target.result);loaded++;if(loaded===files.length){saveM_();renderMandats();toast('📸 '+loaded+' photo'+(loaded>1?'s':'')+' ajoutée'+(loaded>1?'s':''));}};r.readAsDataURL(f);});
+  if(!m.photos)m.photos=[];
+  const files=Array.from(e.target.files).filter(f=>f.type.startsWith('image/'));
+  if(!files.length){toast('⚠️ Aucune image valide');return;}
+  e.target.value = '';
+  const userId = currentUser?.sbId || currentUser?.id;
+  if(!userId || !userId.includes('-')){
+    toast('⚠️ Connexion requise pour uploader des photos');
+    return;
+  }
+  toast('📤 Upload en cours... 0/'+files.length, 30000);
+  let uploaded = 0, errors = 0;
+  for(const f of files){
+    try {
+      const url = await uploadMandatPhoto(f, m.id);
+      m.photos.push(url);
+      uploaded++;
+      toast('📤 Upload en cours... '+uploaded+'/'+files.length, 30000);
+      saveM_();
+      renderMandats();
+    } catch(err) {
+      errors++;
+      console.error('Upload failed:', err.message);
+    }
+  }
+  if(uploaded > 0 && errors === 0){
+    toast('✅ '+uploaded+' photo'+(uploaded>1?'s':'')+' uploadée'+(uploaded>1?'s':''));
+  } else if(uploaded > 0){
+    toast('⚠️ '+uploaded+' OK, '+errors+' échec');
+  } else {
+    toast('❌ Upload échoué');
+  }
 }
-function deleteMandatPhoto(mid,idx){const m=mandats.find(x=>x.id===mid);if(!m||!m.photos)return;if(!confirm('Supprimer cette photo ?'))return;m.photos.splice(idx,1);saveM_();renderMandats();}
+function deleteMandatPhoto(mid,idx){const m=mandats.find(x=>x.id===mid);if(!m||!m.photos)return;if(!confirm('Supprimer cette photo ?'))return;deleteMandatPhotoFromStorage(m.photos[idx]);m.photos.splice(idx,1);saveM_();renderMandats();toast('🗑️ Photo supprimée');}
 function openLightbox(mid,idx){const m=mandats.find(x=>x.id===mid);if(!m||!m.photos[idx])return;document.getElementById('lightbox-img').src=m.photos[idx];document.getElementById('photo-lightbox').classList.remove('hidden');}
 function togglePortal(mid,pid,btn){togglePortalDet(mid,pid,btn);}
 function deleteMandat(id){deleteMandatFromDet(id);}
@@ -6276,7 +6582,7 @@ function saveProfile(){
     objMandats:get('p-obj-mandats'),objCa:get('p-obj-ca'),objEstim:get('p-obj-estim'),
     objVisites:get('p-obj-visites'),objProspects:get('p-obj-prospects')
   };
-  savePro();updateProfilePreview();toast('✅ Profil sauvegardé avec succès !');
+  savePro();updateProfilePreview();updateUserUI();toast('✅ Profil sauvegardé avec succès !');
 }
 
 // ══════════ CHAT ══════════
@@ -7366,6 +7672,8 @@ function openSharedDetail(id){
 
 // Vérification doublon en temps réel sur le select
 document.addEventListener('DOMContentLoaded',()=>{
+  // Synchronisation immédiate des noms utilisateur (sidebar + topbar)
+  if(typeof updateUserUI === 'function') updateUserUI();
   const sel=document.getElementById('share-mandat-sel');
   if(sel)sel.addEventListener('change',function(){
     const msg=document.getElementById('share-already-msg');
@@ -7523,6 +7831,59 @@ function refreshMapFilters(){
 // ══════════════════════════════════════════
 // AUTH — Connexion / Déconnexion / Logs / Reset
 // ══════════════════════════════════════════
+
+// ══════════════════════════
+// AFFILIATION — FirstPromoter
+// ══════════════════════════
+function getAffiliateSlug(){
+  try{
+    if(currentUser && currentUser.email){
+      // slug = partie avant le @ de l'email, en minuscule + sans caractères spéciaux
+      return currentUser.email.split('@')[0].toLowerCase().replace(/[^a-z0-9]/g,'');
+    }
+  }catch(e){}
+  return '';
+}
+function getAffiliateLink(){
+  const slug = getAffiliateSlug();
+  if(!slug) return 'https://mon-crm-immo.fr';
+  return 'https://mon-crm-immo.fr/?fpr=' + encodeURIComponent(slug);
+}
+function refreshAffiliateLink(){
+  const input = document.getElementById('affiliate-link-input');
+  if(input) input.value = getAffiliateLink();
+}
+function copyAffiliateLink(){
+  const link = getAffiliateLink();
+  navigator.clipboard.writeText(link).then(function(){
+    const btn = document.getElementById('affiliate-copy-btn');
+    if(!btn) return;
+    const original = btn.innerHTML;
+    btn.innerHTML = '✓ Copié !';
+    btn.style.background = 'var(--green)';
+    setTimeout(function(){
+      btn.innerHTML = original;
+      btn.style.background = '';
+    }, 1800);
+  }).catch(function(){
+    alert('Lien : ' + link);
+  });
+}
+function shareAff(channel){
+  const link = getAffiliateLink();
+  const text = "Salut ! Je te recommande mon-crm-immo, le CRM tout-en-un pour agents immobiliers. 20% de réduction avec mon lien : ";
+  let url = '';
+  if(channel === 'whatsapp'){
+    url = 'https://wa.me/?text=' + encodeURIComponent(text + link);
+  } else if(channel === 'email'){
+    url = 'mailto:?subject=' + encodeURIComponent('Découvre mon-crm-immo (CRM pour agents immobiliers)') + '&body=' + encodeURIComponent(text + link);
+  } else if(channel === 'linkedin'){
+    url = 'https://www.linkedin.com/sharing/share-offsite/?url=' + encodeURIComponent(link);
+  } else if(channel === 'twitter'){
+    url = 'https://twitter.com/intent/tweet?text=' + encodeURIComponent(text) + '&url=' + encodeURIComponent(link);
+  }
+  if(url) window.open(url, '_blank');
+}
 
 // Variables AUTH (déclarées ici, pas redéclarées)
 authUsers = JSON.parse(localStorage.getItem('immoai_users') || '[]');
@@ -7982,13 +8343,48 @@ function doResetPassword(){
 }
 
 function updateUserUI(){
-  if(!currentUser)return;
-  const name=currentUser.prenom+' '+currentUser.nom;
-  const initials=(currentUser.prenom[0]+currentUser.nom[0]).toUpperCase();
-  ['sb-agent-name','tc-name'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=name;});
-  const dn=document.getElementById('dash-name');if(dn)dn.textContent=currentUser.prenom;
-  ['sb-av','tc-av'].forEach(id=>{const el=document.getElementById(id);if(el&&!el.querySelector('img'))el.textContent=initials;});
-  ['sb-agent-role'].forEach(id=>{const el=document.getElementById(id);if(el&&currentUser.agence)el.textContent=currentUser.agence;});
+  // ═══ Source de vérité prioritaire ═══
+  // 1. profile (localStorage immoai_profile) — modifié par Profil & Paramètres
+  // 2. currentUser (session de connexion) — fallback
+  // 3. "Agent Pro" — défaut ultime
+  const p = (typeof profile === 'object' && profile) ? profile : {};
+  const u = currentUser || {};
+  const prenom = (p.prenom || u.prenom || '').trim();
+  const nom = (p.nom || u.nom || '').trim();
+  const agence = (p.agence || u.agence || '').trim();
+  const specialite = (p.specialite || '').trim();
+  // Nom complet
+  const fullName = (prenom + ' ' + nom).trim() || 'Agent Pro';
+  // Initiales (avec fallbacks safe — pas de crash si vide)
+  const i1 = (prenom[0] || 'A').toUpperCase();
+  const i2 = (nom[0] || 'P').toUpperCase();
+  const initials = i1 + i2;
+  // Rôle/sous-titre (sidebar)
+  const roleText = specialite || agence || 'Agent immobilier';
+  // ═══ Sync sidebar (bas-gauche) + topbar (haut-droite) ═══
+  const setText = (id, val) => {
+    const el = document.getElementById(id);
+    if(el) el.textContent = val;
+  };
+  setText('sb-agent-name', fullName);
+  setText('tc-name', fullName);
+  setText('sb-agent-role', roleText);
+  setText('dash-name', prenom || 'Agent Pro');
+  // Avatars (texte seulement si pas d'image déjà chargée)
+  const setInit = (id) => {
+    const el = document.getElementById(id);
+    if(el && !el.querySelector('img')) el.textContent = initials;
+  };
+  setInit('sb-av');
+  setInit('tc-av');
+  // Si avatar image en profile, l'appliquer aux 2 endroits
+  if(p.avatar){
+    const imgHTML = `<img src="${p.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`;
+    ['sb-av','tc-av'].forEach(id=>{
+      const el = document.getElementById(id);
+      if(el && !el.querySelector('img')) el.innerHTML = imgHTML;
+    });
+  }
 }
 
 // Ancien alias
@@ -9734,7 +10130,8 @@ function gcalConnect() {
     provider: 'google',
     options: {
       scopes: GCAL_SCOPES,
-      redirectTo: window.location.origin,
+      // Redirige vers /app pour que checkGcalCallback() puisse récupérer le token
+      redirectTo: window.location.origin + '/app',
       queryParams: {
         access_type: 'offline',
         prompt: 'consent'
@@ -9754,11 +10151,13 @@ function checkGcalCallback() {
   if(!sb) return;
   
   sb.auth.getSession().then(function(result) {
+    if(result.error){console.warn('GCal callback error:', result.error);return;}
     const session = result.data && result.data.session;
     if(!session) return;
     
     const provider = session.user && session.user.app_metadata && session.user.app_metadata.provider;
     if(provider === 'google' && session.provider_token) {
+      console.log('✅ GCal: token Google détecté, connexion en cours...');
       // Stocker le token Google Calendar
       gcalState = {
         connected: true,
@@ -9777,9 +10176,18 @@ function checkGcalCallback() {
       initGcalBanner();
       toast('✅ Google Calendar connecté ! Synchronisation en cours...');
       
+      // Nettoyer l'URL (enlever les params OAuth après traitement)
+      if(window.history && window.history.replaceState){
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+      
       // Charger les événements Google
       setTimeout(function() { gcalFetchEvents(); }, 1000);
+    } else if(provider === 'google' && !session.provider_token){
+      console.warn('⚠️ GCal: session Google sans provider_token. Vérifier la config OAuth (access_type=offline + scopes Calendar).');
     }
+  }).catch(function(err){
+    console.error('GCal callback exception:', err);
   });
 }
 
@@ -10375,81 +10783,6 @@ setInterval(function() {
   if(currentUser) checkAndSendRdvReminders();
 }, 60*60*1000); // Toutes les heures
 
-
-
-// ══ AFFILIATION ══
-function getAffiliateEmail(){
-  try{
-    for(let i=0;i<localStorage.length;i++){
-      const k=localStorage.key(i);
-      if(k && (k.includes('supabase')||k.includes('auth'))){
-        const v=localStorage.getItem(k);
-        if(v){
-          try{
-            const d=JSON.parse(v);
-            const email=d?.user?.email||d?.currentSession?.user?.email||d?.session?.user?.email;
-            if(email) return email;
-          }catch(e){}
-        }
-      }
-    }
-  }catch(e){}
-  return null;
-}
-function buildAffiliateSlug(email){
-  if(!email) return null;
-  return email.split('@')[0].replace(/[^a-z0-9]/gi,'').toLowerCase().slice(0,20);
-}
-function refreshAffiliateLink(){
-  const inp=document.getElementById('aff-link-input');
-  if(!inp) return;
-  const email=getAffiliateEmail();
-  const slug=buildAffiliateSlug(email);
-  const link=slug ? `https://mon-crm-immo.fr?fpr=${slug}` : 'https://mon-crm-immo.fr';
-  inp.value=link;
-  // Build share links
-  const msg=encodeURIComponent("Salut ! J'utilise mon-crm-immo, le CRM tout-en-un pour agents immobiliers. Test gratuit ici : ");
-  const subj=encodeURIComponent('Un CRM immobilier que je te recommande');
-  const body=encodeURIComponent("Salut,\n\nJ'utilise mon-crm-immo et je voulais te le partager. C'est un CRM + assistants IA pensé pour les agents immobiliers.\n\nTest gratuit ici : "+link+"\n\nÀ bientôt !");
-  const wa=document.getElementById('aff-share-wa');
-  const em=document.getElementById('aff-share-email');
-  const li=document.getElementById('aff-share-linkedin');
-  const tw=document.getElementById('aff-share-twitter');
-  if(wa) wa.href=`https://wa.me/?text=${msg}${encodeURIComponent(link)}`;
-  if(em) em.href=`mailto:?subject=${subj}&body=${body}`;
-  if(li) li.href=`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(link)}`;
-  if(tw) tw.href=`https://twitter.com/intent/tweet?text=${msg}&url=${encodeURIComponent(link)}`;
-}
-function copyAffiliateLink(){
-  const inp=document.getElementById('aff-link-input');
-  const btn=document.getElementById('aff-copy-btn');
-  if(!inp||!btn) return;
-  const txt=inp.value;
-  const fallback=()=>{ inp.select(); inp.setSelectionRange(0,99999); try{document.execCommand('copy');}catch(e){} };
-  const done=()=>{
-    const orig=btn.innerHTML;
-    btn.innerHTML='✓ Copié !';
-    btn.style.background='var(--green)';
-    setTimeout(()=>{ btn.innerHTML=orig; btn.style.background=''; },1800);
-  };
-  if(navigator.clipboard&&navigator.clipboard.writeText){
-    navigator.clipboard.writeText(txt).then(done).catch(()=>{fallback();done();});
-  } else {
-    fallback(); done();
-  }
-}
-// Hook into nav() to refresh link when user opens affiliate view
-(function(){
-  const _nav=window.nav;
-  if(typeof _nav==='function'){
-    window.nav=function(btn,id){
-      _nav(btn,id);
-      if(id==='affiliate') setTimeout(refreshAffiliateLink,50);
-    };
-  }
-})();
-// Initial refresh on load (in case it's the active view)
-document.addEventListener('DOMContentLoaded',()=>{ setTimeout(refreshAffiliateLink,200); });
 
 </script>
 
