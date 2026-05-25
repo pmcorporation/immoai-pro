@@ -8287,6 +8287,9 @@ function _finishLogin(user, remCb){
   if(app)app.style.display='flex';
   updateUserUI(); updateStorageIndicator(); startClock(); bootApp();
 
+  // 🎁 Démarrer le monitoring trial (bandeau countdown + écran expiré)
+  if(typeof startTrialMonitoring === 'function') startTrialMonitoring();
+
   // Charger le plan depuis Supabase (source de vérité)
   if(typeof refreshUserPlan === 'function'){
     refreshUserPlan().then(plan => {
@@ -8458,6 +8461,169 @@ function updateUserUI(){
       if(el && !el.querySelector('img')) el.innerHTML = imgHTML;
     });
   }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// 🎁 SYSTÈME ESSAI GRATUIT 3 MOIS
+// Vérifie trial_ends_at et affiche bandeau ou écran de blocage
+// ═══════════════════════════════════════════════════════════════
+let _trialCheckInterval = null;
+
+async function checkTrialStatus(){
+  if(!currentUser || !currentUser.sbId) return null;
+  try {
+    const sb = getSB();
+    if(!sb) return null;
+    const { data, error } = await sb
+      .from('profiles')
+      .select('plan, subscription_status, trial_ends_at')
+      .eq('id', currentUser.sbId)
+      .maybeSingle();
+    if(error || !data) return null;
+    return data;
+  } catch(e){
+    console.warn('checkTrialStatus error:', e);
+    return null;
+  }
+}
+
+function renderTrialBanner(profile){
+  // Supprimer ancien bandeau s'il existe
+  const old = document.getElementById('trial-banner');
+  if(old) old.remove();
+  if(!profile || !profile.trial_ends_at) return;
+  // Si abonnement payant actif → pas de bandeau
+  if(profile.subscription_status === 'active' && profile.plan !== 'free') return;
+  const now = new Date();
+  const endDate = new Date(profile.trial_ends_at);
+  const daysLeft = Math.ceil((endDate - now) / (1000 * 60 * 60 * 24));
+  if(daysLeft < 0) return; // Expiré → écran fullscreen prend le relais
+  // Couleur selon urgence
+  let bg, color, icon, message;
+  if(daysLeft <= 7){
+    bg = 'linear-gradient(135deg, #DC2626, #B91C1C)';
+    color = '#fff';
+    icon = '⚠️';
+    message = `Plus que <strong>${daysLeft} jour${daysLeft>1?'s':''}</strong> d'essai gratuit`;
+  } else if(daysLeft <= 30){
+    bg = 'linear-gradient(135deg, #F59E0B, #D97706)';
+    color = '#fff';
+    icon = '⏰';
+    message = `<strong>${daysLeft} jours</strong> restants dans votre essai`;
+  } else {
+    bg = 'linear-gradient(135deg, #3B82F6, #2563EB)';
+    color = '#fff';
+    icon = '🎁';
+    message = `Essai gratuit <strong>${daysLeft} jours</strong> restants`;
+  }
+  const banner = document.createElement('div');
+  banner.id = 'trial-banner';
+  banner.style.cssText = `position:fixed;top:0;left:0;right:0;z-index:9000;background:${bg};color:${color};padding:9px 16px;font-size:.78rem;font-family:var(--fb);display:flex;align-items:center;justify-content:center;gap:14px;box-shadow:0 2px 12px rgba(0,0,0,.15)`;
+  banner.innerHTML = `
+    <span style="font-size:1rem">${icon}</span>
+    <span>${message} — Plan <strong>${(profile.plan||'starter').toUpperCase()}</strong></span>
+    <button onclick="showTrialUpgradeModal()" style="background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);color:#fff;padding:5px 14px;border-radius:7px;font-size:.74rem;font-weight:700;cursor:pointer;font-family:var(--fb)">Passer au plan payant →</button>
+  `;
+  document.body.appendChild(banner);
+  // Ajouter du padding-top au body pour pas masquer le contenu
+  document.body.style.paddingTop = '38px';
+}
+
+function showTrialUpgradeModal(){
+  // Petite modal de choix entre Starter et Pro
+  const existing = document.getElementById('trial-upgrade-modal');
+  if(existing) existing.remove();
+  const modal = document.createElement('div');
+  modal.id = 'trial-upgrade-modal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(6px);z-index:10500;display:flex;align-items:center;justify-content:center;padding:20px';
+  modal.innerHTML = `
+    <div style="background:#fff;border-radius:18px;padding:32px;max-width:520px;width:100%;box-shadow:0 32px 80px rgba(0,0,0,.3)">
+      <div style="font-family:var(--fd);font-weight:800;font-size:1.3rem;color:#0F0F11;margin-bottom:8px;text-align:center">🚀 Continuez l'aventure</div>
+      <div style="font-size:.85rem;color:#525252;margin-bottom:24px;text-align:center;line-height:1.5">Choisissez votre plan pour conserver l'accès à toutes les fonctionnalités</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px">
+        <a href="https://buy.stripe.com/6oU3cwddXgIt4TNd38aMU01" target="_blank" style="background:#FAFAFA;border:2px solid #E5E7EB;border-radius:12px;padding:18px;text-decoration:none;text-align:center;transition:all .15s" onmouseover="this.style.borderColor='#F08A6E';this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='#E5E7EB';this.style.transform=''">
+          <div style="font-family:var(--fd);font-weight:800;font-size:1rem;color:#0F0F11;margin-bottom:4px">Starter</div>
+          <div style="font-family:var(--fd);font-weight:800;font-size:1.8rem;color:#F08A6E;letter-spacing:-.03em">35€<span style="font-size:.7rem;color:#9CA3AF;font-weight:500">/mois</span></div>
+          <div style="font-size:.7rem;color:#737373;margin-top:8px">CRM complet • Mandats illimités</div>
+        </a>
+        <a href="https://buy.stripe.com/aFafZi2zjfEp2LF7IOaMU00" target="_blank" style="background:linear-gradient(145deg,#2A211B,#1a1a2e);border:2px solid rgba(240,138,110,.4);border-radius:12px;padding:18px;text-decoration:none;text-align:center;color:#fff;transition:all .15s;position:relative" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">
+          <div style="position:absolute;top:-8px;right:8px;background:#F08A6E;color:#fff;font-size:.55rem;font-weight:800;padding:3px 8px;border-radius:20px">POPULAIRE</div>
+          <div style="font-family:var(--fd);font-weight:800;font-size:1rem;color:#fff;margin-bottom:4px">Pro</div>
+          <div style="font-family:var(--fd);font-weight:800;font-size:1.8rem;color:#F08A6E;letter-spacing:-.03em">75€<span style="font-size:.7rem;color:rgba(255,255,255,.5);font-weight:500">/mois</span></div>
+          <div style="font-size:.7rem;color:rgba(255,255,255,.7);margin-top:8px">+ Expert Juridique IA</div>
+        </a>
+      </div>
+      <button onclick="document.getElementById('trial-upgrade-modal').remove()" style="width:100%;padding:11px;background:transparent;border:1px solid #E5E7EB;border-radius:8px;font-family:var(--fb);font-size:.78rem;color:#525252;cursor:pointer">Plus tard</button>
+    </div>
+  `;
+  document.body.appendChild(modal);
+}
+
+function showTrialExpiredScreen(profile){
+  // Supprimer si déjà affiché
+  const existing = document.getElementById('trial-expired-screen');
+  if(existing) return;
+  const screen = document.createElement('div');
+  screen.id = 'trial-expired-screen';
+  screen.style.cssText = 'position:fixed;inset:0;background:linear-gradient(135deg,#0F1117 0%,#1a1f2e 100%);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px;font-family:var(--fb)';
+  screen.innerHTML = `
+    <div style="background:rgba(255,255,255,.04);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.1);border-radius:24px;padding:48px;max-width:560px;width:100%;text-align:center;box-shadow:0 32px 80px rgba(0,0,0,.4)">
+      <div style="font-size:3.5rem;margin-bottom:16px">⏰</div>
+      <div style="font-family:var(--fd);font-weight:800;font-size:1.7rem;color:#fff;letter-spacing:-.02em;margin-bottom:10px">Votre essai gratuit a expiré</div>
+      <div style="font-size:.92rem;color:rgba(255,255,255,.65);line-height:1.6;margin-bottom:30px">Vos données sont <strong style="color:#fff">conservées intactes</strong>.<br>Choisissez un plan pour continuer à utiliser <strong style="color:#F08A6E">mon-crm-immo</strong>.</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px">
+        <a href="https://buy.stripe.com/6oU3cwddXgIt4TNd38aMU01" target="_blank" style="background:rgba(255,255,255,.05);border:2px solid rgba(255,255,255,.15);border-radius:14px;padding:22px;text-decoration:none;text-align:center;transition:all .15s" onmouseover="this.style.borderColor='#F08A6E';this.style.background='rgba(240,138,110,.1)'" onmouseout="this.style.borderColor='rgba(255,255,255,.15)';this.style.background='rgba(255,255,255,.05)'">
+          <div style="font-family:var(--fd);font-weight:800;font-size:1.05rem;color:#fff;margin-bottom:6px">Starter</div>
+          <div style="font-family:var(--fd);font-weight:800;font-size:2rem;color:#F08A6E;letter-spacing:-.03em;margin-bottom:8px">35€<span style="font-size:.75rem;color:rgba(255,255,255,.4);font-weight:500">/mois</span></div>
+          <div style="font-size:.72rem;color:rgba(255,255,255,.6);line-height:1.4">CRM complet<br>Mandats illimités<br>Assistants IA</div>
+        </a>
+        <a href="https://buy.stripe.com/aFafZi2zjfEp2LF7IOaMU00" target="_blank" style="background:linear-gradient(145deg,rgba(240,138,110,.15),rgba(240,138,110,.05));border:2px solid rgba(240,138,110,.5);border-radius:14px;padding:22px;text-decoration:none;text-align:center;position:relative;transition:all .15s" onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 12px 30px rgba(240,138,110,.3)'" onmouseout="this.style.transform='';this.style.boxShadow=''">
+          <div style="position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:#F08A6E;color:#fff;font-size:.6rem;font-weight:800;padding:4px 10px;border-radius:20px">⭐ RECOMMANDÉ</div>
+          <div style="font-family:var(--fd);font-weight:800;font-size:1.05rem;color:#fff;margin-bottom:6px">Pro</div>
+          <div style="font-family:var(--fd);font-weight:800;font-size:2rem;color:#F08A6E;letter-spacing:-.03em;margin-bottom:8px">75€<span style="font-size:.75rem;color:rgba(255,255,255,.4);font-weight:500">/mois</span></div>
+          <div style="font-size:.72rem;color:rgba(255,255,255,.6);line-height:1.4">Tout Starter +<br>Expert Juridique IA<br>Support prioritaire</div>
+        </a>
+      </div>
+      <button onclick="logoutFromExpired()" style="width:100%;padding:13px;background:transparent;border:1px solid rgba(255,255,255,.15);border-radius:10px;font-family:var(--fb);font-size:.82rem;color:rgba(255,255,255,.6);cursor:pointer;transition:all .15s" onmouseover="this.style.borderColor='rgba(255,255,255,.3)';this.style.color='#fff'" onmouseout="this.style.borderColor='rgba(255,255,255,.15)';this.style.color='rgba(255,255,255,.6)'">Me déconnecter</button>
+      <div style="margin-top:24px;padding-top:20px;border-top:1px solid rgba(255,255,255,.08);font-size:.7rem;color:rgba(255,255,255,.4)">
+        Besoin d'aide ? Contactez <a href="mailto:contact@mon-crm-immo.fr" style="color:#F08A6E;text-decoration:none">contact@mon-crm-immo.fr</a>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(screen);
+}
+
+function logoutFromExpired(){
+  try { const sb = getSB(); if(sb) sb.auth.signOut(); } catch(_){}
+  sessionStorage.clear();
+  window.location.reload();
+}
+
+async function runTrialCheck(){
+  const profile = await checkTrialStatus();
+  if(!profile) return;
+  const now = new Date();
+  // Si trial_ends_at existe et est dépassé ET pas d'abonnement actif → BLOQUER
+  if(profile.trial_ends_at){
+    const endDate = new Date(profile.trial_ends_at);
+    const isExpired = endDate < now;
+    const hasActiveSubscription = profile.subscription_status === 'active' && profile.plan !== 'free';
+    if(isExpired && !hasActiveSubscription){
+      showTrialExpiredScreen(profile);
+      return;
+    }
+    // Sinon afficher le bandeau countdown
+    if(profile.subscription_status === 'trial'){
+      renderTrialBanner(profile);
+    }
+  }
+}
+
+// Démarrer la vérification trial au chargement + toutes les 5 min
+function startTrialMonitoring(){
+  if(_trialCheckInterval) clearInterval(_trialCheckInterval);
+  runTrialCheck();
+  _trialCheckInterval = setInterval(runTrialCheck, 5 * 60 * 1000);
 }
 
 // Ancien alias
@@ -8777,6 +8943,7 @@ function bootApp(){
       document.getElementById('app-root').style.display='flex';
       updateUserUI();startClock();updateStorageIndicator();
       bootApp();
+      if(typeof startTrialMonitoring === 'function') startTrialMonitoring();
     }catch(e){sessionStorage.removeItem('immoai_session');}
   } else {
     document.getElementById('app-root').style.display='none';
@@ -8790,6 +8957,7 @@ function bootApp(){
         document.getElementById('login-screen').classList.add('hidden');
         document.getElementById('app-root').style.display='flex';
         updateUserUI();startClock();updateStorageIndicator();bootApp();
+        if(typeof startTrialMonitoring === 'function') startTrialMonitoring();
         return;
       }
       if(_r&&_r.email){
