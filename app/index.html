@@ -9276,46 +9276,196 @@ function openUserModal(userId){
   const user = _adminUsersCache.find(u => u.id === userId);
   if(!user) return;
   const pl = user.plan || 'free';
+  const isActive = (user.subscription_status || 'active') !== 'inactive';
+  const userEmail = (user.email || '').toLowerCase();
+  // Détection si l'utilisateur est actuellement admin (lecture depuis le cache local)
+  const isCurrentlyAdmin = !!(user.is_admin || user.role === 'admin');
+  // PROTECTION CRITIQUE : on ne peut PAS modifier ses propres droits admin / activation
+  const isSelf = currentUser && currentUser.email && currentUser.email.toLowerCase() === userEmail;
 
   document.getElementById('adm-modal-username').textContent = (user.prenom || '') + ' ' + (user.nom || '');
   document.getElementById('adm-modal-content').innerHTML = `
-    <div style="margin-bottom:12px">
+    <!-- ═══ PLAN D'ABONNEMENT ═══ -->
+    <div style="margin-bottom:16px">
       <label class="adm-label">Plan d'abonnement</label>
-      <select id="modal-plan-sel" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:9px 12px;font-size:.82rem;color:#fff;outline:none;width:100%;margin-bottom:10px">
+      <select id="modal-plan-sel" style="background:#fff;border:1px solid #D4D4D4;border-radius:8px;padding:10px 12px;font-size:.85rem;color:#0F0F11;outline:none;width:100%;cursor:pointer;font-family:var(--fb)">
         <option value="free"    ${pl === 'free'    ? 'selected' : ''}>Gratuit</option>
         <option value="starter" ${pl === 'starter' ? 'selected' : ''}>Starter — 35€/mois</option>
         <option value="pro"     ${pl === 'pro'     ? 'selected' : ''}>Pro — 75€/mois</option>
         <option value="agency"  ${pl === 'agency'  ? 'selected' : ''}>Agence — 149€/mois</option>
       </select>
     </div>
-    <div style="background:rgba(255,255,255,.03);border-radius:8px;padding:10px 12px;font-size:.74rem;color:rgba(255,255,255,.5);line-height:1.9">
-      <strong style="color:#fff">Compte</strong><br>
+
+    <!-- ═══ STATUT DU COMPTE (Activation) ═══ -->
+    <div style="margin-bottom:16px;padding:12px;background:#FAFAFA;border:1px solid #EAEAEA;border-radius:10px">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+        <div>
+          <label class="adm-label" style="margin-bottom:2px">Statut du compte</label>
+          <div style="font-size:.74rem;color:#737373;line-height:1.4">${isActive ? '✅ Actif — peut se connecter' : '🔒 Désactivé — accès bloqué'}</div>
+        </div>
+        <label style="position:relative;display:inline-block;width:46px;height:24px;flex-shrink:0;${isSelf ? 'opacity:.4;cursor:not-allowed' : 'cursor:pointer'}">
+          <input type="checkbox" id="modal-active-toggle" ${isActive ? 'checked' : ''} ${isSelf ? 'disabled' : ''} style="opacity:0;width:0;height:0">
+          <span style="position:absolute;inset:0;background:${isActive ? '#10B981' : '#D4D4D4'};transition:.2s;border-radius:24px"></span>
+          <span style="position:absolute;height:18px;width:18px;left:${isActive ? '25px' : '3px'};top:3px;background:#fff;transition:.2s;border-radius:50%;box-shadow:0 1px 3px rgba(0,0,0,.2)"></span>
+        </label>
+      </div>
+      ${isSelf ? '<div style="font-size:.7rem;color:#DC2626;margin-top:8px">🛡️ Vous ne pouvez pas désactiver votre propre compte</div>' : ''}
+    </div>
+
+    <!-- ═══ RÔLE ADMIN ═══ -->
+    <div style="margin-bottom:16px;padding:12px;background:${isCurrentlyAdmin ? 'rgba(220,38,38,.05)' : '#FAFAFA'};border:1px solid ${isCurrentlyAdmin ? 'rgba(220,38,38,.2)' : '#EAEAEA'};border-radius:10px">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+        <div>
+          <label class="adm-label" style="margin-bottom:2px">Rôle administrateur</label>
+          <div style="font-size:.74rem;color:#737373;line-height:1.4">${isCurrentlyAdmin ? '👑 Admin — accès back-office' : 'Utilisateur standard'}</div>
+        </div>
+        <label style="position:relative;display:inline-block;width:46px;height:24px;flex-shrink:0;${isSelf ? 'opacity:.4;cursor:not-allowed' : 'cursor:pointer'}">
+          <input type="checkbox" id="modal-admin-toggle" ${isCurrentlyAdmin ? 'checked' : ''} ${isSelf ? 'disabled' : ''} style="opacity:0;width:0;height:0">
+          <span style="position:absolute;inset:0;background:${isCurrentlyAdmin ? '#DC2626' : '#D4D4D4'};transition:.2s;border-radius:24px"></span>
+          <span style="position:absolute;height:18px;width:18px;left:${isCurrentlyAdmin ? '25px' : '3px'};top:3px;background:#fff;transition:.2s;border-radius:50%;box-shadow:0 1px 3px rgba(0,0,0,.2)"></span>
+        </label>
+      </div>
+      ${isSelf ? '<div style="font-size:.7rem;color:#DC2626;margin-top:8px">🛡️ Vous ne pouvez pas modifier vos propres droits admin</div>' : '<div style="font-size:.7rem;color:#A16207;margin-top:8px">⚠️ Donner les droits admin = accès total au back-office</div>'}
+    </div>
+
+    <!-- ═══ INFOS COMPTE (lecture seule) ═══ -->
+    <div style="background:#FAFAFA;border:1px solid #EAEAEA;border-radius:10px;padding:12px 14px;font-size:.74rem;color:#525252;line-height:1.9">
+      <strong style="color:#0F0F11">📋 Informations compte</strong><br>
       Email : ${user.email}<br>
       Agence : ${user.agence || '—'}<br>
       Inscrit le : ${user.created_at ? new Date(user.created_at).toLocaleDateString('fr-FR') : '—'}<br>
       Stripe customer : ${user.stripe_customer_id || '—'}<br>
       Sub status : ${user.subscription_status || '—'}<br>
       Renouvellement : ${user.subscription_renews_at ? new Date(user.subscription_renews_at).toLocaleDateString('fr-FR') : '—'}<br>
-      <hr style="border:none;border-top:1px solid rgba(255,255,255,.05);margin:8px 0">
+      <hr style="border:none;border-top:1px solid #EAEAEA;margin:8px 0">
+      <strong style="color:#0F0F11">📊 Activité</strong><br>
       Mandats : ${user.nb_mandats || 0} · Prospects : ${user.nb_prospects || 0} · RDVs : ${user.nb_rdvs || 0}
     </div>`;
-  document.getElementById('adm-modal-save-btn').onclick = () => saveUserModal(userId);
+
+  // Conserver les valeurs initiales pour détecter les changements
+  document.getElementById('adm-modal-save-btn').onclick = () => saveUserModal(userId, {
+    initialPlan: pl,
+    initialActive: isActive,
+    initialAdmin: isCurrentlyAdmin,
+    isSelf: isSelf,
+    email: userEmail
+  });
   document.getElementById('adm-user-modal').classList.remove('hidden');
 }
 
-async function saveUserModal(userId){
-  const newPlan = document.getElementById('modal-plan-sel').value;
+async function saveUserModal(userId, initial){
   const sb = getSB();
   if(!sb){ alert('Connexion DB indisponible'); return; }
+
+  const newPlan = document.getElementById('modal-plan-sel').value;
+  const newActive = document.getElementById('modal-active-toggle').checked;
+  const newAdmin = document.getElementById('modal-admin-toggle').checked;
+
+  // Détection des changements
+  const planChanged = newPlan !== initial.initialPlan;
+  const activeChanged = newActive !== initial.initialActive;
+  const adminChanged = newAdmin !== initial.initialAdmin;
+
+  if(!planChanged && !activeChanged && !adminChanged){
+    document.getElementById('adm-user-modal').classList.add('hidden');
+    showAdminToast('ℹ️ Aucun changement');
+    return;
+  }
+
+  // PROTECTION : pas de modif sur soi-même pour activation/admin
+  if(initial.isSelf && (activeChanged || adminChanged)){
+    alert('🛡️ Vous ne pouvez pas modifier votre propre statut admin ou activation.');
+    return;
+  }
+
+  // Confirmation pour les actions critiques
+  const warnings = [];
+  if(activeChanged && !newActive) warnings.push('🔒 Désactiver ce compte (l\'utilisateur ne pourra plus se connecter)');
+  if(adminChanged && newAdmin) warnings.push('👑 Donner les droits administrateur (accès total au back-office)');
+  if(adminChanged && !newAdmin) warnings.push('⛔ Retirer les droits administrateur');
+  if(warnings.length > 0){
+    if(!confirm('⚠️ Actions critiques :\n\n' + warnings.join('\n') + '\n\nConfirmer ?')) return;
+  }
+
+  let successCount = 0;
+  let errors = [];
+
   try {
-    const { data, error } = await sb.rpc('admin_set_user_plan', { p_user_id: userId, p_plan: newPlan });
-    if(error || !data?.ok){ alert('Erreur : ' + (error?.message || data?.error)); return; }
-    await sb.rpc('admin_log', { p_action: 'user.plan_changed', p_target_type: 'user', p_target_id: userId, p_details: { plan: newPlan } });
+    // 1️⃣ Changement de plan
+    if(planChanged){
+      const { data, error } = await sb.rpc('admin_set_user_plan', { p_user_id: userId, p_plan: newPlan });
+      if(error || !data?.ok){
+        errors.push('Plan : ' + (error?.message || data?.error || 'erreur inconnue'));
+      } else {
+        successCount++;
+        await sb.rpc('admin_log', { p_action: 'user.plan_changed', p_target_type: 'user', p_target_id: userId, p_details: { from: initial.initialPlan, to: newPlan } });
+      }
+    }
+
+    // 2️⃣ Activation/désactivation (via plan free + log explicite)
+    // Note : ici on log l'intention, l'application réelle dépend de ta fonction admin_set_user_plan
+    // Pour bloquer un user, on peut le mettre en plan 'free' avec un statut 'inactive' via une RPC dédiée
+    if(activeChanged){
+      // Tentative via RPC dédiée (à créer si pas dispo)
+      try {
+        const { data, error } = await sb.rpc('admin_set_user_status', { p_user_id: userId, p_active: newActive });
+        if(error){
+          // Fallback : juste logger l'action
+          errors.push('Activation : RPC admin_set_user_status indisponible — créez-la dans Supabase. Action loggée.');
+          await sb.rpc('admin_log', { p_action: newActive ? 'user.activated' : 'user.deactivated', p_target_type: 'user', p_target_id: userId, p_details: { note: 'manual_via_backoffice', rpc_missing: true } });
+        } else {
+          successCount++;
+          await sb.rpc('admin_log', { p_action: newActive ? 'user.activated' : 'user.deactivated', p_target_type: 'user', p_target_id: userId, p_details: {} });
+        }
+      } catch(e){
+        errors.push('Activation : ' + e.message);
+      }
+    }
+
+    // 3️⃣ Promotion/rétrogradation admin
+    if(adminChanged){
+      try {
+        if(newAdmin){
+          // Ajouter à l'allowlist admin
+          const { data, error } = await sb.rpc('admin_add_allowlist', { p_email: initial.email, p_notes: 'Promu via back-office par ' + (currentUser?.email || 'admin') });
+          if(error){
+            errors.push('Admin : ' + (error.message || 'erreur ajout allowlist'));
+          } else {
+            successCount++;
+            await sb.rpc('admin_log', { p_action: 'admin.granted', p_target_type: 'user', p_target_id: userId, p_details: { email: initial.email } });
+          }
+        } else {
+          // Retirer de l'allowlist
+          const { data, error } = await sb.rpc('admin_revoke_allowlist', { p_email: initial.email });
+          if(error){
+            errors.push('Admin : ' + (error.message || 'erreur retrait allowlist'));
+          } else {
+            successCount++;
+            await sb.rpc('admin_log', { p_action: 'admin.revoked', p_target_type: 'user', p_target_id: userId, p_details: { email: initial.email } });
+          }
+        }
+      } catch(e){
+        errors.push('Admin : ' + e.message);
+      }
+    }
+
+    // Fermeture + refresh
     document.getElementById('adm-user-modal').classList.add('hidden');
     await loadAdminUsersFromSupabase();
     renderAdminUsers(); renderAdminSubs(); renderAdminOverview();
-    showAdminToast('✅ Plan mis à jour');
-  } catch(e){ alert('Erreur : ' + e.message); }
+
+    // Toast résultat
+    if(errors.length === 0){
+      showAdminToast('✅ ' + successCount + ' modification(s) appliquée(s)');
+    } else if(successCount > 0){
+      showAdminToast('⚠️ ' + successCount + ' OK · ' + errors.length + ' erreur(s)');
+      console.warn('Erreurs admin:', errors);
+    } else {
+      alert('❌ Aucune modification appliquée :\n\n' + errors.join('\n'));
+    }
+  } catch(e){
+    alert('Erreur : ' + e.message);
+  }
 }
 
 function showAdminToast(msg){
