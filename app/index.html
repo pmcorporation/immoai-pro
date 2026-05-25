@@ -9013,6 +9013,19 @@ async function adminAuth(){
 // Envoyer une alerte email via l'Edge Function
 async function sendAdminAlert(payload){
   try {
+    // Si c'est un login success, comparer l'IP avec la dernière connue
+    if(payload.type === 'login_success' && payload.ip){
+      try {
+        const lastIP = localStorage.getItem('immoai_admin_last_ip');
+        if(lastIP && lastIP !== payload.ip){
+          // Nouvelle IP détectée : marquer comme alerte importante
+          payload.new_ip = true;
+          payload.previous_ip = lastIP;
+        }
+        localStorage.setItem('immoai_admin_last_ip', payload.ip);
+        localStorage.setItem('immoai_admin_last_login', new Date().toISOString());
+      } catch(_){}
+    }
     const res = await fetch(`${SUPABASE_URL}/functions/v1/admin-alert-email`, {
       method: 'POST',
       headers: {
@@ -9031,7 +9044,8 @@ async function sendAdminAlert(payload){
 }
 
 // Session admin : 30 min d'inactivité → logout auto
-const ADMIN_SESSION_TIMEOUT_MS = 30 * 60 * 1000; // 30 min
+const ADMIN_SESSION_TIMEOUT_MS = 15 * 60 * 1000; // 15 min (renforcé : avant 30)
+const ADMIN_SESSION_WARNING_MS = 2 * 60 * 1000; // avertir 2 min avant expiration
 let _adminSessionTimer = null;
 let _adminLastActivity = Date.now();
 
@@ -9041,7 +9055,7 @@ function startAdminSession(){
   ['mousemove', 'keydown', 'click', 'scroll'].forEach(ev => {
     document.addEventListener(ev, resetAdminSession, { passive: true });
   });
-  // Vérification toutes les 60 sec
+  // Vérification toutes les 30 sec (renforcé : avant 60)
   if(_adminSessionTimer) clearInterval(_adminSessionTimer);
   _adminSessionTimer = setInterval(() => {
     const elapsed = Date.now() - _adminLastActivity;
@@ -9052,8 +9066,13 @@ function startAdminSession(){
       const remaining = Math.ceil((ADMIN_SESSION_TIMEOUT_MS - elapsed) / 60000);
       const el = document.getElementById('admin-session-timer');
       if(el) el.textContent = `Session: ${remaining} min`;
+      // Warning visuel quand il reste moins de 2 min
+      if(elapsed >= ADMIN_SESSION_TIMEOUT_MS - ADMIN_SESSION_WARNING_MS && el){
+        el.style.color = '#FCA5A5';
+        el.style.fontWeight = '700';
+      }
     }
-  }, 60000);
+  }, 30000);
 }
 
 function resetAdminSession(){
@@ -9657,10 +9676,52 @@ async function revokeAllowlist(email){
   }
 }
 
+// ═══════════════════════════════════════════════════════════════
+// SÉCURITÉ BACK-OFFICE — Accès silencieux et conditionnel
+// Le back-office est invisible pour tout utilisateur non-admin :
+// - Le hotkey ne fait RIEN si l'user n'est pas dans l'allowlist
+// - L'URL #admin est ignorée si l'user n'est pas dans l'allowlist
+// - Aucun feedback visuel pour ne pas révéler l'existence du back-office
+// ═══════════════════════════════════════════════════════════════
+
+async function secureOpenAdmin(){
+  // 1. L'utilisateur DOIT être connecté
+  if(!currentUser || !currentUser.sbId){
+    // Pas de message, pas de modal : l'attaquant ne sait pas qu'il y a un back-office
+    return;
+  }
+  // 2. Vérification allowlist côté serveur AVANT toute UI
+  try {
+    const sb = getSB();
+    if(!sb) return;
+    const { data: allowed, error } = await sb.rpc('check_admin_allowlist', { p_email: currentUser.email });
+    if(error || allowed !== true){
+      // Logger silencieusement la tentative non autorisée
+      try { await logAdminAttempt(currentUser.email, false, 'hotkey_unauthorized'); } catch(_){}
+      // Aucun feedback visuel : l'attaquant ne sait pas que ce hotkey existe
+      return;
+    }
+    // ✅ User dans l'allowlist : ouvrir le back-office
+    openAdmin();
+  } catch(e){
+    console.warn('secureOpenAdmin error:', e);
+    // Aucun feedback visuel en cas d'erreur
+  }
+}
+
+// Hotkey : Ctrl+Shift+A déclenche désormais le check sécurisé
 document.addEventListener('keydown', e => {
-  if(e.ctrlKey && e.shiftKey && e.key === 'A'){ e.preventDefault(); openAdmin(); }
+  if(e.ctrlKey && e.shiftKey && e.key === 'A'){
+    e.preventDefault();
+    secureOpenAdmin();
+  }
 });
-if(window.location.hash === '#admin') setTimeout(openAdmin, 500);
+
+// URL #admin : ouvre le back-office uniquement si user dans allowlist
+if(window.location.hash === '#admin'){
+  // Délai pour laisser currentUser se charger après le login
+  setTimeout(() => secureOpenAdmin(), 800);
+}
 </script>
 </div><!-- /app-root -->
 <!-- ══════════════ BACKOFFICE ADMIN ══════════════ -->
