@@ -843,6 +843,19 @@ body{font-family:var(--fb);background:#FAFAFA;color:var(--g900);min-height:100vh
 .auth-btn:active{transform:translateY(0)}
 .auth-btn:disabled{opacity:.45;cursor:not-allowed;transform:none}
 
+/* ── Formulaire d'activation sur fond clair ──
+   Les styles .auth-* ci-dessus sont prévus pour le panneau sombre.
+   #register-panel (écran tarifs) est sur fond #F8F9FC : sans ces
+   surcharges, les libellés et les champs sont blancs sur blanc. */
+#register-panel .auth-label{color:var(--g500)}
+#register-panel .auth-input{background:#fff;color:var(--g900);border:1.5px solid #E5E7EB}
+#register-panel .auth-input::placeholder{color:var(--g300)}
+#register-panel .auth-input:focus{border-color:var(--brand);background:#fff}
+#register-panel .auth-eye{color:var(--g400)}
+#register-panel .auth-eye:hover{color:var(--g700)}
+#register-panel .auth-alert.error{background:#FEF2F2;border:1px solid #FECACA;color:#DC2626}
+#register-panel .auth-alert.success{background:#F0FDF4;border:1px solid #BBF7D0;color:#16A34A}
+
 /* Grille 2 colonnes */
 .auth-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 
@@ -1638,7 +1651,7 @@ body{font-family:var(--fb);background:#FAFAFA;color:var(--g900);min-height:100vh
 
   <!-- Droite — Tarifs sexy -->
   <div class="auth-right" style="background:#F8F9FC;overflow-y:auto">
-    <div style="width:100%;max-width:520px;padding:8px 0">
+    <div id="register-panel" style="width:100%;max-width:520px;padding:8px 0">
 
       <!-- Header -->
       <div style="text-align:center;margin-bottom:28px">
@@ -7573,11 +7586,16 @@ function toggleBilling(){
 })();
 
 // ══ CODES D'ACTIVATION ══
-// La source de vérité est la table Supabase activation_codes (générée par Stripe webhook).
-// Les codes "master" ci-dessous sont des fallback en dur pour démos / tests internes.
-const MASTER_ACTIVATION_CODES = {
-  'PMCORP75':  { plan: 'pro',     label: 'Plan Pro — PM Corp' },
-  'BETA2026':  { plan: 'pro',     label: 'Accès Beta Gratuit' },
+// Source de vérité unique : la table Supabase activation_codes (webhook Stripe
+// ou génération manuelle depuis le backoffice admin).
+// La vérification passe par la RPC verify_activation_code, qui ne renvoie que
+// la validité et le plan — jamais le contenu de la table.
+
+const ACTIVATION_ERREURS = {
+  invalid: 'Code invalide ou expiré',
+  used:    'Ce code a déjà été utilisé. Connectez-vous à votre compte.',
+  expired: 'Ce code a expiré. Contactez le support.',
+  revoked: 'Ce code a été révoqué. Contactez le support.',
 };
 
 async function checkActivationCode(){
@@ -7588,43 +7606,32 @@ async function checkActivationCode(){
 
   if(!codeRaw){ return showErr('Entrez un code d\'activation'); }
 
-  // 1) Master codes en dur (fallback démo/test)
-  if(MASTER_ACTIVATION_CODES[codeRaw]){
-    if(errEl) errEl.style.display='none';
-    sessionStorage.setItem('activation_code', codeRaw);
-    sessionStorage.setItem('activation_plan', MASTER_ACTIVATION_CODES[codeRaw].plan);
-    return showActivationForm(MASTER_ACTIVATION_CODES[codeRaw]);
-  }
-
-  // 2) Lookup Supabase
   const sb = getSB();
   if(!sb){ return showErr('Connexion serveur indisponible. Réessayez.'); }
 
   if(btn){ btn.disabled = true; btn.textContent = 'Vérification…'; }
 
   try {
-    const { data, error } = await sb
-      .from('activation_codes')
-      .select('code, plan, status, expires_at, email')
-      .eq('code', codeRaw)
-      .maybeSingle();
+    const { data, error } = await sb.rpc('verify_activation_code', { p_code: codeRaw });
+    if(error){
+      console.warn('verify_activation_code:', error);
+      return showErr('Erreur de vérification. Réessayez.');
+    }
 
-    if(error){ console.warn(error); return showErr('Erreur de vérification. Réessayez.'); }
-    if(!data){ return showErr('Code invalide ou expiré'); }
+    // La fonction renvoie une table : on prend la première ligne.
+    const res = Array.isArray(data) ? data[0] : data;
 
-    if(data.status === 'used')    return showErr('Ce code a déjà été utilisé. Connectez-vous à votre compte.');
-    if(data.status === 'expired' || new Date(data.expires_at) < new Date()) return showErr('Ce code a expiré. Contactez le support.');
-    if(data.status === 'revoked') return showErr('Ce code a été révoqué. Contactez le support.');
+    if(!res || !res.valid){
+      return showErr(ACTIVATION_ERREURS[res?.reason] || ACTIVATION_ERREURS.invalid);
+    }
 
-    // Code valide
-    if(errEl) errEl.style.display='none';
+    if(errEl) errEl.style.display = 'none';
     sessionStorage.setItem('activation_code', codeRaw);
-    sessionStorage.setItem('activation_plan', data.plan);
-    sessionStorage.setItem('activation_email_hint', data.email || '');
+    sessionStorage.setItem('activation_plan', res.plan);
 
     showActivationForm({
-      plan: data.plan,
-      label: data.plan === 'pro' ? 'Plan Pro' : data.plan === 'agency' ? 'Plan Agence' : 'Plan Starter',
+      plan:  res.plan,
+      label: 'Plan ' + (PLAN_LABELS[res.plan] || 'Starter'),
     });
   } catch(e){
     console.error(e);
@@ -7635,8 +7642,12 @@ async function checkActivationCode(){
 }
 
 function showActivationForm(plan){
-  const wrap = document.querySelector('#register-screen .auth-form-wrap');
-  if(!wrap) return;
+  // #register-screen est l'écran tarifs : son conteneur est #register-panel.
+  // On garde .auth-form-wrap en repli pour les autres écrans.
+  const wrap = document.getElementById('register-panel')
+            || document.querySelector('#register-screen .auth-form-wrap');
+  if(!wrap){ console.warn('showActivationForm: conteneur introuvable'); return; }
+  wrap.style.maxWidth = '380px';
   
   wrap.innerHTML = `
     <div style="text-align:center;margin-bottom:20px">
@@ -7768,7 +7779,6 @@ async function doRegister(){
 
   // Récupérer un éventuel code d'activation
   const activationCode = sessionStorage.getItem('activation_code');
-  const isMasterCode   = activationCode && MASTER_ACTIVATION_CODES[activationCode];
 
   if(btn){ btn.disabled = true; btn.textContent = 'Création du compte…'; }
 
@@ -7803,7 +7813,7 @@ async function doRegister(){
     }
 
     // 3) Consommer le code d'activation (RPC atomique)
-    if(activationCode && !isMasterCode && sbUser){
+    if(activationCode && sbUser){
       try {
         // Petit délai pour laisser la session Supabase s'établir
         await new Promise(r => setTimeout(r, 500));
@@ -7825,7 +7835,6 @@ async function doRegister(){
     // 4) Nettoyer
     sessionStorage.removeItem('activation_code');
     sessionStorage.removeItem('activation_plan');
-    sessionStorage.removeItem('activation_email_hint');
 
     // 5) Auto-login
     document.getElementById('login-email').value = email;
