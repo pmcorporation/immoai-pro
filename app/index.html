@@ -4573,6 +4573,95 @@ function nav(btn,id){
   document.querySelector('.content').scrollTop=0;
 }
 
+// ══════════ NOTIFICATIONS ══════════
+// Appelée douze fois dans l'application — au démarrage, après chaque
+// création ou suppression de prospect, et à l'ouverture du panneau —
+// mais définie nulle part. Comme elle est invoquée au milieu de
+// bootApp(), tout ce qui suivait (KPI finance, transactions, filtres
+// de carte, avatar) ne s'exécutait jamais au lancement.
+//
+// Les règles reprennent celles déjà utilisées par les actions rapides
+// du tableau de bord, pour que les deux affichages ne divergent pas.
+
+function buildNotifs(){
+  const liste = document.getElementById('notif-list');
+  const point = document.getElementById('notif-dot');
+  if(!liste) return;
+
+  const notifs = [];
+
+  // Relances en retard
+  prospects.forEach(p => {
+    (p.followups || []).forEach(f => {
+      if(!f.done && isOd(f.date)){
+        notifs.push({
+          icone: '⚠️', couleur: '#EF4444',
+          titre: 'Relance en retard',
+          detail: `${p.prenom || ''} ${p.nom || ''} — ${f.titre || f.title || 'relance'}`.trim(),
+          action: `openDet('${p.id}')`,
+        });
+      }
+    });
+  });
+
+  // Rendez-vous du jour
+  const auj = new Date().toISOString().slice(0, 10);
+  rdvs.filter(r => r.date === auj).forEach(r => {
+    notifs.push({
+      icone: '📅', couleur: '#0EA5E9',
+      titre: r.heure ? `Rendez-vous à ${r.heure}` : 'Rendez-vous aujourd\'hui',
+      detail: r.titre || r.prospect || r.type || '',
+      action: "navTo('agenda')",
+    });
+  });
+
+  // Mandats expirant sous quinze jours
+  mandats.filter(m => {
+    if(!m.dateExp) return false;
+    const j = (new Date(m.dateExp) - new Date()) / 86400000;
+    return j >= 0 && j <= 14;
+  }).forEach(m => {
+    notifs.push({
+      icone: '📋', couleur: '#E8956D',
+      titre: 'Mandat bientôt expiré',
+      detail: `${m.bien || m.adresse || 'Mandat'} — échéance le ${m.dateExp}`,
+      action: "navTo('mandats')",
+    });
+  });
+
+  if(point) point.style.display = notifs.length ? 'block' : 'none';
+
+  if(!notifs.length){
+    liste.innerHTML = '<div style="padding:26px 16px;text-align:center;color:var(--g400);font-size:.82rem">'
+                    + 'Rien à signaler pour le moment.</div>';
+    return;
+  }
+
+  liste.innerHTML = notifs.slice(0, 12).map(n => `
+    <div class="notif-item" onclick="${n.action};clearNotifs()"
+         style="display:flex;gap:10px;padding:11px 14px;border-bottom:1px solid var(--g100);cursor:pointer">
+      <span style="font-size:1rem;line-height:1.2">${n.icone}</span>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:.79rem;font-weight:600;color:${n.couleur}">${echapper(n.titre)}</div>
+        <div style="font-size:.73rem;color:var(--g500);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${echapper(n.detail)}</div>
+      </div>
+    </div>`).join('');
+}
+
+/** Échappement systématique : un nom de prospect ne doit jamais
+    pouvoir injecter du HTML dans l'interface. */
+function echapper(v){
+  return String(v == null ? '' : v)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+/** Module formation : les leçons ne sont pas encore rédigées. Défini
+    pour que les liens n'échouent pas silencieusement. */
+function openLesson(cle){
+  toast('📘 Cette leçon arrive prochainement.');
+}
+
 function toggleNotif(){notifOpen=!notifOpen;document.getElementById('notif-panel').classList.toggle('hidden',!notifOpen);if(notifOpen)buildNotifs();}
 function clearNotifs(){document.getElementById('notif-dot').style.display='none';notifOpen=false;document.getElementById('notif-panel').classList.add('hidden');}
 document.addEventListener('click',e=>{if(!document.getElementById('notif-btn').contains(e.target)&&!document.getElementById('notif-panel').contains(e.target)){notifOpen=false;document.getElementById('notif-panel').classList.add('hidden');}});
@@ -7110,15 +7199,21 @@ function renderFinKPIs(){
   const pipeSub=document.getElementById('fin-pipeline-sub');if(pipeSub)pipeSub.textContent=prospects.filter(p=>isPipeline(p)).length+' opportunités en cours';
   // Mois dispo
   const sel=document.getElementById('fin-month-sel');
+  if(!sel)return;   // module Finance non rendu — voir renderTransactions
   const months=[...new Set(transactions.map(t=>t.date?.slice(0,7)).filter(Boolean))].sort().reverse();
   const cur=sel.value;
   sel.innerHTML='<option value="all">Tous les mois</option>'+months.map(m=>`<option value="${m}" ${cur===m?'selected':''}>${new Date(m+'-01').toLocaleDateString('fr-FR',{month:'long',year:'numeric'})}</option>`).join('');
 }
 function renderTransactions(){
   const body=document.getElementById('tx-body'),em=document.getElementById('fin-empty');
+  // Le module Finance est masqué derrière un écran « Bientôt
+  // disponible » : ses éléments n'existent pas, alors que la fonction
+  // est appelée au démarrage. Sans cette sortie, bootApp() s'arrêtait
+  // ici et l'avatar comme les filtres de carte n'étaient jamais posés.
+  if(!body||!em)return;
   if(!transactions.length){em.style.display='block';body.innerHTML='';return;}
   em.style.display='none';
-  const month=document.getElementById('fin-month-sel').value;
+  const month=document.getElementById('fin-month-sel')?.value||'all';
   let list=transactions.filter(t=>{
     const mOk=month==='all'||t.date?.startsWith(month);
     const tOk=finFilter==='all'||t.type===finFilter;
@@ -8301,6 +8396,52 @@ function getUserCurrentPlan(){
   return subs[session.sbId] || subs[session.id] || 'free';
 }
 
+// ══════════ MISE EN VEILLE DES MODULES IA ══════════
+// Le produit se recentre sur le CRM et l'acquisition de prospects
+// publicitaires. Les assistants IA sont désactivés, pas supprimés :
+// leur code reste intact et il suffit de repasser ce drapeau à true.
+//
+// La désactivation est totale et volontairement redondante — menu,
+// cartes du tableau de bord, navigation, chatbot, écran de clé API —
+// pour qu'aucun chemin détourné ne rouvre une fonctionnalité qui
+// exigeait du client sa propre clé Anthropic.
+const MODULES_IA_ACTIFS = false;
+
+const MODULES_IA = ['gmb','linkedin','prosp','instagram','facebook','juridique','visual'];
+
+/** Masque toute trace des assistants dans l'interface. */
+function appliquerVeilleIA(){
+  if(MODULES_IA_ACTIFS) return;
+
+  // Section entière de la barre latérale
+  const sec = document.querySelector('.sb-section[data-section="ia"]');
+  if(sec) sec.style.display = 'none';
+
+  // Studio Visuel vit dans la section Outils
+  const btnVisuel = document.querySelector('.sb-btn[onclick*="\'visual\'"]');
+  if(btnVisuel) btnVisuel.style.display = 'none';
+
+  // Cartes et raccourcis du tableau de bord
+  MODULES_IA.forEach(function(m){
+    document.querySelectorAll('[onclick*="\'' + m + '\'"]').forEach(function(el){
+      if(el.classList.contains('sb-btn') || el.classList.contains('tool-card')
+         || el.classList.contains('tool-card-locked') || el.classList.contains('ext-item')){
+        el.style.display = 'none';
+      }
+    });
+  });
+
+  // Chatbot flottant : il consomme la même clé API
+  const bulle = document.getElementById('cb-bubble');
+  if(bulle) bulle.style.display = 'none';
+  const fen = document.getElementById('cb-win');
+  if(fen) fen.classList.add('hidden');
+
+  // Écran de saisie de la clé Anthropic : plus jamais proposé
+  const ecranCle = document.getElementById('api-key-screen');
+  if(ecranCle) ecranCle.style.display = 'none';
+}
+
 const PLAN_ACCESS = {
   // CRM plan: accès CRM complet, mandats, agenda
   // Pro plan: tout
@@ -8308,24 +8449,43 @@ const PLAN_ACCESS = {
 };
 
 function isPlanLocked(module){
+  // Les assistants sont en veille pour tout le monde, quel que soit le
+  // plan : ils dépendaient d'une clé Anthropic fournie par le client.
+  if(!MODULES_IA_ACTIFS && MODULES_IA.includes(module)) return true;
   const plan = getUserCurrentPlan();
   if(plan === 'pro' || plan === 'agency') return false;
   return PLAN_ACCESS.crm_only_modules.includes(module);
 }
 
 function showPlanGate(viewEl, module){
-  // Retirer un gate existant
   const existing = viewEl.querySelector('.plan-gate-overlay');
   if(existing) existing.remove();
+
   const gate = document.createElement('div');
   gate.className = 'plan-gate-overlay';
-  const isJuridique = module === 'juridique';
-  gate.innerHTML = `
-    <div class="plan-gate-icon">${isJuridique ? '⚖️' : '🤖'}</div>
-    <div class="plan-gate-title">${isJuridique ? 'Expert Juridique IA' : 'Assistant IA'}</div>
-    <div class="plan-gate-sub">Cette fonctionnalité est disponible avec le plan <strong>mon-crm-immo</strong>.<br>Passez à Pro pour débloquer tous les assistants IA.</div>
-    <button class="plan-gate-btn" onclick="window.open('immoai-landing.html#pricing','_blank')">Passer à mon-crm-immo →</button>
-  `;
+
+  // Deux situations distinctes : un module en veille produit, et un
+  // module réservé à un plan supérieur. Promettre « passez à Pro » pour
+  // le premier serait mensonger — aucun plan ne le débloque.
+  const enVeille = !MODULES_IA_ACTIFS && MODULES_IA.includes(module);
+
+  if(enVeille){
+    gate.innerHTML = `
+      <div class="plan-gate-icon">🌙</div>
+      <div class="plan-gate-title">Module en pause</div>
+      <div class="plan-gate-sub">Les assistants IA sont temporairement retirés du produit.<br>
+        Nous concentrons le développement sur le CRM et l'acquisition de prospects publicitaires.</div>
+      <button class="plan-gate-btn" onclick="navTo('dashboard')">Retour au tableau de bord</button>
+    `;
+  } else {
+    gate.innerHTML = `
+      <div class="plan-gate-icon">🔒</div>
+      <div class="plan-gate-title">Fonctionnalité incluse dans un plan supérieur</div>
+      <div class="plan-gate-sub">Cette fonctionnalité n'est pas comprise dans votre abonnement actuel.</div>
+      <button class="plan-gate-btn" onclick="window.open('/tarifs','_blank')">Voir les tarifs →</button>
+    `;
+  }
+
   viewEl.style.position = 'relative';
   viewEl.appendChild(gate);
 }
@@ -8345,6 +8505,7 @@ function updatePlanBadge(){
 
 // ══════════ BOOT APP ══════════
 function bootApp(){
+  appliquerVeilleIA();
   initSectionsBarreLaterale();
   updatePlanBadge();
   renderList();
