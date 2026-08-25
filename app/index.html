@@ -9069,20 +9069,28 @@ function updateUserUI(){
 // ═══════════════════════════════════════════════════════════════
 let _trialCheckInterval = null;
 
+/**
+ * L'essai appartient à l'ORGANISATION, pas à l'utilisateur.
+ *
+ * L'ancienne version lisait profiles.trial_ends_at, donc un essai par
+ * personne : dans une agence de cinq commerciaux, chacun démarrait le
+ * sien, et un agent invité dans une agence déjà abonnée se voyait
+ * offrir un essai avec bandeau de compte à rebours. Une agence essaie
+ * une fois, pas une fois par tête.
+ *
+ * mon_abonnement() tranche côté serveur — le client n'a plus à
+ * recalculer si l'abonnement prime sur l'essai.
+ */
 async function checkTrialStatus(){
   if(!currentUser || !currentUser.sbId) return null;
   try {
     const sb = getSB();
     if(!sb) return null;
-    const { data, error } = await sb
-      .from('profiles')
-      .select('plan, subscription_status, trial_ends_at')
-      .eq('id', currentUser.sbId)
-      .maybeSingle();
+    const { data, error } = await sb.rpc('mon_abonnement');
     if(error || !data) return null;
     return data;
   } catch(e){
-    console.warn('checkTrialStatus error:', e);
+    console.warn('checkTrialStatus :', e);
     return null;
   }
 }
@@ -9200,22 +9208,23 @@ function logoutFromExpired(){
 }
 
 async function runTrialCheck(){
-  const profile = await checkTrialStatus();
-  if(!profile) return;
-  const now = new Date();
-  // Si trial_ends_at existe et est dépassé ET pas d'abonnement actif → BLOQUER
-  if(profile.trial_ends_at){
-    const endDate = new Date(profile.trial_ends_at);
-    const isExpired = endDate < now;
-    const hasActiveSubscription = profile.subscription_status === 'active' && profile.plan !== 'free';
-    if(isExpired && !hasActiveSubscription){
-      showTrialExpiredScreen(profile);
-      return;
-    }
-    // Sinon afficher le bandeau countdown
-    if(profile.subscription_status === 'trial'){
-      renderTrialBanner(profile);
-    }
+  const abo = await checkTrialStatus();
+  if(!abo) return;
+
+  // Le serveur a déjà tranché : abonne | essai | essai_termine |
+  // sans_abonnement | sans_organisation. Le client se contente
+  // d'afficher, il ne recalcule rien.
+  if(abo.etat === 'abonne' || abo.etat === 'sans_organisation') {
+    const b = document.getElementById('trial-banner');
+    if(b) b.remove();
+    return;
+  }
+
+  if(!abo.actif){ showTrialExpiredScreen(abo); return; }
+
+  if(abo.etat === 'essai'){
+    // Le bandeau attend trial_ends_at : on le lui donne sous ce nom.
+    renderTrialBanner({ ...abo, trial_ends_at: abo.essaiFinLe, plan: abo.plan });
   }
 }
 
