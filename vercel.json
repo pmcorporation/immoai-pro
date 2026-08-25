@@ -3,7 +3,7 @@
   "cleanUrls": true,
   "trailingSlash": false,
   "rewrites": [
-    { "source": "/app/:path*", "destination": "/app/index.html" },
+    { "source": "/app/((?!js/).*)", "destination": "/app/index.html" },
     { "source": "/app", "destination": "/app/index.html" }
   ]
 }

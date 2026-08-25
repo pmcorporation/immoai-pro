@@ -18,6 +18,7 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="js/donnees.js"></script>
 <style>
 /* ══════════════════════════════════════════
    DESIGN SYSTEM — IMMOAI PRO v3
@@ -4239,94 +4240,98 @@ async function sbDeleteWhere(table, field, value) {
   if(error) console.error('sbDeleteWhere error:', error);
 }
 
-// ── Sync data ──
-async function syncToSupabase() {
-  if(!currentUser?.id) return;
-  const userId = currentUser.sbId || currentUser.id;
-  if(!userId || typeof userId !== 'string' || !userId.includes('-')) return; // Pas un UUID Supabase
-  
-  try {
-    // Sync mandats
-    if(mandats.length > 0) {
-      const mandatsData = mandats.map(m => ({...m, user_id: userId, updated_at: new Date().toISOString()}));
-      await getSB()?.from('mandats').upsert(mandatsData, {onConflict: 'id'});
+// ── Synchronisation ──
+// L'ancien couple syncToSupabase()/loadFromSupabase() est remplacé par
+// app/js/donnees.js. Il renvoyait tout toutes les 30 secondes, ne
+// propageait aucune suppression, et son déclencheur à l'enregistrement
+// était du code mort : la lambda saveP_ s'arrêtait au point-virgule et
+// le setTimeout qui suivait s'exécutait une seule fois au chargement,
+// quand currentUser valait encore null.
+
+let _syncEnAttente = null;
+
+/** Regroupe les rafales de sauvegarde en un seul envoi. */
+function planifierSync(delai){
+  if(_syncEnAttente) clearTimeout(_syncEnAttente);
+  _syncEnAttente = setTimeout(function(){
+    _syncEnAttente = null;
+    lancerSync();
+  }, delai || 1500);
+}
+
+async function lancerSync(){
+  const sb = getSB();
+  if(!sb || !Donnees.contexte()) return;
+  try{
+    const bilan = await Donnees.synchroniser(sb);
+    if(bilan && bilan.erreurs && bilan.erreurs.length){
+      console.warn('Synchronisation partielle :', bilan.erreurs);
     }
-    
-    // Sync prospects
-    if(prospects.length > 0) {
-      const prospectsData = prospects.map(p => ({...p, user_id: userId, updated_at: new Date().toISOString()}));
-      await getSB()?.from('prospects').upsert(prospectsData, {onConflict: 'id'});
+    if(bilan && bilan.recus) rafraichirDepuisCouche();
+    majIndicateurSync();
+  }catch(e){ console.warn('Synchronisation impossible :', e.message); }
+}
+
+/** Recharge les tableaux de travail après réception de nouveautés. */
+function rafraichirDepuisCouche(){
+  prospects = Donnees.prospects.liste();
+  mandats   = Donnees.mandats.liste();
+  rdvs      = Donnees.rdvs.liste();
+  try{renderList();}catch(_){}
+  try{renderMandats();}catch(_){}
+  try{renderAgenda();}catch(_){}
+  try{updateDashKPIs();}catch(_){}
+}
+
+/**
+ * Établit le contexte après connexion : sans organisation, aucune
+ * écriture ne peut aboutir, org_id étant NOT NULL.
+ */
+async function etablirContexte(){
+  const sb = getSB();
+  if(!sb || !currentUser || !currentUser.sbId) return null;
+  try{
+    const { data, error } = await sb
+      .from('membres').select('org_id, role')
+      .eq('utilisateur_id', currentUser.sbId).maybeSingle();
+    if(error || !data){
+      console.warn('Aucune organisation rattachée à ce compte.', error && error.message);
+      return null;
     }
-    
-    // Sync RDVs
-    if(rdvs.length > 0) {
-      const rdvsData = rdvs.map(r => ({...r, user_id: userId, updated_at: new Date().toISOString()}));
-      await getSB()?.from('rdvs').upsert(rdvsData, {onConflict: 'id'});
-    }
-    
-    // Sync profil
-    if(profile && profile.prenom) {
-      await getSB()?.from('profiles').upsert({
-        id: userId,
-        email: currentUser.email,
-        prenom: profile.prenom || '',
-        nom: profile.nom || '',
-        agence: profile.agence || '',
-        tel: profile.tel || '',
-        photo: profile.photo || '',
-        plan: sessionStorage.getItem('activation_plan') || getUserCurrentPlan(),
-        updated_at: new Date().toISOString()
-      }, {onConflict: 'id'});
-    }
-  } catch(e) {
-    console.warn('Sync Supabase failed (offline?):', e.message);
+    Donnees.definirContexte({ orgId: data.org_id, userId: currentUser.sbId, role: data.role });
+    return data;
+  }catch(e){ console.warn('etablirContexte :', e.message); return null; }
+}
+
+/** Premier chargement après connexion. */
+async function chargerDonnees(){
+  const sb = getSB();
+  if(!sb) return;
+  if(!Donnees.contexte() && !(await etablirContexte())) return;
+  await Donnees.chargerTout(sb);
+  rafraichirDepuisCouche();
+  majIndicateurSync();
+}
+
+function majIndicateurSync(){
+  const n = Donnees.enAttente();
+  const el = document.getElementById('tb-sync-attente');
+  if(el){
+    el.style.display = n ? 'inline-flex' : 'none';
+    el.textContent = n + (n > 1 ? ' modifications en attente' : ' modification en attente');
   }
 }
 
-async function loadFromSupabase() {
-  if(!currentUser?.sbId) return;
-  const userId = currentUser.sbId;
-  
-  try {
-    // Charger mandats
-    const sbMandats = await sbGet('mandats', {user_id: userId});
-    if(sbMandats.length > 0) {
-      mandats = sbMandats;
-      localStorage.setItem('immoai_mandats', JSON.stringify(mandats));
-    }
-    
-    // Charger prospects
-    const sbProspects = await sbGet('prospects', {user_id: userId});
-    if(sbProspects.length > 0) {
-      prospects = sbProspects;
-      localStorage.setItem('immoai_crm', JSON.stringify(prospects));
-    }
-    
-    // Charger RDVs
-    const sbRdvs = await sbGet('rdvs', {user_id: userId});
-    if(sbRdvs.length > 0) {
-      rdvs = sbRdvs;
-      localStorage.setItem('immoai_rdvs', JSON.stringify(rdvs));
-    }
-    
-    // Charger profil
-    const sbProfile = await sbGet('profiles', {id: userId});
-    if(sbProfile.length > 0) {
-      const p = sbProfile[0];
-      profile = {...profile, ...p};
-      localStorage.setItem('immoai_profile', JSON.stringify(profile));
-    }
-    
-    console.log('✅ Données chargées depuis Supabase');
-  } catch(e) {
-    console.warn('Load from Supabase failed (offline?):', e.message);
-  }
-}
+// Filet : on retente périodiquement ce qui n'est pas passé (hors ligne,
+// erreur serveur). Sans file en attente, aucun appel réseau n'est fait.
+setInterval(function(){
+  if(Donnees.enAttente() > 0) lancerSync();
+}, 60000);
 
-// ── Auto-sync toutes les 30 secondes ──
-setInterval(function() {
-  if(currentUser?.sbId) syncToSupabase();
-}, 30000);
+// Dernière chance avant fermeture de l'onglet.
+window.addEventListener('beforeunload', function(){
+  if(Donnees.enAttente() > 0) lancerSync();
+});
 
 // ══════════ CONFIG ══════════
 // ══ CLÉ API SÉCURISÉE ══
@@ -4393,9 +4398,23 @@ const RDV_TYPES={
 };
 
 // ══════════ STATE ══════════
-let prospects=JSON.parse(localStorage.getItem('immoai_crm')||'[]');
-let mandats=JSON.parse(localStorage.getItem('immoai_mandats')||'[]');
-let rdvs=JSON.parse(localStorage.getItem('immoai_rdvs')||'[]');
+// L'état de travail vient du cache de la couche de données. Les clés
+// immoai_* d'origine servent de reprise pour les comptes existants :
+// elles sont lues une fois, puis la couche prend le relais.
+let prospects = hydrater('prospects', 'immoai_crm');
+let mandats   = hydrater('mandats',   'immoai_mandats');
+let rdvs      = hydrater('rdvs',      'immoai_rdvs');
+
+function hydrater(entite, cleHeritee){
+  const depuisCouche = Donnees[entite].liste();
+  if(depuisCouche.length) return depuisCouche;
+  // Première ouverture après la refonte : on récupère l'ancien cache
+  // local et on le confie à la couche, qui l'enverra en base.
+  let herite = [];
+  try{ herite = JSON.parse(localStorage.getItem(cleHeritee) || '[]'); }catch(_){}
+  if(herite.length) Donnees[entite].remplacerTout(herite);
+  return herite;
+}
 let profile=JSON.parse(localStorage.getItem('immoai_profile')||'{}');
 let reseau=JSON.parse(localStorage.getItem('immoai_reseau')||'[]');
 let transactions=JSON.parse(localStorage.getItem('immoai_finance')||'[]');
@@ -4411,9 +4430,14 @@ let activityLogs=[];
 // ══════════ UTILS ══════════
 const toast=(m,d=3000)=>{const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),d);};
 const today_=()=>new Date().toLocaleDateString('fr-FR');
-const saveP_=()=>localStorage.setItem('immoai_crm',JSON.stringify(prospects));if(currentUser&&currentUser.sbId)setTimeout(function(){syncToSupabase();},1000);
-const saveM_=()=>localStorage.setItem('immoai_mandats',JSON.stringify(mandats));
-const saveR_=()=>localStorage.setItem('immoai_rdvs',JSON.stringify(rdvs));
+// Point d'intégration unique avec la couche de données. L'application
+// continue de muter ses tableaux puis d'appeler ces fonctions : c'est
+// ici que le geste devient une synchronisation correcte. Un identifiant
+// disparu du tableau vaut suppression, ce qui couvre quickDel() et
+// delProspect() sans les modifier.
+const saveP_=()=>{Donnees.prospects.remplacerTout(prospects);planifierSync();};
+const saveM_=()=>{Donnees.mandats.remplacerTout(mandats);planifierSync();};
+const saveR_=()=>{Donnees.rdvs.remplacerTout(rdvs);planifierSync();};
 const savePro=()=>localStorage.setItem('immoai_profile',JSON.stringify(profile));
 const saveReseau=()=>localStorage.setItem('immoai_reseau',JSON.stringify(reseau));
 const saveFin=()=>localStorage.setItem('immoai_finance',JSON.stringify(transactions));
@@ -5930,7 +5954,7 @@ function showRdvDetail(id){
   const msg=`${t.emoji} ${r.titre||t.label}\n\nDate : ${r.date?new Date(r.date+'T12:00').toLocaleDateString('fr-FR'):'—'} à ${r.heure||'—'}\nClient : ${r.prospect||'—'}\nAdresse : ${r.adresse||'—'}\nNote : ${r.note||'—'}\n\nSupprimer ce RDV ?`;
   if(confirm(msg))deleteRdv(id);
 }
-function deleteRdv(id){rdvs=rdvs.filter(x=>x.id!==id);localStorage.setItem('immoai_rdvs',JSON.stringify(rdvs));renderAgenda();toast('🗑️ RDV supprimé');}
+function deleteRdv(id){rdvs=rdvs.filter(x=>x.id!==id);saveR_();renderAgenda();toast('🗑️ RDV supprimé');}
 
 // ══ TODO BOARD ══
 let todos=JSON.parse(localStorage.getItem('immoai_todos')||'[]');
@@ -7856,13 +7880,8 @@ function doLogin(){
       agence: (sbUser.user_metadata && sbUser.user_metadata.agence) || ''
     };
     _finishLogin(user, remCb);
-    // Charger les données depuis Supabase
-    loadFromSupabase().then(function(){
-      try{renderMandats();}catch(e){}
-      try{renderList();}catch(e){}
-      try{renderAgenda();}catch(e){}
-      try{updateDashKPIs();}catch(e){}
-    });
+    // Contexte puis chargement : chargerDonnees() rafraîchit l'affichage.
+    chargerDonnees().catch(function(e){ console.warn('Chargement :', e.message); });
   }).catch(function(){
     // Fallback compte démo local
     const user=getUsers().find(function(u){return u.email.toLowerCase()===email&&u.pwd===pwd;});
@@ -8149,9 +8168,11 @@ function importData(e){
   r.onload = ev => {
     try{
       const data = JSON.parse(ev.target.result);
-      if(data.prospects) localStorage.setItem('immoai_crm', JSON.stringify(data.prospects));
-      if(data.mandats)   localStorage.setItem('immoai_mandats', JSON.stringify(data.mandats));
-      if(data.rdvs)      localStorage.setItem('immoai_rdvs', JSON.stringify(data.rdvs));
+      // Restauration d'une sauvegarde : on confie à la couche, qui
+      // enverra le tout en base au lieu de le laisser dans le navigateur.
+      if(data.prospects) Donnees.prospects.remplacerTout(data.prospects);
+      if(data.mandats)   Donnees.mandats.remplacerTout(data.mandats);
+      if(data.rdvs)      Donnees.rdvs.remplacerTout(data.rdvs);
       if(data.reseau)    localStorage.setItem('immoai_reseau', JSON.stringify(data.reseau));
       if(data.shared)    localStorage.setItem('immoai_shared', JSON.stringify(data.shared));
       if(data.finance)   localStorage.setItem('immoai_finance', JSON.stringify(data.finance));
@@ -8351,6 +8372,7 @@ function bootApp(){
       document.getElementById('app-root').style.display='flex';
       updateUserUI();startClock();updateStorageIndicator();
       bootApp();
+      chargerDonnees().catch(function(_){});
     }catch(e){sessionStorage.removeItem('immoai_session');}
   } else {
     document.getElementById('app-root').style.display='none';
@@ -10137,7 +10159,7 @@ saveRdv = function() {
   };
   
   rdvs.push(r);
-  localStorage.setItem('immoai_rdvs', JSON.stringify(rdvs));
+  saveR_();
   document.getElementById('add-rdv-overlay').classList.add('hidden');
   
   // Reset form
@@ -10156,7 +10178,7 @@ saveRdv = function() {
     gcalCreateEvent(r).then(function(gcalId) {
       if(gcalId) {
         r.google_event_id = gcalId;
-        localStorage.setItem('immoai_rdvs', JSON.stringify(rdvs));
+        saveR_();
         gcalState.syncedCount = (gcalState.syncedCount||0) + 1;
         gcalState.lastSync = new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
         saveGcalState(); initGcalBanner();
@@ -10404,7 +10426,7 @@ async function checkAndSendRdvReminders() {
     
     if(sent) {
       rdv.reminderSent = true;
-      localStorage.setItem('immoai_rdvs', JSON.stringify(rdvs));
+      saveR_();
     }
   }
 }

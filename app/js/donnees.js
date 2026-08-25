@@ -312,6 +312,27 @@
   // 5. DÉPÔTS
   // ══════════════════════════════════════════════════════════════
 
+  // Organisation et utilisateur courants, posés après connexion.
+  // Sans eux, aucune écriture ne peut être rattachée : org_id est NOT NULL.
+  let _contexte = null;
+
+  function definirContexte(c) { _contexte = c || null; }
+  function contexteCourant() { return _contexte; }
+
+  /**
+   * Signature d'un objet, hors champs de service. Sert à repérer ce qui
+   * a réellement changé : sans cela on renverrait tout à chaque
+   * sauvegarde, exactement le défaut de l'ancienne synchronisation.
+   */
+  function signature(obj) {
+    const c = {};
+    for (const k of Object.keys(obj).sort()) {
+      if (k === '_maj' || k === '_supprimeLe' || k === '_attribueA') continue;
+      c[k] = obj[k];
+    }
+    return JSON.stringify(c);
+  }
+
   function creerDepot(entite) {
     return {
       /** Tout ce qui n'est pas supprimé, depuis le cache. */
@@ -332,6 +353,51 @@
         Cache.ecrire(entite, liste);
         File.ajouter({ type: 'maj', entite, id: obj.id, objet: obj, ts: obj._maj });
         return obj;
+      },
+
+      /**
+       * Reçoit le tableau complet tenu par l'application et en déduit ce
+       * qui a changé. L'app continue de muter ses tableaux puis d'appeler
+       * saveP_() : c'est ici que ce geste devient une synchronisation
+       * correcte, sans toucher aux 36 endroits qui l'appellent.
+       *
+       * Un identifiant disparu du tableau vaut suppression : c'est ainsi
+       * que quickDel() et delProspect(), qui filtrent puis sauvegardent,
+       * se retrouvent gérés sans modification.
+       */
+      remplacerTout(liste) {
+        const cache = Cache.lire(entite);
+        const avantParId = new Map(cache.map((o) => [o.id, o]));
+        const idsPresents = new Set(liste.map((o) => o.id));
+        const t = new Date().toISOString();
+        let modifies = 0, supprimes = 0;
+
+        for (const obj of liste) {
+          const avant = avantParId.get(obj.id);
+          if (!avant || signature(avant) !== signature(obj)) {
+            obj._maj = t;
+            File.ajouter({ type: 'maj', entite, id: obj.id, objet: obj, ts: t });
+            modifies++;
+          } else {
+            obj._maj = avant._maj;
+          }
+        }
+
+        // Les pierres tombales restent dans le cache mais pas dans le
+        // tableau applicatif : l'utilisateur ne doit plus les voir.
+        const tombes = [];
+        for (const avant of cache) {
+          if (idsPresents.has(avant.id)) continue;
+          if (!avant._supprimeLe) {
+            avant._supprimeLe = t;
+            File.ajouter({ type: 'suppr', entite, id: avant.id, ts: t });
+            supprimes++;
+          }
+          tombes.push(avant);
+        }
+
+        Cache.ecrire(entite, liste.concat(tombes));
+        return { modifies, supprimes };
       },
 
       /**
@@ -357,6 +423,7 @@
   let _enCours = false;
 
   async function synchroniser(sb, contexte) {
+    contexte = contexte || _contexte;
     if (_enCours) return { ignore: true };
     if (!sb || !contexte || !contexte.orgId) return { horsLigne: true };
 
@@ -420,14 +487,32 @@
     }
   }
 
+  /**
+   * Le serveur a généré un uuid pour remplacer un identifiant hérité.
+   * On répercute dans le cache ET dans la file : une suppression mise
+   * en attente avant le premier envoi viserait sinon l'ancien
+   * identifiant, et ne supprimerait rien.
+   */
   function remplacerId(entite, ancien, nouveau) {
     const liste = Cache.lire(entite);
     const i = liste.findIndex((o) => o.id === ancien);
     if (i >= 0) { liste[i].id = nouveau; Cache.ecrire(entite, liste); }
+
+    const ops = File.lire();
+    let touche = false;
+    for (const op of ops) {
+      if (op.entite === entite && op.id === ancien) {
+        op.id = nouveau;
+        if (op.objet) op.objet.id = nouveau;
+        touche = true;
+      }
+    }
+    if (touche) File.ecrire(ops);
   }
 
   /** Premier chargement : on repart de zéro depuis le serveur. */
   async function chargerTout(sb, contexte) {
+    contexte = contexte || _contexte;
     localStorage.removeItem(CLE_SYNC);
     Object.keys(SCHEMAS).forEach((e) => Cache.ecrire(e, []));
     return synchroniser(sb, contexte);
@@ -444,10 +529,14 @@
 
     synchroniser,
     chargerTout,
+    definirContexte,
+    contexte: contexteCourant,
     enAttente: () => File.taille(),
     vider: Cache.vider,
 
     // Exposés pour les tests et le débogage.
+    _remplacerId: remplacerId,
+    _signature: signature,
     _versBase: versBase,
     _versApp:  versApp,
     _schemas:  SCHEMAS,

@@ -1,3 +1,11 @@
+// localStorage minimal : la couche s'en sert pour le cache et la file.
+const _mem = {};
+globalThis.localStorage = {
+  getItem: (k) => (k in _mem ? _mem[k] : null),
+  setItem: (k, v) => { _mem[k] = String(v); },
+  removeItem: (k) => { delete _mem[k]; },
+};
+
 const D = require('./donnees.js');
 let ok = 0, ko = 0;
 const t = (nom, cond, detail) => {
@@ -94,6 +102,71 @@ t('saisie libre → avec_qui', r.avec_qui === 'Marie Dubois');
 t('date → date_rdv', r.date_rdv === '2026-08-26');
 t('durée en entier', r.duree_min === 45, r.duree_min);
 t('note vide → null', r.note === null);
+
+console.log('\n── Différentiel : ce qui part vraiment en file d\'attente ──');
+const file = () => JSON.parse(localStorage.getItem('mci_file_attente') || '[]');
+const videFile = () => localStorage.setItem('mci_file_attente', '[]');
+
+const p1 = { id: 'u1', prenom: 'Marie', nom: 'Dubois', stage: 'contact' };
+const p2 = { id: 'u2', prenom: 'Jean',  nom: 'Martin', stage: 'rdv' };
+
+videFile();
+D.prospects.remplacerTout([p1, p2]);
+t('deux créations mises en file', file().length === 2, file().length);
+
+videFile();
+D.prospects.remplacerTout([p1, p2]);
+t('aucun changement → file vide (plus de renvoi permanent)', file().length === 0, file());
+
+videFile();
+p2.stage = 'estimation';
+D.prospects.remplacerTout([p1, p2]);
+const f = file();
+t('seul le modifié repart', f.length === 1 && f[0].id === 'u2', f);
+
+videFile();
+D.prospects.remplacerTout([p1]);          // u2 retiré du tableau, comme le fait quickDel()
+const g = file();
+t('un id disparu du tableau vaut suppression',
+  g.length === 1 && g[0].type === 'suppr' && g[0].id === 'u2', g);
+
+t('la suppression n\'est pas rendue à l\'application',
+  D.prospects.liste().map((o) => o.id).join() === 'u1', D.prospects.liste().map((o) => o.id));
+
+t('mais la pierre tombale reste en cache pour être propagée',
+  JSON.parse(localStorage.getItem('mci_cache_prospects')).some((o) => o.id === 'u2' && o._supprimeLe));
+
+videFile();
+D.prospects.remplacerTout([p1]);
+t('une suppression déjà propagée ne repart pas', file().length === 0, file());
+
+console.log('\n── Contexte ──');
+D.definirContexte({ orgId: ctx.orgId, userId: ctx.userId });
+t('contexte mémorisé', D.contexte().orgId === ctx.orgId);
+
+
+
+console.log('\n── Création puis suppression avant la première synchro ──');
+(() => {
+  localStorage.setItem('mci_file_attente', '[]');
+  localStorage.setItem('mci_cache_prospects', '[]');
+
+  const tmp = { id: 'p1777900000000', prenom: 'Ephemere', nom: 'Test' };
+  D.prospects.remplacerTout([tmp]);       // création
+  D.prospects.remplacerTout([]);          // suppression immédiate
+
+  const avant = JSON.parse(localStorage.getItem('mci_file_attente'));
+  t('les deux opérations visent l\'identifiant hérité',
+    avant.length === 2 && avant.every((o) => o.id === 'p1777900000000'), avant.map((o) => o.id));
+
+  // Le serveur répond avec un uuid : la file doit suivre.
+  D._remplacerId('prospects', 'p1777900000000', 'dddddddd-1111-2222-3333-444444444444');
+  const apres = JSON.parse(localStorage.getItem('mci_file_attente'));
+  t('la suppression en attente vise désormais l\'uuid du serveur',
+    apres.every((o) => o.id === 'dddddddd-1111-2222-3333-444444444444'), apres.map((o) => o.id));
+  t('l\'objet en file porte aussi le nouvel identifiant',
+    apres.find((o) => o.type === 'maj').objet.id === 'dddddddd-1111-2222-3333-444444444444');
+})();
 
 console.log(`\n${ok} réussis, ${ko} échoués`);
 process.exit(ko ? 1 : 0);
