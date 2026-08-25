@@ -1602,8 +1602,8 @@ body{font-family:var(--fb);background:#FAFAFA;color:var(--g900);min-height:100vh
     </div>
     <div class="auth-features">
       <div class="auth-feat"><div class="auth-feat-icon">🎯</div><div class="auth-feat-text"><strong>CRM Pipeline 8 étapes</strong>Prospects → Acte signé</div></div>
-      <div class="auth-feat"><div class="auth-feat-icon">⚖️</div><div class="auth-feat-text"><strong>Expert Juridique IA</strong>Droit immobilier · Claude Opus</div></div>
-      <div class="auth-feat"><div class="auth-feat-icon">📢</div><div class="auth-feat-text"><strong>Diffusion 8 portails</strong>SeLoger, LeBonCoin, Bien'ici…</div></div>
+      <div class="auth-feat"><div class="auth-feat-icon">⚖️</div><div class="auth-feat-text"><strong>Leads publicitaires</strong>Vos prospects Facebook, dans le pipeline</div></div>
+      <div class="auth-feat"><div class="auth-feat-icon">📢</div><div class="auth-feat-text"><strong>Relances automatiques</strong>Plus aucun prospect oublié</div></div>
       <div class="auth-feat"><div class="auth-feat-icon">🤝</div><div class="auth-feat-text"><strong>Réseau d'agents</strong>Partagez vos mandats en 1 clic</div></div>
     </div>
     <div class="auth-testimonial">
@@ -1671,9 +1671,9 @@ body{font-family:var(--fb);background:#FAFAFA;color:var(--g900);min-height:100vh
     </div>
     <div class="auth-features">
       <div class="auth-feat"><div class="auth-feat-icon">&#127919;</div><div class="auth-feat-text"><strong>CRM Pipeline 8 &eacute;tapes</strong>De la prospection &agrave; l&rsquo;acte sign&eacute;</div></div>
-      <div class="auth-feat"><div class="auth-feat-icon">&#9878;&#65039;</div><div class="auth-feat-text"><strong>Expert Juridique IA</strong>Droit immobilier &middot; Claude Opus</div></div>
+      <div class="auth-feat"><div class="auth-feat-icon">&#9878;&#65039;</div><div class="auth-feat-text"><strong>Leads publicitaires</strong>Vos prospects Facebook, dans le pipeline</div></div>
       <div class="auth-feat"><div class="auth-feat-icon">&#128197;</div><div class="auth-feat-text"><strong>Agenda &amp; Google Calendar</strong>Sync bidirectionnelle</div></div>
-      <div class="auth-feat"><div class="auth-feat-icon">&#128226;</div><div class="auth-feat-text"><strong>Diffusion 8 portails</strong>SeLoger, LeBonCoin, Bien&rsquo;ici&hellip;</div></div>
+      <div class="auth-feat"><div class="auth-feat-icon">&#128226;</div><div class="auth-feat-text"><strong>Relances automatiques</strong>Plus aucun prospect oublié</div></div>
     </div>
     <!-- Témoignage -->
     <div class="auth-testimonial">
@@ -1688,113 +1688,59 @@ body{font-family:var(--fb);background:#FAFAFA;color:var(--g900);min-height:100vh
 
   <!-- Droite — Tarifs sexy -->
   <div class="auth-right" style="background:#F8F9FC;overflow-y:auto">
-    <div id="register-panel" style="width:100%;max-width:520px;padding:8px 0">
+    <div id="register-panel" style="width:100%;max-width:380px;padding:8px 0">
 
-      <!-- Header -->
-      <div style="text-align:center;margin-bottom:28px">
+      <div style="text-align:center;margin-bottom:24px">
         <div style="display:inline-flex;align-items:center;gap:6px;background:rgba(240,138,110,.1);border:1px solid rgba(240,138,110,.25);border-radius:20px;padding:5px 14px;margin-bottom:14px">
           <span style="width:6px;height:6px;background:var(--brand);border-radius:50%;display:inline-block"></span>
-          <span style="font-size:.7rem;font-weight:700;color:var(--brand);text-transform:uppercase;letter-spacing:.08em">Acc&egrave;s sur abonnement</span>
+          <span style="font-size:.7rem;font-weight:700;color:var(--brand);text-transform:uppercase;letter-spacing:.08em">14 jours d'essai</span>
         </div>
-        <h2 style="font-family:var(--fd);font-weight:800;font-size:1.6rem;color:#111827;letter-spacing:-.04em;margin:0 0 8px">Choisissez votre plan</h2>
-        <p style="font-size:.84rem;color:#6B7280;margin:0">Sans engagement &middot; R&eacute;siliation &agrave; tout moment</p>
+        <h2 style="font-family:var(--fd);font-weight:800;font-size:1.5rem;color:#111827;letter-spacing:-.04em;margin:0 0 6px">Créer votre compte</h2>
+        <p style="font-size:.82rem;color:#6B7280;margin:0">Sans carte bancaire · Résiliation à tout moment</p>
       </div>
 
-      <!-- Toggle mensuel/annuel -->
-      <div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:24px">
-        <span style="font-size:.8rem;font-weight:600;color:#374151">Mensuel</span>
-        <div id="billing-toggle" onclick="toggleBilling()" style="width:44px;height:24px;background:#E5E7EB;border-radius:12px;position:relative;cursor:pointer;transition:background .2s">
-          <div id="billing-knob" style="width:18px;height:18px;background:#fff;border-radius:50%;position:absolute;top:3px;left:3px;transition:transform .2s;box-shadow:0 1px 4px rgba(0,0,0,.15)"></div>
-        </div>
-        <span style="font-size:.8rem;font-weight:600;color:#374151">Annuel</span>
-        <span style="background:#F0FDF4;border:1px solid #BBF7D0;color:#16A34A;font-size:.68rem;font-weight:700;padding:2px 8px;border-radius:10px">-20%</span>
+      <div class="auth-field">
+        <label class="auth-label" for="reg-prenom">Prénom *</label>
+        <input class="auth-input" type="text" id="reg-prenom" placeholder="Jean" autocomplete="given-name">
       </div>
-
-      <!-- Plans -->
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px">
-
-        <!-- STARTER -->
-        <div style="background:#fff;border:2px solid #E5E7EB;border-radius:16px;padding:22px;display:flex;flex-direction:column;transition:border-color .2s" onmouseover="this.style.borderColor='var(--brand)'" onmouseout="this.style.borderColor='#E5E7EB'">
-          <div style="margin-bottom:16px">
-            <div style="display:flex;align-items:center;gap:7px;margin-bottom:10px">
-              <div style="width:30px;height:30px;background:#F4F4F5;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.9rem">&#128640;</div>
-              <span style="font-family:var(--fd);font-weight:700;font-size:.9rem;color:#111827">Starter</span>
-            </div>
-            <div style="margin-bottom:6px">
-              <span id="starter-price" style="font-family:var(--fd);font-weight:800;font-size:2rem;color:#111827;letter-spacing:-.04em">35&euro;</span>
-              <span style="font-size:.78rem;color:#9CA3AF;font-weight:500">/mois</span>
-            </div>
-            <p style="font-size:.76rem;color:#6B7280;line-height:1.5;margin:0">Parfait pour d&eacute;marrer et organiser votre activit&eacute;</p>
-          </div>
-          <div style="display:flex;flex-direction:column;gap:7px;margin-bottom:20px;flex:1">
-            <div style="display:flex;align-items:center;gap:7px;font-size:.76rem;color:#374151"><span style="color:#16A34A;font-weight:700;font-size:.85rem">&#10003;</span>CRM Pipeline complet</div>
-            <div style="display:flex;align-items:center;gap:7px;font-size:.76rem;color:#374151"><span style="color:#16A34A;font-weight:700;font-size:.85rem">&#10003;</span>Mandats illimit&eacute;s</div>
-            <div style="display:flex;align-items:center;gap:7px;font-size:.76rem;color:#374151"><span style="color:#16A34A;font-weight:700;font-size:.85rem">&#10003;</span>Agenda &amp; Google Calendar</div>
-            <div style="display:flex;align-items:center;gap:7px;font-size:.76rem;color:#374151"><span style="color:#16A34A;font-weight:700;font-size:.85rem">&#10003;</span>Assistants IA (GMB, LinkedIn)</div>
-            <div style="display:flex;align-items:center;gap:7px;font-size:.76rem;color:#374151"><span style="color:#16A34A;font-weight:700;font-size:.85rem">&#10003;</span>Diffusion 8 portails</div>
-            <div style="display:flex;align-items:center;gap:7px;font-size:.76rem;color:#9CA3AF"><span style="color:#D1D5DB;font-weight:700;font-size:.85rem">&#10007;</span>Expert Juridique IA</div>
-            <div style="display:flex;align-items:center;gap:7px;font-size:.76rem;color:#9CA3AF"><span style="color:#D1D5DB;font-weight:700;font-size:.85rem">&#10007;</span>R&eacute;seau mandats prioritaire</div>
-          </div>
-          <a href="https://buy.stripe.com/6oU3cwddXgIt4TNd38aMU01" target="_blank" style="display:flex;align-items:center;justify-content:center;gap:6px;padding:11px;background:#F9FAFB;border:1.5px solid #E5E7EB;border-radius:10px;font-family:var(--fd);font-weight:700;font-size:.82rem;color:#374151;text-decoration:none;transition:all .15s" onmouseover="this.style.background='#F3F4F6'" onmouseout="this.style.background='#F9FAFB'">
-            &#128179; S'abonner — 35€/mois
-          </a>
-        </div>
-
-        <!-- PRO -->
-        <div style="background:linear-gradient(145deg,#2A211B,#1a1a2e);border:2px solid rgba(240,138,110,.4);border-radius:16px;padding:22px;display:flex;flex-direction:column;position:relative;overflow:hidden">
-          <div style="position:absolute;top:-30px;right:-30px;width:120px;height:120px;border-radius:50%;background:radial-gradient(circle,rgba(240,138,110,.2),transparent 70%);pointer-events:none"></div>
-          <div style="position:absolute;top:12px;right:12px;background:linear-gradient(135deg,var(--brand),#E8956D);color:#fff;font-size:.62rem;font-weight:800;padding:3px 9px;border-radius:20px">&#11088; POPULAIRE</div>
-          <div style="margin-bottom:16px;position:relative;z-index:1">
-            <div style="display:flex;align-items:center;gap:7px;margin-bottom:10px">
-              <div style="width:30px;height:30px;background:rgba(240,138,110,.2);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.9rem">&#128081;</div>
-              <span style="font-family:var(--fd);font-weight:700;font-size:.9rem;color:#fff">Pro</span>
-            </div>
-            <div style="margin-bottom:6px">
-              <span id="pro-price" style="font-family:var(--fd);font-weight:800;font-size:2rem;color:#F08A6E;letter-spacing:-.04em">75&euro;</span>
-              <span style="font-size:.78rem;color:rgba(255,255,255,.4);font-weight:500">/mois</span>
-            </div>
-            <p style="font-size:.76rem;color:rgba(255,255,255,.55);line-height:1.5;margin:0">Pour les agents qui veulent aller chercher plus</p>
-          </div>
-          <div style="display:flex;flex-direction:column;gap:7px;margin-bottom:20px;flex:1;position:relative;z-index:1">
-            <div style="display:flex;align-items:center;gap:7px;font-size:.76rem;color:rgba(255,255,255,.85)"><span style="color:#F08A6E;font-weight:700;font-size:.85rem">&#10003;</span>Tout du plan Starter</div>
-            <div style="display:flex;align-items:center;gap:7px;font-size:.76rem;color:rgba(255,255,255,.85)"><span style="color:#F08A6E;font-weight:700;font-size:.85rem">&#10003;</span><strong style="color:#fff">Expert Juridique IA</strong></div>
-            <div style="display:flex;align-items:center;gap:7px;font-size:.76rem;color:rgba(255,255,255,.85)"><span style="color:#F08A6E;font-weight:700;font-size:.85rem">&#10003;</span>R&eacute;seau mandats prioritaire</div>
-            <div style="display:flex;align-items:center;gap:7px;font-size:.76rem;color:rgba(255,255,255,.85)"><span style="color:#F08A6E;font-weight:700;font-size:.85rem">&#10003;</span>Instagram &amp; Facebook IA</div>
-            <div style="display:flex;align-items:center;gap:7px;font-size:.76rem;color:rgba(255,255,255,.85)"><span style="color:#F08A6E;font-weight:700;font-size:.85rem">&#10003;</span>Statistiques avanc&eacute;es</div>
-            <div style="display:flex;align-items:center;gap:7px;font-size:.76rem;color:rgba(255,255,255,.85)"><span style="color:#F08A6E;font-weight:700;font-size:.85rem">&#10003;</span>Support prioritaire 7j/7</div>
-            <div style="display:flex;align-items:center;gap:7px;font-size:.76rem;color:rgba(255,255,255,.85)"><span style="color:#F08A6E;font-weight:700;font-size:.85rem">&#10003;</span>Acc&egrave;s beta nouvelles fonctions</div>
-          </div>
-          <a href="https://buy.stripe.com/aFafZi2zjfEp2LF7IOaMU00" target="_blank" style="display:flex;align-items:center;justify-content:center;gap:6px;padding:11px;background:linear-gradient(135deg,var(--brand),#E8956D);border-radius:10px;font-family:var(--fd);font-weight:700;font-size:.82rem;color:#fff;text-decoration:none;position:relative;z-index:1;box-shadow:0 4px 16px rgba(240,138,110,.35)">
-            &#128179; S'abonner — 75€/mois
-          </a>
+      <div class="auth-field">
+        <label class="auth-label" for="reg-nom">Nom *</label>
+        <input class="auth-input" type="text" id="reg-nom" placeholder="Dupont" autocomplete="family-name">
+      </div>
+      <div class="auth-field">
+        <label class="auth-label" for="reg-email">Email professionnel *</label>
+        <input class="auth-input" type="email" id="reg-email" placeholder="jean.dupont@agence.fr" autocomplete="email">
+      </div>
+      <div class="auth-field">
+        <label class="auth-label" for="reg-agence">Agence / Réseau</label>
+        <input class="auth-input" type="text" id="reg-agence" placeholder="Facultatif" autocomplete="organization">
+      </div>
+      <div class="auth-field">
+        <label class="auth-label" for="reg-pwd">Mot de passe *</label>
+        <div class="auth-input-wrap">
+          <input class="auth-input" type="password" id="reg-pwd" placeholder="Min. 8 caractères" autocomplete="new-password">
+          <button class="auth-eye" type="button" onclick="togglePwdVisibility2()">👁</button>
         </div>
       </div>
 
-      <!-- Garantie -->
-      <div style="background:#fff;border:1px solid #E5E7EB;border-radius:12px;padding:14px;display:flex;align-items:center;gap:12px;margin-bottom:18px">
-        <div style="font-size:1.4rem;flex-shrink:0">&#128737;&#65039;</div>
-        <div>
-          <div style="font-family:var(--fd);font-weight:700;font-size:.82rem;color:#111827;margin-bottom:2px">Satisfait ou rembours&eacute; 14 jours</div>
-          <div style="font-size:.74rem;color:#6B7280">Essayez sans risque. Si vous n&rsquo;&ecirc;tes pas satisfait, on vous rembourse.</div>
-        </div>
+      <div id="reg-error" class="auth-alert error"></div>
+      <button class="auth-btn" type="button" onclick="doRegister()">Créer mon compte →</button>
+
+      <div style="text-align:center;margin-top:16px;font-size:.76rem;color:#9CA3AF;line-height:1.9">
+        <a href="#" onclick="showScreen('login-screen')" style="color:#9CA3AF;text-decoration:none">J'ai déjà un compte</a><br>
+        <a href="#" onclick="afficherSaisieCode()" style="color:#9CA3AF;text-decoration:none">J'ai un code d'activation</a>
       </div>
 
-      <!-- Code activation -->
-      <div style="background:#fff;border:1.5px solid #E5E7EB;border-radius:12px;padding:16px">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
-          <span style="font-size:1rem">&#128273;</span>
-          <span style="font-family:var(--fd);font-weight:700;font-size:.82rem;color:#111827">J&rsquo;ai un code d&rsquo;activation</span>
-        </div>
+      <div id="bloc-code" style="display:none;margin-top:14px;background:#fff;border:1.5px solid #E5E7EB;border-radius:12px;padding:14px">
         <div style="display:flex;gap:8px">
-          <input type="text" id="activation-code" placeholder="Ex: STARTER2026" style="flex:1;padding:10px 12px;border:1.5px solid #E5E7EB;border-radius:9px;font-family:var(--fb);font-size:.84rem;outline:none;letter-spacing:.05em;transition:border .15s;text-transform:uppercase" oninput="this.value=this.value.toUpperCase()" onfocus="this.style.borderColor='var(--brand)'" onblur="this.style.borderColor='#E5E7EB'" onkeydown="if(event.key==='Enter')checkActivationCode()">
-          <button onclick="checkActivationCode()" style="padding:10px 16px;background:var(--g900);color:#fff;border:none;border-radius:9px;font-family:var(--fd);font-weight:700;font-size:.8rem;cursor:pointer;white-space:nowrap;transition:all .15s" onmouseover="this.style.background='var(--brand)'" onmouseout="this.style.background='var(--g900)'">Valider &#8594;</button>
+          <input type="text" id="activation-code" placeholder="MCI-XXXX-XXXX"
+                 style="flex:1;padding:10px 12px;border:1.5px solid #E5E7EB;border-radius:9px;font-family:var(--fb);font-size:.84rem;outline:none;letter-spacing:.05em;text-transform:uppercase"
+                 oninput="this.value=this.value.toUpperCase()"
+                 onkeydown="if(event.key==='Enter')checkActivationCode()">
+          <button onclick="checkActivationCode()"
+                  style="padding:10px 16px;background:var(--g900);color:#fff;border:none;border-radius:9px;font-family:var(--fd);font-weight:700;font-size:.8rem;cursor:pointer;white-space:nowrap">Valider →</button>
         </div>
-        <div id="activation-error" style="display:none;margin-top:7px;font-size:.73rem;color:#DC2626;font-weight:500;display:flex;align-items:center;gap:5px"></div>
-      </div>
-
-      <!-- Retour -->
-      <div style="text-align:center;margin-top:16px">
-        <a href="#" onclick="showScreen('login-screen')" style="font-size:.76rem;color:#9CA3AF;text-decoration:none">&#8592; D&eacute;j&agrave; un compte&nbsp;? Se connecter</a>
+        <div id="activation-error" style="display:none;margin-top:7px;font-size:.73rem;color:#DC2626;font-weight:500"></div>
       </div>
 
     </div>
@@ -8062,7 +8008,7 @@ authUsers = JSON.parse(localStorage.getItem('immoai_users') || '[]');
 currentUser = JSON.parse(sessionStorage.getItem('immoai_session') || 'null');
 activityLogs = JSON.parse(localStorage.getItem('immoai_logs') || '[]');
 
-function getUsers(){ return [...JSON.parse(localStorage.getItem('immoai_users')||'[]'), {id:'demo',email:'agent@immoai.pro',pwd:'immoai2025',prenom:'Agent',nom:'Pro',agence:'ImmoAI Demo',createdAt:'2025-01-01'}]; }
+
 
 function addLog(action, user){
   const log={ts:new Date().toISOString(),user:user?(user.prenom+' '+user.nom):'?',email:user?.email||'',action,device:getDevice()};
@@ -8128,15 +8074,7 @@ function checkPwdStrength(inp,barId='pwd-bar',hintId='pwd-hint'){
   if(hint){hint.textContent=c.t;hint.style.color=c.bg;}
 }
 
-function fillDemo(field){
-  if(field==='email'){
-    const el=document.getElementById('login-email');
-    if(el)el.value='agent@immoai.pro';
-  } else {
-    const el=document.getElementById('login-pwd');
-    if(el)el.value='immoai2025';
-  }
-}
+
 
 function showAuthAlert(id,msg,type='error'){
   const el=document.getElementById(id);if(!el)return;
@@ -8223,6 +8161,16 @@ const ACTIVATION_ERREURS = {
   expired: 'Ce code a expiré. Contactez le support.',
   revoked: 'Ce code a été révoqué. Contactez le support.',
 };
+
+/** Le code d'activation devient un chemin secondaire : l'inscription
+    par défaut est libre, avec quatorze jours d'essai. */
+function afficherSaisieCode(){
+  const bloc = document.getElementById('bloc-code');
+  if(!bloc) return;
+  bloc.style.display = 'block';
+  const champ = document.getElementById('activation-code');
+  if(champ) champ.focus();
+}
 
 async function checkActivationCode(){
   const codeRaw = (document.getElementById('activation-code')?.value || '').trim().toUpperCase();
@@ -8345,19 +8293,21 @@ function doLogin(){
     _finishLogin(user, remCb);
     // Contexte puis chargement : chargerDonnees() rafraîchit l'affichage.
     chargerDonnees().catch(function(e){ console.warn('Chargement :', e.message); });
-  }).catch(function(){
-    // Fallback compte démo local
-    const user=getUsers().find(function(u){return u.email.toLowerCase()===email&&u.pwd===pwd;});
-    if(!user){
-      showAuthAlert('login-error','Email ou mot de passe incorrect. Utilisez vos identifiants mon-crm-immo.');
-      if(btn)btn.disabled=false;
-      if(spin)spin.style.display='none';
-      if(arrow)arrow.style.display='';
-      if(txt)txt.textContent='Se connecter';
-      return;
-    }
-    const localUser={id:user.id,email:user.email,prenom:user.prenom,nom:user.nom,agence:user.agence||''};
-    _finishLogin(localUser, remCb);
+  }).catch(function(err){
+    // Plus de repli local : il comparait un mot de passe en clair
+    // (u.pwd === pwd) et permettait de contourner Supabase. Le message
+    // distingue un identifiant erroné d'un serveur injoignable — dire
+    // « mot de passe incorrect » quand la base est en panne envoie
+    // l'utilisateur chercher un problème qui n'existe pas.
+    const msg = (err && err.message) || '';
+    const serveurInjoignable = /fetch|network|failed to fetch|load failed/i.test(msg);
+    showAuthAlert('login-error', serveurInjoignable
+      ? 'Service momentanément indisponible. Réessayez dans un instant.'
+      : 'Email ou mot de passe incorrect.');
+    if(btn)btn.disabled=false;
+    if(spin)spin.style.display='none';
+    if(arrow)arrow.style.display='';
+    if(txt)txt.textContent='Se connecter';
   });
 }
 
@@ -8419,19 +8369,15 @@ async function doRegister(){
       console.warn('sbRegister failed, fallback localStorage:', sbErr);
     }
 
-    // 2) Fallback localStorage (au cas où Supabase échoue)
-    const users = getUsers();
-    if(!users.find(u => u.email.toLowerCase() === email)){
-      const newUser = {
-        id: sbUser?.id || ('u' + Date.now()),
-        sbId: sbUser?.id,
-        email, pwd, prenom, nom, agence,
-        createdAt: new Date().toISOString(),
-      };
-      authUsers.push(newUser);
-      localStorage.setItem('immoai_users', JSON.stringify(authUsers));
-      addLog('Création de compte', newUser);
+    // Le compte n'existe que dans Supabase. L'ancien repli écrivait le
+    // mot de passe en clair dans localStorage et laissait croire à une
+    // inscription réussie alors que rien n'était créé côté serveur.
+    if(!sbUser){
+      showAuthAlert('reg-error', 'Création impossible pour le moment. Réessayez dans un instant.');
+      if(btn){ btn.disabled = false; btn.textContent = 'Créer mon compte →'; }
+      return;
     }
+    addLog('Création de compte', { prenom: prenom, nom: nom, email: email });
 
     // 3) Consommer le code d'activation (RPC atomique)
     if(activationCode && sbUser){
@@ -8483,26 +8429,50 @@ function doLogout(){
 
 // ── RESET MOT DE PASSE ──
 let resetTargetEmail='';
-function verifyResetEmail(){
+
+/**
+ * Réinitialisation réelle, par email. L'ancienne version vérifiait un
+ * compte dans localStorage puis y changeait un mot de passe : le mot de
+ * passe Supabase ne bougeait pas, et l'utilisateur restait bloqué
+ * dehors en croyant l'avoir réinitialisé.
+ *
+ * On ne dit jamais si l'adresse existe : ce serait un moyen simple de
+ * découvrir qui est client.
+ */
+async function verifyResetEmail(){
   const email=document.getElementById('reset-email').value.trim().toLowerCase();
   if(!email){showAuthAlert('reset-error','Entrez votre email');return;}
-  const user=getUsers().find(u=>u.email.toLowerCase()===email);
-  if(!user){showAuthAlert('reset-error','Aucun compte trouvé avec cet email');return;}
+
+  const sb=getSB();
+  if(!sb){showAuthAlert('reset-error','Service momentanément indisponible.');return;}
+
+  try{
+    await sb.auth.resetPasswordForEmail(email, { redirectTo: location.origin + location.pathname });
+  }catch(e){ console.warn('resetPasswordForEmail :', e); }
+
   resetTargetEmail=email;
   document.getElementById('reset-step1').style.display='none';
-  document.getElementById('reset-step2').style.display='block';
+  document.getElementById('reset-step3').style.display='block';
+  const t=document.querySelector('#reset-step3 .auth-form-sub, #reset-step3 p');
+  if(t) t.textContent='Si un compte existe pour ' + email + ', un lien de réinitialisation vient d\'être envoyé.';
+  return;
+  // Étape 2 conservée pour le retour depuis le lien reçu par email.
 }
 function doResetPassword(){
   const p1=document.getElementById('reset-pwd1').value;
   const p2=document.getElementById('reset-pwd2').value;
   if(p1.length<6){showAuthAlert('reset-error2','Le mot de passe doit faire au moins 6 caractères');return;}
   if(p1!==p2){showAuthAlert('reset-error2','Les mots de passe ne correspondent pas');return;}
-  // Mettre à jour (pas pour le compte démo)
-  const idx=authUsers.findIndex(u=>u.email.toLowerCase()===resetTargetEmail);
-  if(idx>=0){authUsers[idx].pwd=p1;localStorage.setItem('immoai_users',JSON.stringify(authUsers));}
-  addLog('Réinitialisation mot de passe',{prenom:'',nom:'',email:resetTargetEmail});
-  document.getElementById('reset-step2').style.display='none';
-  document.getElementById('reset-step3').style.display='block';
+  // Appelé au retour du lien reçu par email : Supabase a ouvert une
+  // session de récupération, updateUser() change le vrai mot de passe.
+  const sb=getSB();
+  if(!sb){showAuthAlert('reset-error2','Service momentanément indisponible.');return;}
+  sb.auth.updateUser({ password: p1 }).then(function(r){
+    if(r.error){ showAuthAlert('reset-error2', r.error.message); return; }
+    addLog('Réinitialisation mot de passe',{prenom:'',nom:'',email:resetTargetEmail});
+    document.getElementById('reset-step2').style.display='none';
+    document.getElementById('reset-step3').style.display='block';
+  });
 }
 
 function updateUserUI(){
