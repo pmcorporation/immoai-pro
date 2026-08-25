@@ -10,10 +10,25 @@ Le schéma vit ici, plus uniquement sur le projet Supabase distant.
 | `20260824130100_organisations.sql` | Organisations, membres, rôles, contrôle des sièges, **fonctions de contexte RLS** |
 | `20260824130200_crm.sql` | Prospects, mandats, rendez-vous et tables filles |
 | `20260824130300_partages_mandat.sql` | Partage de mandat avec un agent extérieur |
+| `20260825100000_alignement_app.sql` | Aligne le schéma sur ce que les formulaires produisent réellement |
+| `20260825140000_invitations.sql` | Invitations, rôles, gestion de l'équipe |
+| `20260825160000_essai_gratuit.sql` | Essai de 14 jours et état d'abonnement |
 
 Les fichiers 03 et 04 refusent de s'exécuter si les tables concernées
 contiennent des lignes. C'est volontaire : ils recréent des tables
 vides, et doivent échouer plutôt que détruire des données.
+
+## Deux règles apprises à la dure
+
+**Les fonctions `language sql` d'abord les tables.** Leur corps est
+analysé dès la création : elles refusent de naître si leurs tables
+n'existent pas encore. Les fonctions `plpgsql` n'ont pas cette
+contrainte, leur corps n'est vérifié qu'à l'exécution.
+
+**Tout le DDL avant la moindre écriture.** Une insertion met des
+événements de déclencheur différés en attente, et plus aucun
+`ALTER TABLE` ne passe ensuite dans la même transaction. Le RLS se pose
+donc à la création de la table, jamais après la reprise de données.
 
 ## Ordre à l'intérieur d'un fichier
 
@@ -90,6 +105,9 @@ supabase db pull    # vérifie qu'il n'y a plus d'écart
 
 ## Reste à traiter
 
+- Le webhook Stripe écrit dans `profiles` ; il doit écrire dans
+  `organisations`, poser `essai_fin_le` à NULL à la conversion, et
+  gérer le nombre de sièges.
 - `profiles.plan` fait doublon avec `organisations.plan` depuis le
   fichier 02. La source de vérité est `mon_plan()`. La colonne doit
   disparaître une fois le webhook Stripe et l'application basculés.

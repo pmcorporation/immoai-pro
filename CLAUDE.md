@@ -2,25 +2,43 @@
 
 Contexte pour Claude Code. À lire avant toute modification.
 
+> **Ce document a été réaligné le 25 août 2026** après le recentrage du
+> produit. Ce qui suit décrit l'état réel, pas l'historique. Pour la
+> carte du dossier et le parcours de bout en bout, voir `README.md` ;
+> pour le schéma, `supabase/migrations/README.md`.
+
 ## Le projet en une phrase
 
-`mon-crm-immo` (anciennement « ImmoAI Pro », d'où le nom du dossier `immoai-pro`) est
-un CRM immobilier pour agents et mandataires indépendants, avec des assistants IA
-intégrés. Produit en ligne : **https://mon-crm-immo.fr** — dépôt GitHub :
-`pmcorporation/immoai-pro`.
+`mon-crm-immo` est un CRM pour agents immobiliers centré sur
+l'acquisition de prospects publicitaires : les leads Facebook arrivent
+dans le pipeline, les relances partent seules, et le coût par lead se
+lit à côté des mandats signés. Vendu aux indépendants et aux agences,
+en libre-service.
 
-> ⚠️ Le nom du dossier, le nom du dépôt et le nom du produit diffèrent. C'est la
-> raison principale pour laquelle ce projet est difficile à retrouver.
+Produit : **https://mon-crm-immo.fr** — dépôt : `pmcorporation/immoai-pro`.
 
-## Les 2 fichiers qui comptent
+> ⚠️ Dossier `immoai-pro`, dépôt `immoai-pro`, produit `mon-crm-immo`,
+> clés historiques `immoai_*`, clés récentes `mci_*`. Les trois premiers
+> désignent la même chose.
 
-| Fichier | Rôle | Taille |
-|---|---|---|
-| **`app/index.html`** | **L'application CRM entière** (HTML + CSS + JS dans un seul fichier) | ~10 300 lignes / 674 Ko |
-| `index.html` | Le site vitrine / landing page (racine du domaine) | ~5 750 lignes / 204 Ko |
+## Ce qui a changé, et qu'il ne faut pas défaire
 
-**Pour travailler sur le CRM, c'est `app/index.html`.** Tout le reste est du contenu
-marketing ou de l'infra.
+**Les assistants IA sont en veille**, pas supprimés. Drapeau
+`MODULES_IA_ACTIFS = false` dans `app/index.html`. Ils dépendaient d'une
+clé Anthropic fournie par le client, ce qui était incompatible avec la
+vente en libre-service. Le code est intact.
+
+**Supabase est la source de vérité.** localStorage n'est plus qu'un
+cache de lecture. Toute écriture passe par `app/js/donnees.js` — ne pas
+réintroduire d'appel direct à `localStorage.setItem` pour les prospects,
+mandats ou rendez-vous.
+
+**Les droits sont portés par Postgres**, pas par l'interface. Masquer un
+bouton ne protège rien ; la règle vit dans les politiques RLS et les
+fonctions `security definer`.
+
+**Plus aucun mot de passe en clair.** Le repli local, le compte de
+démonstration en dur et la fausse réinitialisation ont été retirés.
 
 ## Architecture
 
@@ -57,7 +75,7 @@ immoai-pro/
 
 Le stockage est **hybride**, et c'est le point le plus contre-intuitif du projet :
 
-- **localStorage (~76 appels)** = les données métier de l'agent : prospects, mandats,
+- **localStorage** = cache de lecture uniquement, géré par `app/js/donnees.js`. Les données métier : prospects, mandats,
   RDV, finance, profil, réseau, logs. Clés préfixées `immoai_` :
   `immoai_crm`, `immoai_mandats`, `immoai_rdvs`, `immoai_shared`, `immoai_reseau`,
   `immoai_finance`, `immoai_logs`, `immoai_profile`, `immoai_subs`.
@@ -67,8 +85,8 @@ Le stockage est **hybride**, et c'est le point le plus contre-intuitif du projet
   `profiles`, `prospects`, `rdvs`, `mandats`, `activation_codes`, `google_tokens`,
   `audit_log`, `stripe_events`, `admin_allowlist`, `admin_users_overview` (vue).
 
-Autrement dit : les tables `prospects` / `mandats` / `rdvs` existent côté Supabase mais
-l'app travaille encore majoritairement en local. Toute évolution sérieuse passe par
+Le schéma complet est versionné dans `supabase/migrations/` (7 fichiers, à appliquer
+dans l'ordre). Toute évolution sérieuse passe par
 une décision explicite sur cette migration.
 
 Projet Supabase : `wwqccgacezbzkbaptyup` (la clé `anon` est en clair dans
@@ -99,6 +117,9 @@ PLAN_ACCESS.crm_only_modules = ['gmb','linkedin','prosp','instagram','facebook',
 localStorage (`immoai_subs`) et un cache mémoire de 5 min (`getUserCurrentPlan`).
 
 ### Assistants IA
+> **En veille depuis le 25 août 2026.** Ce qui suit décrit un code conservé mais
+> désactivé, et explique pourquoi : la clé API était à la charge du client.
+
 Appels **directs depuis le navigateur** vers `https://api.anthropic.com/v1/messages`
 avec l'en-tête `anthropic-dangerous-direct-browser-access: true`. La clé API est
 saisie par l'utilisateur (doit commencer par `sk-ant`) et stockée côté client.
@@ -146,9 +167,12 @@ Secrets des edge functions (à définir dans Supabase, jamais dans le dépôt) :
 
 ## Points d'attention avant de reprendre
 
-1. **`supabase/migrations/` est vide.** Le schéma des 10 tables n'existe nulle part
-   dans le dépôt — il ne vit que dans le projet Supabase distant. À dumper en
-   priorité (`supabase db pull`) sinon le schéma est irrécupérable en cas de pépin.
+1. **Le schéma est versionné** dans `supabase/migrations/` — 7 fichiers,
+   à appliquer dans l'ordre depuis le SQL Editor. `supabase db push` ne
+   fonctionne pas tant que le distant n'est pas aligné. Lire le README
+   de ce dossier avant d'en ajouter un : deux règles d'ordonnancement
+   PostgreSQL y sont documentées, apprises à la dure.
+
 2. **Le nommage est incohérent** : dossier `immoai-pro`, produit `mon-crm-immo`,
    design system commenté « IMMOAI PRO v3 », clés localStorage `immoai_*`.
    Renommer est possible mais touche beaucoup de lignes — décision à prendre avant,
@@ -168,4 +192,6 @@ Secrets des edge functions (à définir dans Supabase, jamais dans le dépôt) :
 
 ## Compte de démonstration
 
-`agent@immoai.pro` / `immoai2025`
+Il n'y en a plus. Le compte en dur `agent@immoai.pro` comparait un mot
+de passe en clair et contournait Supabase ; il a été retiré avec le
+reste du modèle local. Créer un compte d'essai prend trente secondes.
