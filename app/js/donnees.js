@@ -116,6 +116,7 @@
         dateExp: 'date_expiration',
         desc: 'note',
         portals: 'portails',
+        photos: 'photos',
         vendu: 'vendu',
         venduPrix: 'vendu_prix',
         venduDate: 'vendu_le',
