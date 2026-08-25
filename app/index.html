@@ -4326,15 +4326,21 @@ async function sbLogin(email, password) {
   return data.user;
 }
 
+/**
+ * Renvoie l'utilisateur ET la session. La distinction est essentielle :
+ * quand la confirmation par email est exigée, Supabase crée le compte
+ * mais n'ouvre aucune session. Enchaîner sur une connexion automatique
+ * échoue alors sans que l'utilisateur comprenne pourquoi.
+ */
 async function sbRegister(email, password, meta) {
   const sb = getSB();
   if(!sb) return null;
   const { data, error } = await sb.auth.signUp({
     email, password,
-    options: { data: meta }
+    options: { data: meta, emailRedirectTo: location.origin + location.pathname }
   });
   if(error) throw error;
-  return data.user;
+  return { user: data.user, session: data.session };
 }
 
 async function sbLogout() {
@@ -8704,6 +8710,26 @@ const ACTIVATION_ERREURS = {
 
 /** Le code d'activation devient un chemin secondaire : l'inscription
     par défaut est libre, avec quatorze jours d'essai. */
+/** Compte créé, adresse à confirmer. Sans cet écran, l'utilisateur
+    voyait un formulaire de connexion qui refusait ses identifiants. */
+function afficherConfirmationEmail(email){
+  const panneau = document.getElementById('register-panel');
+  if(!panneau){ toast('✉️ Vérifiez votre boîte mail pour confirmer votre adresse.'); return; }
+  panneau.innerHTML =
+    '<div style="text-align:center;padding:20px 0">'
+    + '<div style="width:54px;height:54px;background:rgba(61,122,92,.1);border:2px solid rgba(61,122,92,.2);'
+    + 'border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:1.5rem">✉️</div>'
+    + '<div style="font-family:var(--fd);font-weight:800;font-size:1.25rem;color:#111827;margin-bottom:8px">'
+    + 'Confirmez votre adresse</div>'
+    + '<p style="font-size:.86rem;color:#6B7280;line-height:1.6;margin:0 0 20px">'
+    + 'Votre compte est créé. Un email vient d\'être envoyé à<br><strong>' + echapper(email) + '</strong>.<br>'
+    + 'Cliquez sur le lien qu\'il contient pour activer votre accès.</p>'
+    + '<p style="font-size:.76rem;color:#9CA3AF;line-height:1.6;margin:0 0 20px">'
+    + 'Pensez à regarder dans les indésirables. Le lien est valable 24 heures.</p>'
+    + '<button class="auth-btn" type="button" onclick="showScreen(\'login-screen\')">Retour à la connexion</button>'
+    + '</div>';
+}
+
 function afficherSaisieCode(){
   const bloc = document.getElementById('bloc-code');
   if(!bloc) return;
@@ -8898,9 +8924,11 @@ async function doRegister(){
 
   try {
     // 1) Création du compte Supabase
-    let sbUser = null;
+    let sbUser = null, sbSession = null;
     try {
-      sbUser = await sbRegister(email, pwd, { prenom, nom, agence });
+      const inscription = await sbRegister(email, pwd, { prenom, nom, agence });
+      sbUser = inscription && inscription.user;
+      sbSession = inscription && inscription.session;
     } catch(sbErr){
       const msg = sbErr?.message || '';
       if(msg.toLowerCase().includes('already')){
@@ -8946,7 +8974,13 @@ async function doRegister(){
     sessionStorage.removeItem('activation_code');
     sessionStorage.removeItem('activation_plan');
 
-    // 5) Auto-login
+    // 5) Suite du parcours
+    if(!sbSession){
+      // Le compte existe mais l'adresse doit être confirmée : on le dit
+      // clairement plutôt que de tenter une connexion vouée à l'échec.
+      afficherConfirmationEmail(email);
+      return;
+    }
     document.getElementById('login-email').value = email;
     document.getElementById('login-pwd').value   = pwd;
     showScreen('login-screen');
