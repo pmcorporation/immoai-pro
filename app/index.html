@@ -2013,6 +2013,9 @@ body{font-family:var(--fb);background:#FAFAFA;color:var(--g900);min-height:100vh
       </button>
       <div class="sb-section-corps" id="sb-corps-compte">
         <div class="sb-section-inner">
+          <button class="sb-btn" onclick="nav(this,'equipe')" data-tip="Mon équipe">
+            <span class="sb-icon">◍</span><span class="sb-label">Mon équipe</span>
+          </button>
           <button class="sb-btn" onclick="nav(this,'profile')" data-tip="Profil & Paramètres">
             <span class="sb-icon">◌</span><span class="sb-label">Profil & Paramètres</span>
           </button>
@@ -3093,6 +3096,70 @@ body{font-family:var(--fb);background:#FAFAFA;color:var(--g900);min-height:100vh
 </div>
 
 <!-- ══ PROFIL ══ -->
+<div id="v-equipe" class="view">
+
+  <!-- Bandeau organisation -->
+  <div class="card card-p" style="margin-bottom:16px">
+    <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+      <div style="flex:1;min-width:200px">
+        <div id="eq-nom" style="font-family:var(--fd);font-weight:800;font-size:1.15rem;color:var(--g900)">—</div>
+        <div id="eq-sous" style="font-size:.78rem;color:var(--g500);margin-top:2px">Chargement…</div>
+      </div>
+      <div id="eq-sieges-bloc" style="text-align:right">
+        <div id="eq-sieges" style="font-family:var(--fd);font-weight:800;font-size:1.35rem;color:var(--g900);font-variant-numeric:tabular-nums">—</div>
+        <div style="font-size:.66rem;color:var(--g400);text-transform:uppercase;letter-spacing:.08em">sièges occupés</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Inviter -->
+  <div class="card card-p" id="eq-inviter" style="margin-bottom:16px;display:none">
+    <div class="card-title" style="margin-bottom:12px">Inviter un commercial</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-start">
+      <input type="email" id="eq-email" class="finput" style="flex:1;min-width:220px"
+             placeholder="prenom.nom@agence.fr" onkeydown="if(event.key==='Enter')inviterCommercial()">
+      <select id="eq-role" class="finput" style="width:150px">
+        <option value="agent">Commercial</option>
+        <option value="direction">Direction</option>
+      </select>
+      <button class="btn btn-brand" onclick="inviterCommercial()">Créer l'invitation</button>
+    </div>
+    <div id="eq-erreur" style="display:none;margin-top:9px;font-size:.76rem;color:#DC2626"></div>
+    <div id="eq-lien-bloc" style="display:none;margin-top:12px;padding:12px 14px;background:var(--brand-ghost);border:1px solid rgba(240,138,110,.3);border-radius:10px">
+      <div style="font-size:.73rem;color:var(--g600);margin-bottom:7px">
+        Transmettez ce lien à votre commercial. Il expire dans 14 jours.
+      </div>
+      <div style="display:flex;gap:8px">
+        <input id="eq-lien" class="finput" readonly style="flex:1;font-size:.74rem" onclick="this.select()">
+        <button class="btn btn-outline" onclick="copierLienInvitation()">Copier</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Invitations en attente -->
+  <div class="card card-p" id="eq-attente-bloc" style="margin-bottom:16px;display:none">
+    <div class="card-title" style="margin-bottom:10px">Invitations en attente</div>
+    <div id="eq-attente"></div>
+  </div>
+
+  <!-- Membres -->
+  <div class="card card-p" style="margin-bottom:16px">
+    <div class="card-title" style="margin-bottom:10px">Commerciaux</div>
+    <div id="eq-membres"></div>
+  </div>
+
+  <!-- Vivier -->
+  <div class="card card-p" id="eq-vivier-bloc" style="display:none">
+    <div class="card-title" style="margin-bottom:6px">Vivier à distribuer</div>
+    <div id="eq-vivier-txt" style="font-size:.8rem;color:var(--g500);margin-bottom:12px"></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+      <select id="eq-vivier-agent" class="finput" style="min-width:220px"></select>
+      <button class="btn btn-brand" onclick="distribuerVivier()">Attribuer les leads non assignés</button>
+    </div>
+  </div>
+
+</div>
+
 <div id="v-profile" class="view">
   <div class="ph"><div class="ph-tag">⚙️ Profil & Paramètres</div><h1>Mon <em>Profil</em> Agent</h1><p>Personnalisez vos informations professionnelles, secteur géographique et objectifs</p></div>
 
@@ -4307,6 +4374,9 @@ async function etablirContexte(){
 async function chargerDonnees(){
   const sb = getSB();
   if(!sb) return;
+  // Une invitation en attente se consomme avant d'établir le contexte :
+  // sinon on rattacherait l'utilisateur à son ancienne organisation.
+  await consommerInvitation();
   if(!Donnees.contexte() && !(await etablirContexte())) return;
   await Donnees.chargerTout(sb);
   rafraichirDepuisCouche();
@@ -4459,9 +4529,10 @@ function toggleSidebar(){
 }
 
 // ══════════ NAVIGATION ══════════
-const ALL_VIEWS=['dashboard','crm','pipeline','mandats','agenda','finance','gmb','linkedin','prosp','instagram','facebook','juridique','visual','partners','products','profile'];
+const ALL_VIEWS=['dashboard','crm','pipeline','mandats','agenda','equipe','finance','gmb','linkedin','prosp','instagram','facebook','juridique','visual','partners','products','profile'];
 const TB_TITLES={
   dashboard:['Tableau de <em>bord</em>','Dashboard'],
+  equipe:['Mon <em>équipe</em>','Commerciaux et attribution'],
   crm:['Mes <em>Prospects</em>','Prospects'],
   pipeline:['Mon <em>Pipeline</em>','Opportunités'],
   mandats:['Mes <em>Mandats</em>','Mandats'],
@@ -4536,6 +4607,302 @@ function initSectionsBarreLaterale(){
   });
 }
 
+// ══════════ ARRIVÉE PAR UN LIEN D'INVITATION ══════════
+// Le commercial ouvre le lien reçu de sa direction. Il n'a pas encore
+// de compte et n'appartient à aucune organisation : invitation_info()
+// est la seule fonction lisible sans être connecté, et elle ne révèle
+// que le nom de l'agence et le rôle proposé.
+
+const CLE_INVITATION = 'mci_invitation_en_cours';
+
+(function lireInvitationDepuisURL(){
+  try{
+    const jeton = new URLSearchParams(window.location.search).get('invitation');
+    if(!jeton) return;
+    sessionStorage.setItem(CLE_INVITATION, jeton);
+    window.history.replaceState({}, '', window.location.pathname);
+
+    const afficher = function(){ annoncerInvitation(jeton); };
+    if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', afficher);
+    else setTimeout(afficher, 100);
+  }catch(e){ console.warn('lireInvitationDepuisURL :', e); }
+})();
+
+async function annoncerInvitation(jeton){
+  const sb = getSB();
+  if(!sb) return;
+
+  const { data, error } = await sb.rpc('invitation_info', { p_jeton: jeton });
+  const info = Array.isArray(data) ? data[0] : data;
+
+  if(error || !info || !info.valide){
+    const motifs = {
+      introuvable:   'Ce lien d\'invitation n\'est pas valide.',
+      annulee:       'Cette invitation a été annulée.',
+      deja_acceptee: 'Cette invitation a déjà été utilisée. Connectez-vous simplement.',
+      expiree:       'Cette invitation a expiré. Demandez-en une nouvelle.',
+    };
+    sessionStorage.removeItem(CLE_INVITATION);
+    toast('⚠️ ' + (motifs[info && info.motif] || 'Invitation invalide.'));
+    return;
+  }
+
+  // On pose le décor sur l'écran d'inscription : l'invité doit
+  // comprendre qui l'invite avant de saisir quoi que ce soit.
+  showScreen('register-screen');
+  const panneau = document.getElementById('register-panel');
+  if(!panneau) return;
+  panneau.style.maxWidth = '380px';
+  panneau.innerHTML =
+    '<div style="text-align:center;margin-bottom:20px">'
+    + '<div style="width:50px;height:50px;background:rgba(61,122,92,.1);border:2px solid rgba(61,122,92,.2);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 10px;font-size:1.4rem">👋</div>'
+    + '<div style="font-family:var(--fd);font-weight:800;font-size:1.2rem;color:var(--g900);margin-bottom:4px">Rejoindre ' + echapper(info.agence) + '</div>'
+    + '<div style="font-size:.8rem;color:var(--g500)">Invitation en tant que '
+    + (info.role === 'direction' ? 'direction' : 'commercial') + '</div></div>'
+    + '<div class="auth-field"><label class="auth-label" for="reg-prenom">Prénom *</label>'
+    + '<input class="auth-input" type="text" id="reg-prenom" placeholder="Jean"></div>'
+    + '<div class="auth-field"><label class="auth-label" for="reg-nom">Nom *</label>'
+    + '<input class="auth-input" type="text" id="reg-nom" placeholder="Dupont"></div>'
+    + '<div class="auth-field"><label class="auth-label" for="reg-email">Email professionnel *</label>'
+    + '<input class="auth-input" type="email" id="reg-email" value="' + echapper(info.email) + '"></div>'
+    + '<div class="auth-field"><label class="auth-label" for="reg-pwd">Mot de passe *</label>'
+    + '<div class="auth-input-wrap"><input class="auth-input" type="password" id="reg-pwd" placeholder="Min. 8 caractères">'
+    + '<button class="auth-eye" type="button" onclick="togglePwdVisibility2()">👁</button></div></div>'
+    + '<div id="reg-error" class="auth-alert error"></div>'
+    + '<button class="auth-btn" type="button" onclick="doRegister()">Rejoindre l\'équipe →</button>'
+    + '<div style="text-align:center;margin-top:12px">'
+    + '<a href="#" onclick="showScreen(\'login-screen\')" style="font-size:.76rem;color:var(--g400);text-decoration:none">'
+    + 'J\'ai déjà un compte</a></div>';
+}
+
+/**
+ * Consomme l'invitation une fois l'utilisateur authentifié. Appelée
+ * après connexion, que le compte vienne d'être créé ou qu'il existait
+ * déjà — un commercial peut très bien avoir un compte avant d'être
+ * invité par une agence.
+ */
+async function consommerInvitation(){
+  const jeton = sessionStorage.getItem(CLE_INVITATION);
+  if(!jeton) return false;
+  const sb = getSB();
+  if(!sb || !currentUser || !currentUser.sbId) return false;
+
+  try{
+    const { data, error } = await sb.rpc('accepter_invitation', { p_jeton: jeton });
+    sessionStorage.removeItem(CLE_INVITATION);
+    const r = Array.isArray(data) ? data[0] : data;
+    if(error || !r || !r.ok){
+      const motifs = {
+        plus_de_siege: 'L\'agence n\'a plus de siège disponible. Contactez votre direction.',
+        expiree:       'Cette invitation a expiré.',
+        deja_acceptee: 'Cette invitation a déjà été utilisée.',
+      };
+      toast('⚠️ ' + (motifs[r && r.motif] || (error && error.message) || 'Invitation non acceptée.'));
+      return false;
+    }
+    toast('✅ Vous avez rejoint votre équipe');
+    return true;
+  }catch(e){ console.warn('consommerInvitation :', e); return false; }
+}
+
+// ══════════════════════════════════════════════════════════════
+// ÉQUIPE — membres, invitations, distribution des leads
+// ══════════════════════════════════════════════════════════════
+// Toutes les actions passent par des fonctions Postgres qui vérifient
+// le rôle. L'interface masque ce qui n'est pas permis, mais c'est le
+// serveur qui refuse — masquer un bouton n'a jamais protégé personne.
+
+let _equipe = null;
+
+const ROLES_LIBELLES = {
+  proprietaire: 'Propriétaire',
+  direction:    'Direction',
+  agent:        'Commercial',
+};
+
+async function renderEquipe(){
+  const sb = getSB();
+  const zoneMembres = document.getElementById('eq-membres');
+  if(!sb || !zoneMembres) return;
+
+  zoneMembres.innerHTML = '<div style="padding:20px;text-align:center;color:var(--g400);font-size:.8rem">Chargement…</div>';
+
+  const { data, error } = await sb.rpc('mon_equipe');
+  if(error){
+    zoneMembres.innerHTML = '<div style="padding:20px;color:#DC2626;font-size:.8rem">'
+      + echapper(error.message) + '</div>';
+    return;
+  }
+  if(!data || data.erreur){
+    zoneMembres.innerHTML = '<div style="padding:24px;text-align:center;color:var(--g400);font-size:.82rem">'
+      + 'Aucune organisation rattachée à ce compte.</div>';
+    return;
+  }
+
+  _equipe = data;
+  const org        = data.organisation || {};
+  const membres    = data.membres || [];
+  const invits     = data.invitations || [];
+  const estDirection = data.monRole === 'proprietaire' || data.monRole === 'direction';
+
+  // ── Bandeau ──
+  document.getElementById('eq-nom').textContent = org.nom || '—';
+  document.getElementById('eq-sous').textContent =
+    (org.type === 'agence' ? 'Agence' : 'Compte individuel')
+    + ' · plan ' + (org.plan || 'free')
+    + ' · vous êtes ' + (ROLES_LIBELLES[data.monRole] || data.monRole || '—').toLowerCase();
+
+  const occupes = membres.length + invits.length;
+  const elSieges = document.getElementById('eq-sieges');
+  elSieges.textContent = occupes + ' / ' + (org.sieges || 1);
+  elSieges.style.color = occupes >= (org.sieges || 1) ? 'var(--red)' : 'var(--g900)';
+
+  document.getElementById('eq-inviter').style.display = estDirection ? 'block' : 'none';
+
+  // ── Membres ──
+  zoneMembres.innerHTML = membres.map(function(m){
+    const nom = ((m.prenom || '') + ' ' + (m.nom || '')).trim() || m.email || '—';
+    const proprio = m.role === 'proprietaire';
+    const moi = _equipe && m.id === (currentUser && currentUser.sbId);
+    return '<div style="display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--g100)">'
+      + '<div class="sb-agent-av" style="width:34px;height:34px;flex-shrink:0;font-size:.72rem">'
+      + echapper(nom.slice(0,2).toUpperCase()) + '</div>'
+      + '<div style="flex:1;min-width:0">'
+        + '<div style="font-size:.83rem;font-weight:600;color:var(--g900)">' + echapper(nom)
+        + (moi ? ' <span style="font-size:.68rem;color:var(--g400);font-weight:500">(vous)</span>' : '') + '</div>'
+        + '<div style="font-size:.72rem;color:var(--g500)">' + echapper(m.email || '') + '</div>'
+      + '</div>'
+      + '<div style="text-align:right;font-size:.72rem;color:var(--g500);white-space:nowrap">'
+        + m.prospects + ' prospect' + (m.prospects > 1 ? 's' : '')
+        + ' · ' + m.mandats + ' mandat' + (m.mandats > 1 ? 's' : '') + '</div>'
+      + '<span class="ebadge" style="background:var(--g100);color:var(--g600);white-space:nowrap">'
+        + (ROLES_LIBELLES[m.role] || m.role) + '</span>'
+      + (estDirection && !proprio && !moi
+          ? '<button class="btn-ghost-sm" title="Changer de rôle" onclick="basculerRole(\'' + m.id + '\',\'' + m.role + '\')">⇅</button>'
+          + '<button class="btn-ghost-sm" title="Retirer de l\'équipe" onclick="retirerCommercial(\'' + m.id + '\',\'' + echapper(nom).replace(/'/g, "\\'") + '\')">✕</button>'
+          : '')
+      + '</div>';
+  }).join('') || '<div style="padding:20px;text-align:center;color:var(--g400);font-size:.8rem">Aucun membre.</div>';
+
+  // ── Invitations en attente ──
+  const blocAttente = document.getElementById('eq-attente-bloc');
+  blocAttente.style.display = invits.length ? 'block' : 'none';
+  if(invits.length){
+    document.getElementById('eq-attente').innerHTML = invits.map(function(v){
+      return '<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--g100)">'
+        + '<span style="font-size:.95rem">✉️</span>'
+        + '<div style="flex:1;min-width:0">'
+          + '<div style="font-size:.8rem;font-weight:600;color:var(--g900)">' + echapper(v.email) + '</div>'
+          + '<div style="font-size:.71rem;color:var(--g400)">' + (ROLES_LIBELLES[v.role] || v.role)
+          + ' · expire le ' + new Date(v.expireLe).toLocaleDateString('fr-FR') + '</div>'
+        + '</div>'
+        + '<button class="btn-ghost-sm" onclick="copierLien(\'' + v.jeton + '\')">Copier le lien</button>'
+        + '<button class="btn-ghost-sm" onclick="annulerInvitation(\'' + v.id + '\')">✕</button>'
+        + '</div>';
+    }).join('');
+  }
+
+  // ── Vivier ──
+  const blocVivier = document.getElementById('eq-vivier-bloc');
+  const aDistribuer = estDirection && data.vivier > 0 && membres.length > 0;
+  blocVivier.style.display = aDistribuer ? 'block' : 'none';
+  if(aDistribuer){
+    document.getElementById('eq-vivier-txt').textContent =
+      data.vivier + ' prospect' + (data.vivier > 1 ? 's ne sont' : ' n\'est')
+      + ' attribué' + (data.vivier > 1 ? 's' : '') + ' à personne.';
+    document.getElementById('eq-vivier-agent').innerHTML = membres.map(function(m){
+      const nom = ((m.prenom || '') + ' ' + (m.nom || '')).trim() || m.email;
+      return '<option value="' + m.id + '">' + echapper(nom) + '</option>';
+    }).join('');
+  }
+}
+
+function lienInvitation(jeton){
+  return location.origin + location.pathname + '?invitation=' + jeton;
+}
+
+async function inviterCommercial(){
+  const sb = getSB();
+  const email = (document.getElementById('eq-email').value || '').trim();
+  const role  = document.getElementById('eq-role').value;
+  const err   = document.getElementById('eq-erreur');
+  err.style.display = 'none';
+
+  if(!email){ err.textContent = 'Saisissez une adresse email.'; err.style.display = 'block'; return; }
+
+  const { data, error } = await sb.rpc('inviter_membre', { p_email: email, p_role: role });
+  if(error){ err.textContent = error.message; err.style.display = 'block'; return; }
+
+  const ligne = Array.isArray(data) ? data[0] : data;
+  document.getElementById('eq-lien').value = lienInvitation(ligne.jeton);
+  document.getElementById('eq-lien-bloc').style.display = 'block';
+  document.getElementById('eq-email').value = '';
+  toast('✅ Invitation créée');
+  renderEquipe();
+}
+
+function copierLienInvitation(){
+  const champ = document.getElementById('eq-lien');
+  champ.select();
+  navigator.clipboard.writeText(champ.value)
+    .then(function(){ toast('📋 Lien copié'); })
+    .catch(function(){ toast('Sélectionnez le lien et copiez-le'); });
+}
+
+function copierLien(jeton){
+  navigator.clipboard.writeText(lienInvitation(jeton))
+    .then(function(){ toast('📋 Lien copié'); })
+    .catch(function(){ toast('Copie impossible depuis ce navigateur'); });
+}
+
+async function annulerInvitation(id){
+  if(!confirm('Annuler cette invitation ?')) return;
+  const { error } = await getSB().rpc('annuler_invitation', { p_id: id });
+  if(error){ toast('❌ ' + error.message); return; }
+  toast('Invitation annulée');
+  renderEquipe();
+}
+
+async function basculerRole(utilisateur, roleActuel){
+  const nouveau = roleActuel === 'agent' ? 'direction' : 'agent';
+  if(!confirm('Passer ce membre en « ' + ROLES_LIBELLES[nouveau] + ' » ?')) return;
+  const { error } = await getSB().rpc('changer_role', { p_utilisateur: utilisateur, p_role: nouveau });
+  if(error){ toast('❌ ' + error.message); return; }
+  toast('Rôle mis à jour');
+  renderEquipe();
+}
+
+async function retirerCommercial(utilisateur, nom){
+  if(!confirm('Retirer ' + nom + ' de l\'équipe ?\n\nSes prospects et mandats retournent au vivier, ils ne sont pas supprimés.')) return;
+  const { error } = await getSB().rpc('retirer_membre', { p_utilisateur: utilisateur });
+  if(error){ toast('❌ ' + error.message); return; }
+  toast('Membre retiré · ses leads sont au vivier');
+  renderEquipe();
+  lancerSync();
+}
+
+async function distribuerVivier(){
+  const sb = getSB();
+  const agent = document.getElementById('eq-vivier-agent').value;
+  if(!agent) return;
+
+  const { data, error } = await sb.from('prospects')
+    .select('id').is('attribue_a', null).is('supprime_le', null);
+  if(error){ toast('❌ ' + error.message); return; }
+  if(!data || !data.length){ toast('Le vivier est vide'); renderEquipe(); return; }
+
+  if(!confirm('Attribuer ' + data.length + ' prospect' + (data.length > 1 ? 's' : '') + ' à ce commercial ?')) return;
+
+  let ok = 0;
+  for(const p of data){
+    const r = await sb.rpc('attribuer_lead', { p_table: 'prospects', p_id: p.id, p_agent: agent });
+    if(!r.error) ok++;
+  }
+  toast('✅ ' + ok + ' prospect' + (ok > 1 ? 's attribués' : ' attribué'));
+  renderEquipe();
+  chargerDonnees();
+}
+
 // Navigation depuis une carte du tableau de bord, une tuile de KPI ou
 // une action rapide. Retrouve le bouton correspondant dans la barre
 // latérale pour que l'état actif et le repli de section suivent.
@@ -4559,6 +4926,7 @@ function nav(btn,id){
   if(id==='mandats')renderMandats();
   if(id==='agenda')renderAgenda();
   if(id==='profile')loadProfile();
+  if(id==='equipe')renderEquipe();
   if(id==='dashboard')updateDashKPIs();
   if(id==='pipeline')renderPipeline();
   if(id==='finance'){/* coming soon — no render needed */}
