@@ -84,6 +84,42 @@ body{font-family:var(--fb);background:#FAFAFA;color:var(--g900);min-height:100vh
 .sidebar.collapsed:hover .sb-badge,
 .sidebar.collapsed:hover .sb-agent-info,
 .sidebar.collapsed:hover .sb-section-label{opacity:1;width:auto;max-width:200px}
+
+/* ── Sections repliables de la barre latérale ── */
+.sb-section{display:flex;flex-direction:column}
+.sb-section-head{
+  display:flex;align-items:center;gap:6px;width:100%;
+  background:none;border:none;padding:0;margin:0;
+  cursor:pointer;text-align:left;font:inherit;
+  color:inherit;transition:opacity .15s;
+}
+.sb-section-head:hover .sb-section-label{color:rgba(255,255,255,.7)}
+.sb-section-head:focus-visible{outline:2px solid var(--brand);outline-offset:2px;border-radius:4px}
+.sb-section-head .sb-section-label{flex:1;margin:0}
+.sb-chevron{
+  width:0;height:0;flex-shrink:0;margin-right:14px;
+  border-left:4px solid transparent;border-right:4px solid transparent;
+  border-top:5px solid rgba(255,255,255,.38);
+  transition:transform .22s ease;
+}
+.sb-section.replie .sb-chevron{transform:rotate(-90deg)}
+
+/* Repli animé sans hauteur codée en dur : la grille passe de 1fr à 0fr. */
+.sb-section-corps{
+  display:grid;grid-template-rows:1fr;
+  transition:grid-template-rows .22s ease;
+}
+.sb-section.replie .sb-section-corps{grid-template-rows:0fr}
+.sb-section-inner{overflow:hidden;min-height:0;display:flex;flex-direction:column}
+
+/* Barre réduite en rail d'icônes : on rouvre tout, sinon les icônes
+   d'une section repliée deviennent inatteignables. */
+.sidebar.collapsed:not(:hover) .sb-section.replie .sb-section-corps{grid-template-rows:1fr}
+.sidebar.collapsed:not(:hover) .sb-chevron{opacity:0}
+
+@media (prefers-reduced-motion:reduce){
+  .sb-section-corps,.sb-chevron{transition:none}
+}
 .sidebar.collapsed:hover .sb-btn{justify-content:flex-start;padding:7px 14px}
 .sidebar.collapsed:hover .sb-btn::after{display:none}
 
@@ -1908,47 +1944,81 @@ body{font-family:var(--fb);background:#FAFAFA;color:var(--g900);min-height:100vh
       <span class="sb-icon">◷</span><span class="sb-label">Agenda</span>
     </button>
     <!-- Assistants IA -->
-    <div class="sb-section-label">Assistants IA</div>
-    <button class="sb-btn" onclick="nav(this,'gmb')" data-tip="Google My Business">
-      <span class="sb-icon">◉</span><span class="sb-label">Google My Business</span>
-    </button>
-    <button class="sb-btn" onclick="nav(this,'linkedin')" data-tip="LinkedIn">
-      <span class="sb-icon">◧</span><span class="sb-label">LinkedIn</span>
-    </button>
-    <button class="sb-btn" onclick="nav(this,'prosp')" data-tip="Prospection">
-      <span class="sb-icon">◎</span><span class="sb-label">Prospection</span>
-      <span class="sb-badge sb-badge-new">NEW</span>
-    </button>
-    <button class="sb-btn" onclick="nav(this,'instagram')" data-tip="Instagram">
-      <span class="sb-icon">◑</span><span class="sb-label">Instagram</span>
-    </button>
-    <button class="sb-btn" onclick="nav(this,'facebook')" data-tip="Facebook">
-      <span class="sb-icon">◐</span><span class="sb-label">Facebook</span>
-    </button>
-    <button class="sb-btn" onclick="nav(this,'juridique')" data-tip="Juridique Immo">
-      <span class="sb-icon">⚖</span><span class="sb-label">Juridique Immo</span>
-      <span class="sb-badge" style="background:rgba(239,68,68,.15);color:#FCA5A5">PRO</span>
-    </button>
+    <div class="sb-section" data-section="ia">
+      <button type="button" class="sb-section-head" onclick="basculerSection('ia')"
+              aria-expanded="true" aria-controls="sb-corps-ia">
+        <span class="sb-section-label">Assistants IA</span>
+        <span class="sb-chevron" aria-hidden="true"></span>
+      </button>
+      <div class="sb-section-corps" id="sb-corps-ia">
+        <div class="sb-section-inner">
+          <button class="sb-btn" onclick="nav(this,'gmb')" data-tip="Google My Business">
+            <span class="sb-icon">◉</span><span class="sb-label">Google My Business</span>
+          </button>
+          <button class="sb-btn" onclick="nav(this,'linkedin')" data-tip="LinkedIn">
+            <span class="sb-icon">◧</span><span class="sb-label">LinkedIn</span>
+          </button>
+          <button class="sb-btn" onclick="nav(this,'prosp')" data-tip="Prospection">
+            <span class="sb-icon">◎</span><span class="sb-label">Prospection</span>
+            <span class="sb-badge sb-badge-new">NEW</span>
+          </button>
+          <button class="sb-btn" onclick="nav(this,'instagram')" data-tip="Instagram">
+            <span class="sb-icon">◑</span><span class="sb-label">Instagram</span>
+          </button>
+          <button class="sb-btn" onclick="nav(this,'facebook')" data-tip="Facebook">
+            <span class="sb-icon">◐</span><span class="sb-label">Facebook</span>
+          </button>
+          <button class="sb-btn" onclick="nav(this,'juridique')" data-tip="Juridique Immo">
+            <span class="sb-icon">⚖</span><span class="sb-label">Juridique Immo</span>
+            <span class="sb-badge" style="background:rgba(239,68,68,.15);color:#FCA5A5">PRO</span>
+          </button>
+
+
+        </div>
+      </div>
+    </div>
 
     <!-- Outils -->
-    <div class="sb-section-label">Outils</div>
-    <button class="sb-btn" onclick="nav(this,'visual')" data-tip="Studio Visuel">
-      <span class="sb-icon">◈</span><span class="sb-label">Studio Visuel</span>
-      <span class="sb-badge sb-badge-lock">bientôt</span>
-    </button>
-    <button class="sb-btn" onclick="nav(this,'partners')" data-tip="Partenaires">
-      <span class="sb-icon">◇</span><span class="sb-label">Partenaires</span>
-    </button>
-    <button class="sb-btn" onclick="nav(this,'products')" data-tip="Nos Produits">
-      <span class="sb-icon">◻</span><span class="sb-label">Nos Produits</span>
-    </button>
+    <div class="sb-section" data-section="outils">
+      <button type="button" class="sb-section-head" onclick="basculerSection('outils')"
+              aria-expanded="true" aria-controls="sb-corps-outils">
+        <span class="sb-section-label">Outils</span>
+        <span class="sb-chevron" aria-hidden="true"></span>
+      </button>
+      <div class="sb-section-corps" id="sb-corps-outils">
+        <div class="sb-section-inner">
+          <button class="sb-btn" onclick="nav(this,'visual')" data-tip="Studio Visuel">
+            <span class="sb-icon">◈</span><span class="sb-label">Studio Visuel</span>
+            <span class="sb-badge sb-badge-lock">bientôt</span>
+          </button>
+          <button class="sb-btn" onclick="nav(this,'partners')" data-tip="Partenaires">
+            <span class="sb-icon">◇</span><span class="sb-label">Partenaires</span>
+          </button>
+          <button class="sb-btn" onclick="nav(this,'products')" data-tip="Nos Produits">
+            <span class="sb-icon">◻</span><span class="sb-label">Nos Produits</span>
+          </button>
 
-    <!-- Settings -->
-    <div class="sb-section-label">Compte</div>
-    <button class="sb-btn" onclick="nav(this,'profile')" data-tip="Profil & Paramètres">
-      <span class="sb-icon">◌</span><span class="sb-label">Profil & Paramètres</span>
-    </button>
 
+        </div>
+      </div>
+    </div>
+
+    <!-- Compte -->
+    <div class="sb-section" data-section="compte">
+      <button type="button" class="sb-section-head" onclick="basculerSection('compte')"
+              aria-expanded="true" aria-controls="sb-corps-compte">
+        <span class="sb-section-label">Compte</span>
+        <span class="sb-chevron" aria-hidden="true"></span>
+      </button>
+      <div class="sb-section-corps" id="sb-corps-compte">
+        <div class="sb-section-inner">
+          <button class="sb-btn" onclick="nav(this,'profile')" data-tip="Profil & Paramètres">
+            <span class="sb-icon">◌</span><span class="sb-label">Profil & Paramètres</span>
+          </button>
+
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- Agent bas -->
@@ -4384,11 +4454,80 @@ const TB_TITLES={
   products:['Nos <em>Produits</em>','Produits'],
   profile:['Mon <em>Profil</em>','Profil & Paramètres'],
 };
+// ══════════ SECTIONS REPLIABLES DE LA BARRE LATÉRALE ══════════
+// L'état est mémorisé : un agent qui n'utilise pas les assistants IA
+// ne les rouvre pas à chaque visite.
+
+const CLE_SECTIONS = 'mci_sections_repliees';
+
+// Repliées au premier lancement : la barre passe de seize entrées à
+// six, et l'essentiel — le CRM — reste toujours visible.
+const SECTIONS_REPLIEES_PAR_DEFAUT = ['ia', 'outils', 'compte'];
+
+function lireSectionsRepliees(){
+  try{
+    const brut = localStorage.getItem(CLE_SECTIONS);
+    if(brut === null) return SECTIONS_REPLIEES_PAR_DEFAUT.slice();
+    return JSON.parse(brut);
+  }catch(_){ return SECTIONS_REPLIEES_PAR_DEFAUT.slice(); }
+}
+
+function ecrireSectionsRepliees(cles){
+  try{ localStorage.setItem(CLE_SECTIONS, JSON.stringify(cles)); }catch(_){}
+}
+
+function appliquerEtatSection(cle, replie){
+  const sec = document.querySelector('.sb-section[data-section="' + cle + '"]');
+  if(!sec) return;
+  sec.classList.toggle('replie', replie);
+  const tete = sec.querySelector('.sb-section-head');
+  if(tete) tete.setAttribute('aria-expanded', String(!replie));
+}
+
+function basculerSection(cle){
+  const repliees = lireSectionsRepliees();
+  const i = repliees.indexOf(cle);
+  if(i >= 0) repliees.splice(i, 1); else repliees.push(cle);
+  ecrireSectionsRepliees(repliees);
+  appliquerEtatSection(cle, i < 0);
+}
+
+// Ouvre la section qui contient le bouton actif : sans cela, arriver
+// sur une vue depuis le tableau de bord la laisserait cachée.
+function ouvrirSectionDuBouton(btn){
+  if(!btn) return;
+  const sec = btn.closest ? btn.closest('.sb-section') : null;
+  if(!sec || !sec.classList.contains('replie')) return;
+  const cle = sec.getAttribute('data-section');
+  const repliees = lireSectionsRepliees().filter(c => c !== cle);
+  ecrireSectionsRepliees(repliees);
+  appliquerEtatSection(cle, false);
+}
+
+function initSectionsBarreLaterale(){
+  const repliees = lireSectionsRepliees();
+  document.querySelectorAll('.sb-section').forEach(sec => {
+    const cle = sec.getAttribute('data-section');
+    appliquerEtatSection(cle, repliees.indexOf(cle) >= 0);
+  });
+}
+
+// Navigation depuis une carte du tableau de bord, une tuile de KPI ou
+// une action rapide. Retrouve le bouton correspondant dans la barre
+// latérale pour que l'état actif et le repli de section suivent.
+// Appelée 26 fois depuis le HTML ; son absence rendait muettes toutes
+// les cartes du tableau de bord.
+function navTo(id){
+  const btn = document.querySelector('.sb-btn[onclick*="\'' + id + '\'"]');
+  nav(btn || null, id);
+}
+
 function nav(btn,id){
   ALL_VIEWS.forEach(v=>{const el=document.getElementById('v-'+v);if(el)el.classList.remove('active');});
   document.querySelectorAll('.sb-btn').forEach(b=>b.classList.remove('active'));
   document.getElementById('v-'+id).classList.add('active');
-  btn.classList.add('active');
+  if(btn && btn.classList) btn.classList.add('active');
+  ouvrirSectionDuBouton(btn);
   const t=TB_TITLES[id]||[id,id];
   document.getElementById('tb-title').innerHTML=t[0];
   document.getElementById('tb-sub').textContent=t[1];
@@ -8185,6 +8324,7 @@ function updatePlanBadge(){
 
 // ══════════ BOOT APP ══════════
 function bootApp(){
+  initSectionsBarreLaterale();
   updatePlanBadge();
   renderList();
   renderMandats();
