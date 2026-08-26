@@ -9531,35 +9531,45 @@ const MODULES_IA_ACTIFS = false;
 
 const MODULES_IA = ['gmb','linkedin','prosp','instagram','facebook','juridique','visual'];
 
-/** Masque toute trace des assistants dans l'interface. */
+/**
+ * Met les assistants en veille sans les faire disparaître.
+ *
+ * On garde la section visible et repliée : l'agent voit que ces
+ * modules existent et qu'ils reviendront. Les masquer entièrement
+ * donnerait l'impression qu'ils n'ont jamais existé — et pour un
+ * client qui les a vus dans une démonstration, c'est déroutant.
+ *
+ * Ce qui disparaît en revanche : le chatbot flottant et l'écran de
+ * saisie de la clé Anthropic. Ce ne sont pas des modules qu'on
+ * annonce, c'est de la plomberie qui réclamait au client sa propre
+ * clé API — la raison même de la mise en veille.
+ */
 function appliquerVeilleIA(){
   if(MODULES_IA_ACTIFS) return;
 
-  // Section entière de la barre latérale
+  // Pastille « en pause » sur l'en-tête de section, pour que l'état se
+  // comprenne sans avoir à ouvrir chaque module.
   const sec = document.querySelector('.sb-section[data-section="ia"]');
-  if(sec) sec.style.display = 'none';
+  if(sec && !sec.querySelector('.sb-badge-pause')){
+    const tete = sec.querySelector('.sb-section-head');
+    const chevron = tete && tete.querySelector('.sb-chevron');
+    if(tete && chevron){
+      const pastille = document.createElement('span');
+      pastille.className = 'sb-badge sb-badge-pause';
+      pastille.textContent = 'en pause';
+      pastille.style.cssText = 'background:rgba(255,255,255,.08);color:rgba(255,255,255,.45);'
+        + 'font-size:.58rem;padding:2px 6px;border-radius:4px;letter-spacing:.04em;margin-right:6px';
+      tete.insertBefore(pastille, chevron);
+    }
+  }
 
-  // Studio Visuel vit dans la section Outils
-  const btnVisuel = document.querySelector('.sb-btn[onclick*="\'visual\'"]');
-  if(btnVisuel) btnVisuel.style.display = 'none';
-
-  // Cartes et raccourcis du tableau de bord
-  MODULES_IA.forEach(function(m){
-    document.querySelectorAll('[onclick*="\'' + m + '\'"]').forEach(function(el){
-      if(el.classList.contains('sb-btn') || el.classList.contains('tool-card')
-         || el.classList.contains('tool-card-locked') || el.classList.contains('ext-item')){
-        el.style.display = 'none';
-      }
-    });
-  });
-
-  // Chatbot flottant : il consomme la même clé API
+  // Le chatbot consomme la même clé API que les assistants.
   const bulle = document.getElementById('cb-bubble');
   if(bulle) bulle.style.display = 'none';
   const fen = document.getElementById('cb-win');
   if(fen) fen.classList.add('hidden');
 
-  // Écran de saisie de la clé Anthropic : plus jamais proposé
+  // Écran de saisie de la clé Anthropic : plus jamais proposé.
   const ecranCle = document.getElementById('api-key-screen');
   if(ecranCle) ecranCle.style.display = 'none';
 }
