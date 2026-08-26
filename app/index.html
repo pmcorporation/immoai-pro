@@ -9090,6 +9090,11 @@ function doLogin(){
     const msg  = (err && err.message) || '';
     const code = (err && (err.code || err.error_code)) || '';
 
+    // Trace complète en console : l'utilisateur ne doit voir qu'un
+    // message clair, mais le diagnostic doit rester accessible sans
+    // avoir à modifier le code.
+    console.warn('[connexion] échec', { code: code, message: msg, erreur: err });
+
     if(/fetch|network|failed to fetch|load failed/i.test(msg)){
       showAuthAlert('login-error', 'Service momentanément indisponible. Réessayez dans un instant.');
     } else if(code === 'email_not_confirmed' || /not confirmed|confirmer/i.test(msg)){
