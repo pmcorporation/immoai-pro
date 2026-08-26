@@ -4472,6 +4472,11 @@ function getSB() {
 }
 
 // ── Auth Supabase ──
+/**
+ * Laisse remonter l'erreur telle quelle : son `code` distingue un
+ * mauvais mot de passe d'une adresse non confirmée, et les deux
+ * appellent des réponses très différentes.
+ */
 async function sbLogin(email, password) {
   const sb = getSB();
   if(!sb) return null;
@@ -8915,6 +8920,34 @@ function afficherConfirmationEmail(email){
     + '</div>';
 }
 
+/** Propose de renvoyer le lien de confirmation, sous l'erreur de
+    connexion. Sans cela, un compte non confirmé est une impasse. */
+function afficherRenvoiConfirmation(email){
+  const zone = document.getElementById('login-error');
+  if(!zone || document.getElementById('lien-renvoi')) return;
+  const a = document.createElement('a');
+  a.id = 'lien-renvoi';
+  a.href = '#';
+  a.textContent = 'Renvoyer le lien de confirmation';
+  a.style.cssText = 'display:block;margin-top:7px;font-size:.76rem;color:var(--brand);text-decoration:underline';
+  a.onclick = function(e){
+    e.preventDefault();
+    const sb = getSB();
+    if(!sb) return;
+    a.textContent = 'Envoi…';
+    sb.auth.resend({ type: 'signup', email: email,
+                     options: { emailRedirectTo: location.origin + location.pathname } })
+      .then(function(r){
+        a.textContent = r.error
+          ? (/rate limit/i.test(r.error.message)
+              ? 'Trop d\'envois — patientez quelques minutes'
+              : r.error.message)
+          : 'Lien renvoyé — vérifiez votre boîte mail';
+      });
+  };
+  zone.appendChild(a);
+}
+
 function afficherSaisieCode(){
   const bloc = document.getElementById('bloc-code');
   if(!bloc) return;
@@ -9050,11 +9083,24 @@ function doLogin(){
     // distingue un identifiant erroné d'un serveur injoignable — dire
     // « mot de passe incorrect » quand la base est en panne envoie
     // l'utilisateur chercher un problème qui n'existe pas.
-    const msg = (err && err.message) || '';
-    const serveurInjoignable = /fetch|network|failed to fetch|load failed/i.test(msg);
-    showAuthAlert('login-error', serveurInjoignable
-      ? 'Service momentanément indisponible. Réessayez dans un instant.'
-      : 'Email ou mot de passe incorrect.');
+    // Distinguer les causes : annoncer « mot de passe incorrect » à
+    // quelqu'un dont l'adresse n'est simplement pas confirmée l'envoie
+    // chercher un problème qui n'existe pas. C'est le défaut qu'avait
+    // l'ancienne version, il n'y a pas de raison de le reproduire.
+    const msg  = (err && err.message) || '';
+    const code = (err && (err.code || err.error_code)) || '';
+
+    if(/fetch|network|failed to fetch|load failed/i.test(msg)){
+      showAuthAlert('login-error', 'Service momentanément indisponible. Réessayez dans un instant.');
+    } else if(code === 'email_not_confirmed' || /not confirmed|confirmer/i.test(msg)){
+      showAuthAlert('login-error',
+        'Votre adresse n\'est pas encore confirmée. Vérifiez votre boîte mail — ou renvoyez le lien ci-dessous.');
+      afficherRenvoiConfirmation(email);
+    } else if(code === 'over_email_send_rate_limit' || /rate limit/i.test(msg)){
+      showAuthAlert('login-error', 'Trop de tentatives. Patientez quelques minutes.');
+    } else {
+      showAuthAlert('login-error', 'Email ou mot de passe incorrect.');
+    }
     if(btn)btn.disabled=false;
     if(spin)spin.style.display='none';
     if(arrow)arrow.style.display='';
