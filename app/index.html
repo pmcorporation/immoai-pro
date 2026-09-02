@@ -786,9 +786,9 @@ body{font-family:var(--fb);background:#FAFAFA;color:var(--g900);min-height:100vh
 .auth-brand{display:flex;align-items:center;gap:9px}
 .auth-brand-mark{width:32px;height:32px;background:var(--brand);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:.85rem;font-weight:700;color:#fff;flex-shrink:0}
 .auth-brand-name{font-family:var(--fd);font-weight:800;font-size:.95rem;color:#fff}
-.auth-brand-name span{color:#FF8A3D}
+.auth-brand-name span{color:var(--w)}
 .auth-tagline h2{font-family:var(--fd);font-weight:700;font-size:1.5rem;color:#fff;letter-spacing:-.03em;line-height:1.25;margin-bottom:10px}
-.auth-tagline h2 em{color:#FF8A3D;font-style:normal}
+.auth-tagline h2 em{color:var(--w);font-style:normal}
 .auth-tagline p{font-size:.79rem;color:rgba(255,255,255,.4);line-height:1.7}
 .auth-features{display:flex;flex-direction:column;gap:8px}
 .auth-feat{display:flex;align-items:center;gap:10px;padding:9px 11px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:8px}
@@ -814,12 +814,12 @@ body{font-family:var(--fb);background:#FAFAFA;color:var(--g900);min-height:100vh
 .auth-form-wrap{width:100%;max-width:360px}
 .auth-form-title{font-family:var(--fd);font-weight:700;font-size:1.3rem;color:#fff;margin-bottom:4px;letter-spacing:-.02em}
 .auth-form-sub{font-size:.79rem;color:rgba(255,255,255,.35);margin-bottom:22px;line-height:1.5}
-.auth-form-sub a{color:#FF8A3D;text-decoration:none;font-weight:500}
+.auth-form-sub a{color:var(--w);text-decoration:none;font-weight:500}
 .auth-form-sub a:hover{text-decoration:underline}
 
 /* Démo badge */
 .auth-demo{background:rgba(var(--brand-rgb),.07);border:1px solid rgba(var(--brand-rgb),.15);border-radius:8px;padding:10px 13px;margin-bottom:18px}
-.auth-demo-title{font-size:.64rem;font-weight:700;color:#FF8A3D;text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px}
+.auth-demo-title{font-size:.64rem;font-weight:700;color:var(--w);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px}
 .auth-demo-line{display:flex;align-items:center;justify-content:space-between;margin-bottom:3px}
 .auth-demo-line:last-child{margin-bottom:0}
 .auth-demo-key{font-size:.7rem;color:rgba(255,255,255,.3)}
@@ -832,7 +832,7 @@ body{font-family:var(--fb);background:#FAFAFA;color:var(--g900);min-height:100vh
   border:none;outline:none;
   transition:background .15s;
 }
-.auth-demo-val:hover{background:rgba(var(--brand-rgb),.2);color:#FF8A3D}
+.auth-demo-val:hover{background:rgba(var(--brand-rgb),.2);color:var(--w)}
 
 /* Alerte */
 .auth-alert{
@@ -879,7 +879,7 @@ body{font-family:var(--fb);background:#FAFAFA;color:var(--g900);min-height:100vh
 /* Lien forgot */
 .auth-forgot-row{text-align:right;margin-top:5px}
 .auth-forgot{font-size:.71rem;color:rgba(255,255,255,.3);text-decoration:none}
-.auth-forgot:hover{color:#FF8A3D}
+.auth-forgot:hover{color:var(--w)}
 
 /* Bouton principal */
 .auth-btn{
@@ -1725,77 +1725,121 @@ body{font-family:var(--fb);background:#FAFAFA;color:var(--g900);min-height:100vh
   .dash-hero-title,.dash-hero h1,.dash-hero h2{font-size:1.3rem}
 }
 
+
+/* ══ ANNUAIRE DE CONNEXION ══ */
+/* La photo prime, le nom la confirme : sur un écran de téléphone on
+   reconnaît un visage avant de lire une ligne de texte. */
+.auth-logo{height:38px;width:auto;display:block}
+.annu-grille{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:20px;
+}
+.annu-carte{
+  display:flex;flex-direction:column;align-items:center;gap:8px;
+  padding:14px 8px;border-radius:12px;cursor:pointer;
+  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);
+  transition:var(--tr);font:inherit;color:inherit;text-align:center;
+}
+.annu-carte:hover{background:rgba(255,255,255,.09);border-color:rgba(255,255,255,.22);transform:translateY(-2px)}
+.annu-carte:focus-visible{outline:2px solid #fff;outline-offset:2px}
+.annu-av{
+  width:56px;height:56px;border-radius:50%;flex:none;
+  background:rgba(255,255,255,.10);
+  background-size:cover;background-position:center 18%;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--fd);font-weight:700;font-size:.9rem;
+  color:rgba(255,255,255,.75);letter-spacing:.02em;
+}
+.annu-av-lg{width:60px;height:60px;font-size:1rem}
+.annu-nom{font-size:.74rem;font-weight:700;color:rgba(255,255,255,.92);line-height:1.25}
+.annu-role{font-size:.64rem;color:rgba(255,255,255,.42);line-height:1.2}
+.annu-retour{
+  background:none;border:none;padding:0;margin-bottom:16px;cursor:pointer;
+  font:inherit;font-size:.76rem;color:rgba(255,255,255,.5);transition:var(--tr);
+}
+.annu-retour:hover{color:#fff}
+.annu-choisi{display:flex;align-items:center;gap:13px;margin-bottom:22px}
+.annu-choisi-nom{font-family:var(--fd);font-weight:800;font-size:1.05rem;color:#fff;letter-spacing:-.01em}
+.annu-choisi-role{font-size:.76rem;color:rgba(255,255,255,.45);margin-top:2px}
+.annu-souvenir{display:flex;align-items:center;gap:8px;margin-bottom:14px;cursor:pointer}
+.annu-souvenir input{accent-color:#fff;width:15px;height:15px}
+.annu-souvenir span{font-size:.8rem;color:rgba(255,255,255,.55);font-weight:500}
+@media(max-width:560px){
+  .annu-grille{grid-template-columns:repeat(2,1fr)}
+}
+
 </style>
 </head>
 <body>
 
-<!-- ══════════════ LOGIN ══════════════ -->
+<!-- ══════════════ CONNEXION — MANALEX ══════════════ -->
+<!-- Deux temps : on se désigne, puis on prouve que c'est bien soi.
+     Afficher la liste ne coûte rien en confidentialité — ces noms et
+     ces visages sont déjà publiés sur manalex-immobilier.fr. Elle
+     évite en revanche de taper une adresse complète sur un téléphone,
+     entre deux visites. -->
 <div class="auth-screen" id="login-screen">
 
-  <!-- Branding gauche -->
   <div class="auth-left">
     <div class="auth-brand">
-      <div class="auth-brand-mark">⬡</div>
-      <div class="auth-brand-name">mon-<span>crm</span>-immo</div>
+      <img src="img/logo-manalex.png" alt="Manalex Immobilier" class="auth-logo">
     </div>
     <div class="auth-tagline">
-      <h2>Le CRM des <em>agents immobiliers</em></h2>
-      <p>Vos prospects publicitaires arrivent seuls dans le pipeline, les relances partent sans y penser.</p>
+      <h2>L'outil interne<br>de l'<em>agence</em></h2>
+      <p>Prospects, mandats et rendez-vous au même endroit, pour toute l'équipe.</p>
     </div>
-    <div class="auth-features">
-      <div class="auth-feat"><div class="auth-feat-icon">🎯</div><div class="auth-feat-text"><strong>CRM Pipeline 8 étapes</strong>Prospects → Acte signé</div></div>
-      <div class="auth-feat"><div class="auth-feat-icon">⚖️</div><div class="auth-feat-text"><strong>Leads publicitaires</strong>Vos prospects Facebook, dans le pipeline</div></div>
-      <div class="auth-feat"><div class="auth-feat-icon">📢</div><div class="auth-feat-text"><strong>Relances automatiques</strong>Plus aucun prospect oublié</div></div>
-      <div class="auth-feat"><div class="auth-feat-icon">🤝</div><div class="auth-feat-text"><strong>Réseau d'agents</strong>Partagez vos mandats en 1 clic</div></div>
-    </div>
-    <div class="auth-testimonial">
-      <p>"mon-crm-immo a transformé ma façon de travailler. Je gagne 3h par jour."</p>
-      <div class="auth-testimonial-author">
-        <div class="auth-testimonial-av">SL</div>
-        <div class="auth-testimonial-name">Sophie L. · Agent immobilier, Paris 16e</div>
-      </div>
-    </div>
-    <div class="auth-bottom">
-      <a href="#">CGU</a><a href="#">Confidentialité</a><a href="#">Support</a>
-    </div>
+    <div class="auth-bottom" style="color:rgba(255,255,255,.35);font-size:.72rem">Manalex Immobilier · usage interne</div>
   </div>
 
-  <!-- Formulaire droite -->
   <div class="auth-right">
     <div class="auth-form-wrap">
-      <div class="auth-form-title">Bon retour 👋</div>
-      <div class="auth-form-sub">Pas encore de compte&nbsp;? <a href="#" onclick="showScreen('register-screen')" style="color:var(--brand);font-weight:600">Voir les offres &rarr;</a></div>
 
-      
-
-      <div class="auth-alert error" id="login-error">
-        <span>⚠️</span><span id="login-error-msg">Email ou mot de passe incorrect</span>
+      <div id="etape-qui">
+        <div class="auth-form-title">Qui êtes-vous&nbsp;?</div>
+        <div class="auth-form-sub">Sélectionnez votre nom pour continuer</div>
+        <div class="annu-grille" id="annu-grille"></div>
       </div>
 
-      <div class="auth-field">
-        <label class="auth-label" for="login-email">Email</label>
-        <input class="auth-input" type="email" id="login-email" placeholder="vous@agence.fr" autocomplete="email">
-      </div>
-      <div class="auth-field">
-        <label class="auth-label" for="login-pwd">Mot de passe</label>
-        <div class="auth-input-wrap">
-          <input class="auth-input" type="password" id="login-pwd" placeholder="••••••••" autocomplete="current-password">
-          <button class="auth-eye" type="button" id="login-eye" onclick="toggleAuthEye('login-pwd','login-eye')">👁</button>
+      <div id="etape-mdp" style="display:none">
+        <button class="annu-retour" type="button" onclick="annuRetour()">&larr; Changer d'utilisateur</button>
+
+        <div class="annu-choisi">
+          <div class="annu-av annu-av-lg" id="choisi-av"></div>
+          <div>
+            <div class="annu-choisi-nom" id="choisi-nom"></div>
+            <div class="annu-choisi-role" id="choisi-role"></div>
+          </div>
         </div>
-        <div class="auth-forgot-row">
-          <a href="#" class="auth-forgot" onclick="showScreen('reset-screen')">Mot de passe oublié ?</a>
+
+        <div class="auth-alert error" id="login-error">
+          <span>⚠️</span><span id="login-error-msg">Mot de passe incorrect</span>
         </div>
+
+        <!-- doLogin() lit toujours ces deux champs : le mécanisme de
+             connexion est inchangé, seule la façon de désigner le
+             compte a changé. -->
+        <input type="hidden" id="login-email">
+
+        <div class="auth-field">
+          <label class="auth-label" for="login-pwd">Mot de passe</label>
+          <div class="auth-input-wrap">
+            <input class="auth-input" type="password" id="login-pwd" placeholder="••••••••"
+                   autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
+            <button class="auth-eye" type="button" id="login-eye" onclick="toggleAuthEye('login-pwd','login-eye')">👁</button>
+          </div>
+        </div>
+
+        <label class="annu-souvenir">
+          <input type="checkbox" id="remember-me">
+          <span>Rester connecté 30 jours</span>
+        </label>
+
+        <button class="auth-btn" type="button" id="login-btn" onclick="doLogin()">
+          <span id="login-btn-text">Se connecter</span>
+          <span id="login-btn-arrow"> &rarr;</span>
+          <span id="login-spin" style="display:none">⟳</span>
+        </button>
       </div>
 
-      <label style="display:flex;align-items:center;gap:8px;margin-bottom:14px;cursor:pointer">
-        <input type="checkbox" id="remember-me" style="accent-color:var(--brand);width:15px;height:15px">
-        <span style="font-size:.8rem;color:rgba(255,255,255,.55);font-weight:500">Se souvenir de moi pendant 30 jours</span>
-      </label>
-      <button class="auth-btn" type="button" id="login-btn" onclick="doLogin()">
-        <span id="login-btn-text">Se connecter</span>
-        <span id="login-btn-arrow"> →</span>
-        <span id="login-spin" style="display:none">⟳</span>
-      </button>
     </div>
   </div>
 </div>
@@ -7882,7 +7926,100 @@ function getDevice(){
   return '🌐 Web';
 }
 
+// ══════════ ANNUAIRE DE CONNEXION ══════════
+// Roster de l'agence. Provisoirement en dur : tant que la vue
+// Supabase `annuaire` n'est pas posée, l'écran doit fonctionner. Le
+// jour où elle existe, seul chargerAnnuaire() change — le reste de
+// l'écran ne connaît que la forme des objets, pas leur provenance.
+const ANNUAIRE = [
+  {prenom:'Alexis',   nom:'Lacroix',          role:'Gérant',      mail:'alexis@manalex-immobilier.fr'},
+  {prenom:'Isabelle', nom:'Lacroix',          role:'Administratif',mail:'isabelle@manalex-immobilier.fr'},
+  {prenom:'Didier',   nom:'Lacroix',          role:'Négociateur',  mail:'didier@manalex-immobilier.fr'},
+  {prenom:'Simon',    nom:'Lardet',           role:'Négociateur',  mail:'simon@manalex-immobilier.fr'},
+  {prenom:'Frédéric', nom:'Billet',           role:'Négociateur',  mail:'frederic@manalex-immobilier.fr'},
+  {prenom:'Tiffani',  nom:'Barlerin Portier', role:'Négociatrice', mail:'tiffani@manalex-immobilier.fr'},
+  {prenom:'Milla',    nom:'Salot',            role:'Négociatrice', mail:'milla@manalex-immobilier.fr'},
+];
+
+// La photo est nommée d'après la partie locale de l'adresse. Pas de
+// colonne à tenir à jour : ajouter quelqu'un, c'est déposer un fichier.
+function annuPhoto(m){ return 'img/equipe/' + m.mail.split('@')[0] + '.jpg'; }
+function annuInitiales(m){ return (m.prenom[0] + m.nom[0]).toUpperCase(); }
+
+function chargerAnnuaire(){
+  const g = document.getElementById('annu-grille');
+  if(!g) return;
+  g.innerHTML = '';
+  ANNUAIRE.forEach(function(m, idx){
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'annu-carte';
+    b.onclick = function(){ annuChoisir(idx); };
+
+    const av = document.createElement('div');
+    av.className = 'annu-av';
+    av.textContent = annuInitiales(m);
+    // Les initiales restent dessous : si la photo manque ou tarde,
+    // la carte est lisible quand même.
+    const img = new Image();
+    img.onload = function(){
+      av.style.backgroundImage = 'url("' + annuPhoto(m) + '")';
+      av.textContent = '';
+    };
+    img.src = annuPhoto(m);
+
+    const n = document.createElement('div');
+    n.className = 'annu-nom';
+    n.textContent = m.prenom + ' ' + m.nom;
+
+    const r = document.createElement('div');
+    r.className = 'annu-role';
+    r.textContent = m.role;
+
+    b.appendChild(av); b.appendChild(n); b.appendChild(r);
+    g.appendChild(b);
+  });
+}
+
+function annuChoisir(idx){
+  const m = ANNUAIRE[idx];
+  if(!m) return;
+  document.getElementById('login-email').value = m.mail;
+  document.getElementById('choisi-nom').textContent  = m.prenom + ' ' + m.nom;
+  document.getElementById('choisi-role').textContent = m.role;
+
+  const av = document.getElementById('choisi-av');
+  av.textContent = annuInitiales(m);
+  av.style.backgroundImage = '';
+  const img = new Image();
+  img.onload = function(){
+    av.style.backgroundImage = 'url("' + annuPhoto(m) + '")';
+    av.textContent = '';
+  };
+  img.src = annuPhoto(m);
+
+  document.getElementById('etape-qui').style.display = 'none';
+  document.getElementById('etape-mdp').style.display = 'block';
+  const err = document.getElementById('login-error');
+  if(err) err.classList.remove('show');
+  const pwd = document.getElementById('login-pwd');
+  pwd.value = '';
+  pwd.focus();
+}
+
+function annuRetour(){
+  document.getElementById('etape-mdp').style.display = 'none';
+  document.getElementById('etape-qui').style.display = 'block';
+  document.getElementById('login-pwd').value = '';
+  document.getElementById('login-email').value = '';
+}
+
+
 function showScreen(id){
+  // Les comptes sont créés par la direction depuis l'écran Équipe.
+  // Ni inscription libre, ni réinitialisation : l'équipe ne voit
+  // jamais Supabase.
+  if(id==='register-screen'||id==='reset-screen') id='login-screen';
   ['login-screen','register-screen','reset-screen'].forEach(s=>{
     const el=document.getElementById(s);
     if(el)el.classList.toggle('hidden',s!==id);
@@ -7896,6 +8033,7 @@ function showScreen(id){
   }
   if(id==='login-screen'){
     const e=document.getElementById('login-error');if(e)e.classList.remove('show');
+    annuRetour();   // toujours revenir sur le choix de la personne
   }
 }
 
@@ -8666,6 +8804,7 @@ function bootApp(){
 
 // ══════════ INIT ══════════
 (function(){
+  chargerAnnuaire();   // la grille des visages, avant toute décision d'écran
   const session=sessionStorage.getItem('immoai_session');
   if(session){
     try{
@@ -10017,7 +10156,7 @@ if(window.location.hash === '#admin'){
             <div style="font-size:.72rem;color:#737373;margin-top:4px" id="adm-sub-starter-mrr">0 € MRR</div>
           </div>
           <div class="adm-card" style="border-color:rgba(var(--brand-rgb),.2)">
-            <div style="font-size:.65rem;color:#FDBA74;text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px">Plan Pro · 75€/mois</div>
+            <div style="font-size:.65rem;color:var(--g300);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px">Plan Pro · 75€/mois</div>
             <div style="font-family:var(--fd);font-weight:800;font-size:1.8rem;color:#0F0F11" id="adm-sub-pro">0</div>
             <div style="font-size:.72rem;color:#737373;margin-top:4px" id="adm-sub-pro-mrr">0 € MRR</div>
           </div>
