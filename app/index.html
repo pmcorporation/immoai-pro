@@ -2851,26 +2851,49 @@ body{font-family:var(--fb);background:#FAFAFA;color:var(--g900);min-height:100vh
     </div>
   </div>
 
-  <!-- Inviter -->
+  <!-- Ouvrir un compte -->
+  <!-- Le mot de passe saisi ici est provisoire : l'agent le remplace
+       à sa première connexion. La direction ouvre le compte, elle ne
+       le détient pas. -->
   <div class="card card-p" id="eq-inviter" style="margin-bottom:16px;display:none">
-    <div class="card-title" style="margin-bottom:12px">Inviter un commercial</div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-start">
+    <div class="card-title" style="margin-bottom:4px">Ouvrir un compte</div>
+    <div style="font-size:.75rem;color:var(--g500);margin-bottom:13px">
+      Le compte est actif immédiatement. Aucun courriel n'est envoyé&nbsp;: vous transmettez
+      vous-même les identifiants, et l'agent choisit son mot de passe définitif à sa première connexion.
+    </div>
+
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px">
+      <input type="text" id="eq-prenom" class="finput" style="flex:1;min-width:130px" placeholder="Prénom">
+      <input type="text" id="eq-nom" class="finput" style="flex:1;min-width:130px" placeholder="Nom">
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px">
       <input type="email" id="eq-email" class="finput" style="flex:1;min-width:220px"
-             placeholder="prenom.nom@agence.fr" onkeydown="if(event.key==='Enter')inviterCommercial()">
+             placeholder="prenom@manalex-immobilier.fr">
       <select id="eq-role" class="finput" style="width:150px">
         <option value="agent">Commercial</option>
         <option value="direction">Direction</option>
       </select>
-      <button class="btn btn-brand" onclick="inviterCommercial()">Créer l'invitation</button>
     </div>
-    <div id="eq-erreur" style="display:none;margin-top:9px;font-size:.76rem;color:#DC2626"></div>
-    <div id="eq-lien-bloc" style="display:none;margin-top:12px;padding:12px 14px;background:var(--brand-ghost);border:1px solid rgba(var(--brand-rgb),.3);border-radius:10px">
-      <div style="font-size:.73rem;color:var(--g600);margin-bottom:7px">
-        Transmettez ce lien à votre commercial. Il expire dans 14 jours.
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+      <input type="text" id="eq-mdp" class="finput" style="flex:1;min-width:200px"
+             placeholder="Mot de passe provisoire" autocomplete="off"
+             onkeydown="if(event.key==='Enter')creerCompte()">
+      <button class="btn btn-outline" type="button" onclick="genererMdp()">Générer</button>
+      <button class="btn btn-brand" type="button" id="eq-creer-btn" onclick="creerCompte()">Créer le compte</button>
+    </div>
+
+    <div id="eq-erreur" style="display:none;margin-top:9px;font-size:.76rem;color:var(--red)"></div>
+
+    <!-- Les identifiants ne s'affichent qu'une fois, juste après la
+         création : ils ne sont stockés nulle part en clair. -->
+    <div id="eq-lien-bloc" style="display:none;margin-top:12px;padding:13px 15px;background:var(--g100);border:1px solid var(--g200);border-radius:var(--r)">
+      <div style="font-size:.73rem;color:var(--g600);margin-bottom:8px">
+        <strong>À transmettre maintenant.</strong> Ces identifiants ne seront plus affichés.
       </div>
       <div style="display:flex;gap:8px">
-        <input id="eq-lien" class="finput" readonly style="flex:1;font-size:.74rem" onclick="this.select()">
-        <button class="btn btn-outline" onclick="copierLienInvitation()">Copier</button>
+        <input id="eq-lien" class="finput" readonly style="flex:1;font-size:.74rem;font-family:ui-monospace,monospace"
+               onclick="this.select()">
+        <button class="btn btn-outline" type="button" onclick="copierIdentifiants()">Copier</button>
       </div>
     </div>
   </div>
@@ -4462,7 +4485,8 @@ async function renderEquipe(){
         + (ROLES_LIBELLES[m.role] || m.role) + '</span>'
       + (estDirection && !proprio && !moi
           ? '<button class="btn-ghost-sm" title="Changer de rôle" onclick="basculerRole(\'' + m.id + '\',\'' + m.role + '\')">⇅</button>'
-          + '<button class="btn-ghost-sm" title="Retirer de l\'équipe" onclick="retirerCommercial(\'' + m.id + '\',\'' + echapper(nom).replace(/'/g, "\\'") + '\')">✕</button>'
+          + '<button class="btn-ghost-sm" title="Nouveau mot de passe provisoire" onclick="reinitialiserMdp(\'' + m.id + '\',\'' + echapper(nom) + '\')">🔑</button>'
+          + '<button class="btn-ghost-sm" title="Désactiver le compte" onclick="basculerActivation(\'' + m.id + '\',\'' + echapper(nom) + '\',true)">⛔</button>'
           : '')
       + '</div>';
   }).join('') || '<div style="padding:20px;text-align:center;color:var(--g400);font-size:.8rem">Aucun membre.</div>';
@@ -4504,33 +4528,119 @@ function lienInvitation(jeton){
   return location.origin + location.pathname + '?invitation=' + jeton;
 }
 
-async function inviterCommercial(){
+// ══════════ OUVERTURE DES COMPTES PAR LA DIRECTION ══════════
+// L'invitation par lien laissait l'agent choisir son mot de passe et
+// traverser les écrans de Supabase. Ici, la direction ouvre le compte
+// et transmet elle-même les identifiants. Rien n'est envoyé par
+// courriel : ce qui circule, c'est ce que la direction dicte.
+
+// Le vrai travail est côté serveur : créer un compte exige la clé de
+// service, qui ne peut pas descendre ici. Cette fonction ne fait que
+// porter la demande, signée par la session de l'appelant.
+async function appelerEquipe(charge){
   const sb = getSB();
-  const email = (document.getElementById('eq-email').value || '').trim();
-  const role  = document.getElementById('eq-role').value;
-  const err   = document.getElementById('eq-erreur');
-  err.style.display = 'none';
+  if(!sb) throw new Error('Supabase indisponible');
+  const { data: { session } } = await sb.auth.getSession();
+  if(!session) throw new Error('Session expirée, reconnectez-vous');
 
-  if(!email){ err.textContent = 'Saisissez une adresse email.'; err.style.display = 'block'; return; }
+  const r = await fetch(SUPABASE_URL + '/functions/v1/equipe', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + session.access_token,
+      'apikey': SUPABASE_KEY
+    },
+    body: JSON.stringify(charge)
+  });
 
-  const { data, error } = await sb.rpc('inviter_membre', { p_email: email, p_role: role });
-  if(error){ err.textContent = error.message; err.style.display = 'block'; return; }
-
-  const ligne = Array.isArray(data) ? data[0] : data;
-  document.getElementById('eq-lien').value = lienInvitation(ligne.jeton);
-  document.getElementById('eq-lien-bloc').style.display = 'block';
-  document.getElementById('eq-email').value = '';
-  toast('✅ Invitation créée');
-  renderEquipe();
+  const rep = await r.json().catch(function(){ return {}; });
+  if(!r.ok) throw new Error(rep.erreur || ('Erreur ' + r.status));
+  return rep;
 }
 
-function copierLienInvitation(){
+// Prononçable au téléphone : ni O/0 ni I/l/1, qu'on se fait toujours
+// répéter deux fois.
+function genererMdp(){
+  const lettres = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789';
+  const n = new Uint32Array(12);
+  crypto.getRandomValues(n);
+  let m = '';
+  for(let k = 0; k < n.length; k++) m += lettres[n[k] % lettres.length];
+  document.getElementById('eq-mdp').value = m;
+  return m;
+}
+
+async function creerCompte(){
+  const err = document.getElementById('eq-erreur');
+  const btn = document.getElementById('eq-creer-btn');
+  const val = function(id){ return (document.getElementById(id).value || '').trim(); };
+  err.style.display = 'none';
+
+  const prenom = val('eq-prenom'), nom = val('eq-nom'), email = val('eq-email');
+  const role = document.getElementById('eq-role').value;
+  let mdp = val('eq-mdp');
+
+  const refus = !prenom || !nom ? 'Prénom et nom sont requis.'
+              : !email.includes('@') ? 'Adresse électronique invalide.'
+              : null;
+  if(refus){ err.textContent = refus; err.style.display = 'block'; return; }
+
+  // Un champ laissé vide ne doit pas produire un compte sans mot de
+  // passe : on en engendre un plutôt que de refuser.
+  if(!mdp) mdp = genererMdp();
+
+  btn.disabled = true; btn.textContent = 'Création…';
+  try{
+    await appelerEquipe({ action:'creer', prenom:prenom, nom:nom, email:email, role:role, motdepasse:mdp });
+
+    // Affichés une seule fois : rien n'est conservé en clair.
+    document.getElementById('eq-lien').value = email + '   ·   ' + mdp;
+    document.getElementById('eq-lien-bloc').style.display = 'block';
+    ['eq-prenom','eq-nom','eq-email','eq-mdp'].forEach(function(id){
+      document.getElementById(id).value = '';
+    });
+    toast('✅ Compte ouvert pour ' + prenom);
+    renderEquipe();
+  }catch(e){
+    err.textContent = e.message; err.style.display = 'block';
+  }finally{
+    btn.disabled = false; btn.textContent = 'Créer le compte';
+  }
+}
+
+async function reinitialiserMdp(membreId, nomAffiche){
+  if(!confirm('Donner un nouveau mot de passe provisoire à ' + nomAffiche + ' ?\n\n'
+            + 'Son mot de passe actuel cessera immédiatement de fonctionner.')) return;
+  try{
+    const rep = await appelerEquipe({ action:'reinitialiser', membre_id:membreId });
+    document.getElementById('eq-lien').value = nomAffiche + '   ·   ' + rep.motdepasse_genere;
+    document.getElementById('eq-lien-bloc').style.display = 'block';
+    toast('🔑 Nouveau mot de passe provisoire');
+    renderEquipe();
+  }catch(e){ toast('⚠️ ' + e.message); }
+}
+
+async function basculerActivation(membreId, nomAffiche, sortant){
+  const q = sortant
+    ? 'Désactiver ' + nomAffiche + ' ?\n\nSes sessions sont fermées immédiatement. '
+      + 'Ses leads, mandats et rendez-vous restent en place et lui restent attribués.'
+    : 'Réactiver ' + nomAffiche + ' ?';
+  if(!confirm(q)) return;
+  try{
+    await appelerEquipe({ action: sortant ? 'desactiver' : 'reactiver', membre_id: membreId });
+    toast(sortant ? 'Compte désactivé' : 'Compte réactivé');
+    renderEquipe();
+  }catch(e){ toast('⚠️ ' + e.message); }
+}
+
+function copierIdentifiants(){
   const champ = document.getElementById('eq-lien');
   champ.select();
   navigator.clipboard.writeText(champ.value)
-    .then(function(){ toast('📋 Lien copié'); })
-    .catch(function(){ toast('Sélectionnez le lien et copiez-le'); });
+    .then(function(){ toast('📋 Identifiants copiés'); })
+    .catch(function(){ toast('Sélectionnez la ligne et copiez-la'); });
 }
+
 
 function copierLien(jeton){
   navigator.clipboard.writeText(lienInvitation(jeton))
@@ -7938,7 +8048,6 @@ const ANNUAIRE = [
   {prenom:'Simon',    nom:'Lardet',           role:'Négociateur',  mail:'simon@manalex-immobilier.fr'},
   {prenom:'Frédéric', nom:'Billet',           role:'Négociateur',  mail:'frederic@manalex-immobilier.fr'},
   {prenom:'Tiffani',  nom:'Barlerin Portier', role:'Négociatrice', mail:'tiffani@manalex-immobilier.fr'},
-  {prenom:'Milla',    nom:'Salot',            role:'Négociatrice', mail:'milla@manalex-immobilier.fr'},
 ];
 
 // La photo est nommée d'après la partie locale de l'adresse. Pas de
@@ -8389,7 +8498,91 @@ function _finishLogin(user, remCb){
   const app=document.getElementById('app-root');
   if(app)app.style.display='flex';
   updateUserUI(); updateStorageIndicator(); startClock(); bootApp();
+  verifierMdpProvisoire();   // un mot de passe posé par la direction ne survit pas à la première connexion
 }
+
+// ══════════ MOT DE PASSE PROVISOIRE ══════════
+// La direction ouvre le compte, elle ne le détient pas : le mot de
+// passe qu'elle a posé est remplacé dès la première connexion.
+//
+// Ce n'est pas de la cérémonie. Toute la traçabilité repose sur
+// l'idée que « ce lead a été traité par Simon » désigne Simon — ce
+// qui est faux tant qu'une autre personne peut se connecter à sa
+// place. Sans cette étape, l'imputabilité des leads est décorative.
+async function verifierMdpProvisoire(){
+  const sb = getSB();
+  if(!sb || !currentUser || !currentUser.sbId) return;
+  try{
+    const { data } = await sb.from('membres')
+      .select('mdp_a_changer').eq('utilisateur_id', currentUser.sbId).maybeSingle();
+    if(data && data.mdp_a_changer) ouvrirChangementMdp();
+  }catch(e){ /* colonne absente tant que la migration n'est pas posée */ }
+}
+
+function ouvrirChangementMdp(){
+  if(document.getElementById('mdp-overlay')) return;
+  const o = document.createElement('div');
+  o.id = 'mdp-overlay';
+  o.style.cssText = 'position:fixed;inset:0;z-index:10001;background:var(--navy);'
+    + 'display:flex;align-items:center;justify-content:center;padding:24px';
+  o.innerHTML =
+      '<div style="width:100%;max-width:400px">'
+    +   '<div style="font-family:var(--fd);font-weight:800;font-size:1.4rem;color:#fff;margin-bottom:8px">'
+    +     'Choisissez votre mot de passe</div>'
+    +   '<div style="font-size:.83rem;color:rgba(255,255,255,.55);line-height:1.6;margin-bottom:22px">'
+    +     'Celui qui vous a été communiqué était provisoire. Le nouveau '
+    +     'ne sera connu que de vous.</div>'
+    +   '<input type="password" id="mdp-1" class="auth-input" placeholder="Nouveau mot de passe" '
+    +     'autocomplete="new-password" style="margin-bottom:9px">'
+    +   '<input type="password" id="mdp-2" class="auth-input" placeholder="Confirmez" '
+    +     'autocomplete="new-password" style="margin-bottom:9px">'
+    +   '<div id="mdp-err" style="display:none;font-size:.76rem;color:#FCA5A5;margin-bottom:11px"></div>'
+    +   '<div style="font-size:.72rem;color:rgba(255,255,255,.35);margin-bottom:16px">'
+    +     'Au moins 10 caractères, avec majuscules, minuscules et un chiffre.</div>'
+    +   '<button class="auth-btn" type="button" id="mdp-btn">Enregistrer</button>'
+    + '</div>';
+  document.body.appendChild(o);
+  document.getElementById('mdp-btn').onclick = enregistrerNouveauMdp;
+  document.getElementById('mdp-2').onkeydown = function(e){
+    if(e.key === 'Enter') enregistrerNouveauMdp();
+  };
+  document.getElementById('mdp-1').focus();
+}
+
+function mdpRefuse(m){
+  if(m.length < 10) return 'Au moins 10 caractères.';
+  if(!/[a-z]/.test(m) || !/[A-Z]/.test(m)) return 'Il faut des minuscules et des majuscules.';
+  if(!/[0-9]/.test(m)) return 'Il faut au moins un chiffre.';
+  return null;
+}
+
+async function enregistrerNouveauMdp(){
+  const a = document.getElementById('mdp-1').value;
+  const b = document.getElementById('mdp-2').value;
+  const err = document.getElementById('mdp-err');
+  const btn = document.getElementById('mdp-btn');
+  const dire = function(t){ err.textContent = t; err.style.display = 'block'; };
+  err.style.display = 'none';
+
+  const refus = a !== b ? 'Les deux saisies diffèrent.' : mdpRefuse(a);
+  if(refus){ dire(refus); return; }
+
+  btn.disabled = true; btn.textContent = 'Enregistrement…';
+  try{
+    const sb = getSB();
+    // updateUser() n'agit que sur la session en cours : personne ne
+    // peut changer le mot de passe d'un autre par ce chemin.
+    const { error } = await sb.auth.updateUser({ password: a });
+    if(error) throw new Error(error.message);
+    await sb.rpc('mdp_change');
+    document.getElementById('mdp-overlay').remove();
+    toast('✅ Mot de passe enregistré');
+  }catch(e){
+    dire(e.message);
+    btn.disabled = false; btn.textContent = 'Enregistrer';
+  }
+}
+
 
 async function doRegister(){
   const prenom = document.getElementById('reg-prenom').value.trim();
