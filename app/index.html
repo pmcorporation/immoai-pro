@@ -5928,7 +5928,7 @@ function buildNotifs(){
         notifs.push({
           icone: '⚠️', couleur: '#EF4444',
           titre: 'Relance en retard',
-          detail: `${p.prenom || ''} ${p.nom || ''} — ${f.titre || f.title || 'relance'}`.trim(),
+          detail: `${echapper(p.prenom || '')} ${echapper(p.nom || '')} — ${f.titre || f.title || 'relance'}`.trim(),
           action: `openDet('${p.id}')`,
         });
       }
@@ -5955,7 +5955,7 @@ function buildNotifs(){
     notifs.push({
       icone: '📋', couleur: 'var(--brand-l)',
       titre: 'Mandat bientôt expiré',
-      detail: `${m.bien || m.adresse || 'Mandat'} — échéance le ${m.dateExp}`,
+      detail: `${echapper(m.bien || m.adresse || 'Mandat')} — échéance le ${m.dateExp}`,
       action: "navTo('mandats')",
     });
   });
@@ -6122,8 +6122,8 @@ function renderDashVentes(venduList,totalPrix,totalComm){
   tableEl.innerHTML=venduList.sort((a,b)=>new Date(b.venduDate||'1970')-new Date(a.venduDate||'1970')).map(m=>`
     <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr 100px;align-items:center;padding:11px 16px;border-bottom:1px solid var(--g100);transition:background .1s" onmouseover="this.style.background='var(--g50)'" onmouseout="this.style.background='transparent'">
       <div>
-        <div style="font-size:.82rem;font-weight:700;color:var(--g900)">${m.vendeur} — ${m.bien||'Bien'} ${m.surface?m.surface+'m²':''}</div>
-        <div style="font-size:.7rem;color:var(--g400)">📍 ${m.adresse||'—'} ${m.venduAcquereur?'· Acheteur : '+m.venduAcquereur:''}</div>
+        <div style="font-size:.82rem;font-weight:700;color:var(--g900)">${echapper(m.vendeur)} — ${echapper(m.bien||'Bien')} ${m.surface?m.surface+'m²':''}</div>
+        <div style="font-size:.7rem;color:var(--g400)">📍 ${echapper(m.adresse||'—')} ${m.venduAcquereur?'· Acheteur : '+m.venduAcquereur:''}</div>
       </div>
       <div style="font-size:.82rem;font-weight:700;color:var(--g900)">${m.venduPrix?m.venduPrix.toLocaleString('fr-FR')+' €':'—'}</div>
       <div style="font-size:.82rem;font-weight:700;color:var(--green)">${m.venduCommission?fmtEur(m.venduCommission):'—'}</div>
@@ -6204,7 +6204,7 @@ function renderList(){
     const fuT=fu?`<span style="font-size:.73rem;font-weight:700;color:${fuOd?'#EF4444':'#0EA5E9'}">${fu.date}${fuOd?' ⚠️':''}</span>`:`<span style="font-size:.7rem;color:var(--g400)">—</span>`;
     const commT=p.commission?`<span class="comm-badge">${fmtEur(p.commission)}</span>`:'';
     return`<div class="dt-row" style="grid-template-columns:2fr .8fr 1.1fr 1fr 1fr 1fr 110px" onclick="openDet('${p.id}')">
-      <div class="dt-cell"><div style="display:flex;align-items:center;gap:10px"><div class="avatar-sm" style="background:${c}">${initials(p)}</div><div><strong style="font-weight:600;color:var(--g900);font-size:.84rem;display:block">${p.prenom} ${p.nom}</strong><span style="font-size:.7rem;color:var(--g400)">${p.source||p.tel||'—'}</span></div></div></div>
+      <div class="dt-cell"><div style="display:flex;align-items:center;gap:10px"><div class="avatar-sm" style="background:${c}">${initials(p)}</div><div><strong style="font-weight:600;color:var(--g900);font-size:.84rem;display:block">${echapper(p.prenom)} ${echapper(p.nom)}</strong><span style="font-size:.7rem;color:var(--g400)">${echapper(p.source||p.tel||'—')}</span></div></div></div>
       <div class="dt-cell">${statusBadge}</div>
       <div class="dt-cell"><span class="pill" style="background:${s.dot}20;color:${s.dot}"><span class="pill-dot" style="background:${s.dot}"></span>${s.label}</span></div>
       <div class="dt-cell" style="font-weight:600">${p.budget||'—'}${commT?'<br>'+commT:''}</div>
@@ -6243,7 +6243,7 @@ function openDet(id){
   if(metaEl)metaEl.innerHTML=`
     <span style="background:${ptConf.bg};color:${ptConf.color};font-size:.65rem;font-weight:700;padding:2px 9px;border-radius:10px">${ptConf.emoji} ${ptConf.label}</span>
     ${p.budget?`<span style="background:var(--g100);color:var(--g700);font-size:.65rem;font-weight:600;padding:2px 9px;border-radius:10px">💰 ${p.budget}</span>`:''}
-    ${p.source?`<span style="background:var(--g100);color:var(--g500);font-size:.63rem;padding:2px 8px;border-radius:10px">${p.source}</span>`:''}
+    ${p.source?`<span style="background:var(--g100);color:var(--g500);font-size:.63rem;padding:2px 8px;border-radius:10px">${echapper(p.source)}</span>`:''}
   `;
   // Onglet actif → infos
   document.querySelectorAll('.dp-tab').forEach(t=>t.classList.remove('active'));
@@ -6284,10 +6284,10 @@ function renderInfo(p){
     <div class="dp-sec" style="border-left:3px solid var(--brand);padding-left:12px">
       <div class="dp-sec-title" style="color:var(--brand)">🔑 Profil Vendeur</div>
       <div class="pipe-info-grid">
-        <div class="pipe-info-item full"><div class="pipe-info-key">Bien à vendre</div><div class="pipe-info-val">${p.bien||'—'} ${p.surface?'· '+p.surface+'m²':''} ${p.pieces?'· '+p.pieces+'P':''}</div></div>
+        <div class="pipe-info-item full"><div class="pipe-info-key">Bien à vendre</div><div class="pipe-info-val">${echapper(p.bien||'—')} ${p.surface?'· '+p.surface+'m²':''} ${p.pieces?'· '+p.pieces+'P':''}</div></div>
         <div class="pipe-info-item"><div class="pipe-info-key">Prix souhaité</div><div class="pipe-info-val" style="color:var(--brand);font-weight:700">${p.budget||'—'}</div></div>
-        <div class="pipe-info-item"><div class="pipe-info-key">Adresse du bien</div><div class="pipe-info-val">${p.adresse||'—'}</div></div>
-        <div class="pipe-info-item"><div class="pipe-info-key">Horizon de vente</div><div class="pipe-info-val">${p.horizon||'—'}</div></div>
+        <div class="pipe-info-item"><div class="pipe-info-key">Adresse du bien</div><div class="pipe-info-val">${echapper(p.adresse||'—')}</div></div>
+        <div class="pipe-info-item"><div class="pipe-info-key">Horizon de vente</div><div class="pipe-info-val">${echapper(p.horizon||'—')}</div></div>
         <div class="pipe-info-item"><div class="pipe-info-key">DPE estimé</div><div class="pipe-info-val">${p.dpeVendeur||'Non renseigné'}</div></div>
         <div class="pipe-info-item"><div class="pipe-info-key">Travaux estimés</div><div class="pipe-info-val">${p.travauxVendeur||'—'}</div></div>
       </div>
@@ -6304,7 +6304,7 @@ function renderInfo(p){
         <div class="pipe-info-item"><div class="pipe-info-key">Budget d'acquisition</div><div class="pipe-info-val" style="font-weight:700;color:var(--brand)">${p.budget||'—'}</div></div>
         <div class="pipe-info-item"><div class="pipe-info-key">Rendement visé</div><div class="pipe-info-val">${p.rendementVise?p.rendementVise+'%':'—'}</div></div>
         <div class="pipe-info-item"><div class="pipe-info-key">Apport disponible</div><div class="pipe-info-val">${p.apport?p.apport+' €':'—'}</div></div>
-        <div class="pipe-info-item"><div class="pipe-info-key">Financement</div><div class="pipe-info-val">${p.financement||'—'}</div></div>
+        <div class="pipe-info-item"><div class="pipe-info-key">Financement</div><div class="pipe-info-val">${echapper(p.financement||'—')}</div></div>
         ${p.investType&&(p.investType.includes('sci')||p.investType.includes('SCI'))?`<div class="pipe-info-item full"><div class="pipe-info-key">Régime fiscal SCI</div><div class="pipe-info-val" style="font-weight:600">${p.sciRegime==='ir'?'📊 IR — Impôt sur le revenu (transparence fiscale)':p.sciRegime==='is'?'🏢 IS — Impôt sur les sociétés (optimisation capitaux)':'Non renseigné'}</div></div>`:''}
         <div class="pipe-info-item"><div class="pipe-info-key">Déjà propriétaire</div><div class="pipe-info-val">${p.dejaProprietaire||'—'}</div></div>
         <div class="pipe-info-item"><div class="pipe-info-key">Expérience invest.</div><div class="pipe-info-val">${p.experienceInvest||'—'}</div></div>
@@ -6317,12 +6317,12 @@ function renderInfo(p){
     <div class="dp-sec" style="border-left:3px solid #2563EB;padding-left:12px">
       <div class="dp-sec-title" style="color:#2563EB">🔍 Profil Acheteur</div>
       <div class="pipe-info-grid">
-        <div class="pipe-info-item full"><div class="pipe-info-key">Bien recherché</div><div class="pipe-info-val">${p.typeBien||'—'} ${p.surfMin?p.surfMin+'m² min':''} ${p.surfMax?'→ '+p.surfMax+'m²':''} ${p.pieces?'· '+p.pieces+' pièces min':''}</div></div>
+        <div class="pipe-info-item full"><div class="pipe-info-key">Bien recherché</div><div class="pipe-info-val">${echapper(p.typeBien||'—')} ${p.surfMin?p.surfMin+'m² min':''} ${p.surfMax?'→ '+p.surfMax+'m²':''} ${p.pieces?'· '+p.pieces+' pièces min':''}</div></div>
         <div class="pipe-info-item"><div class="pipe-info-key">Budget max</div><div class="pipe-info-val" style="color:var(--brand);font-weight:700">${p.budget||'—'}</div></div>
         <div class="pipe-info-item"><div class="pipe-info-key">Zone de recherche</div><div class="pipe-info-val">${p.adresse?p.adresse+(p.rayon?' (rayon '+p.rayon+'km)':''):'—'}</div></div>
-        <div class="pipe-info-item"><div class="pipe-info-key">Financement</div><div class="pipe-info-val">${p.financement||'—'}</div></div>
+        <div class="pipe-info-item"><div class="pipe-info-key">Financement</div><div class="pipe-info-val">${echapper(p.financement||'—')}</div></div>
         <div class="pipe-info-item"><div class="pipe-info-key">Accord bancaire</div><div class="pipe-info-val">${p.accordBanque==='oui'?'✅ Obtenu':p.accordBanque==='en-cours'?'🔄 En cours':p.accordBanque==='non'?'❌ Non':'—'}</div></div>
-        <div class="pipe-info-item"><div class="pipe-info-key">Horizon</div><div class="pipe-info-val">${p.horizon||'—'}</div></div>
+        <div class="pipe-info-item"><div class="pipe-info-key">Horizon</div><div class="pipe-info-val">${echapper(p.horizon||'—')}</div></div>
       </div>
       ${(p.criteres||[]).length?`<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:8px">${(p.criteres||[]).map(c=>'<span style="background:var(--g100);color:var(--g700);font-size:.63rem;padding:2px 8px;border-radius:6px">'+c+'</span>').join('')}</div>`:''}
     </div>`;
@@ -6333,10 +6333,10 @@ function renderInfo(p){
     <div class="dp-sec">
       <div class="dp-sec-title">📞 Coordonnées</div>
       <div class="pipe-info-grid">
-        ${p.tel?`<div class="pipe-info-item"><div class="pipe-info-key">Téléphone</div><div class="pipe-info-val"><a href="tel:${p.tel}" style="color:var(--brand);text-decoration:none">${p.tel}</a></div></div>`:''}
-        ${p.email?`<div class="pipe-info-item"><div class="pipe-info-key">Email</div><div class="pipe-info-val"><a href="mailto:${p.email}" style="color:var(--brand);text-decoration:none;font-size:.74rem;word-break:break-all">${p.email}</a></div></div>`:''}
-        ${p.adresseClient?`<div class="pipe-info-item full"><div class="pipe-info-key">Adresse actuelle</div><div class="pipe-info-val">📍 ${p.adresseClient}</div></div>`:''}
-        ${p.profession?`<div class="pipe-info-item"><div class="pipe-info-key">Profession</div><div class="pipe-info-val">${p.profession}</div></div>`:''}
+        ${p.tel?`<div class="pipe-info-item"><div class="pipe-info-key">Téléphone</div><div class="pipe-info-val"><a href="tel:${echapper(p.tel)}" style="color:var(--brand);text-decoration:none">${echapper(p.tel)}</a></div></div>`:''}
+        ${p.email?`<div class="pipe-info-item"><div class="pipe-info-key">Email</div><div class="pipe-info-val"><a href="mailto:${echapper(p.email)}" style="color:var(--brand);text-decoration:none;font-size:.74rem;word-break:break-all">${echapper(p.email)}</a></div></div>`:''}
+        ${p.adresseClient?`<div class="pipe-info-item full"><div class="pipe-info-key">Adresse actuelle</div><div class="pipe-info-val">📍 ${echapper(p.adresseClient)}</div></div>`:''}
+        ${p.profession?`<div class="pipe-info-item"><div class="pipe-info-key">Profession</div><div class="pipe-info-val">${echapper(p.profession)}</div></div>`:''}
       </div>
     </div>
 
@@ -6379,7 +6379,7 @@ function renderInfo(p){
       <div class="dp-sec-title">🔗 Mandat lié</div>
       <select class="fsel" onchange="linkMandat(this)" style="font-size:.78rem;margin-bottom:6px">
         <option value="">— Lier un mandat —</option>
-        ${mandats.map(m=>`<option value="${m.id}" ${p.mandatRef===m.id?'selected':''}>${m.vendeur} — ${m.bien||'Bien'} ${m.adresse?'· '+m.adresse:''}</option>`).join('')}
+        ${mandats.map(m=>`<option value="${m.id}" ${p.mandatRef===m.id?'selected':''}>${echapper(m.vendeur)} — ${echapper(m.bien||'Bien')} ${m.adresse?'· '+m.adresse:''}</option>`).join('')}
       </select>
       ${p.mandatRef&&mandats.find(m=>m.id===p.mandatRef)?`<div style="background:rgba(var(--brand-rgb),.05);border:1px solid rgba(var(--brand-rgb),.2);border-radius:7px;padding:8px 11px;font-size:.76rem"><strong>${mandats.find(m=>m.id===p.mandatRef).vendeur}</strong> — ${mandats.find(m=>m.id===p.mandatRef).bien||'Bien'}<br><span style="font-size:.7rem;color:var(--g400)">${mandats.find(m=>m.id===p.mandatRef).adresse||''}</span></div>`:''}
     </div>`:''}
@@ -6394,8 +6394,8 @@ function renderProspectMandatsMini(p){
     const STATUS={visite:'✅ Visité',programme:'📅 Visite programmée',interesse:'🔥 Intéressé',refuse:'❌ Refusé',attente:'⏳ En attente',offre:'💰 Offre faite',autre:'📎 Autre'};
     return`<div style="background:#FAFAFA;border:1px solid var(--g200);border-radius:7px;padding:8px 10px;margin-bottom:6px;display:flex;align-items:center;gap:8px">
       <div style="flex:1;min-width:0">
-        <div style="font-size:.78rem;font-weight:600;color:var(--g900);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${m.vendeur} — ${m.bien||'Bien'} ${m.surface?m.surface+'m²':''}</div>
-        <div style="font-size:.67rem;color:var(--g400)">📍 ${m.adresse||'—'} ${m.prix?'· '+m.prix+'€':''}</div>
+        <div style="font-size:.78rem;font-weight:600;color:var(--g900);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${echapper(m.vendeur)} — ${echapper(m.bien||'Bien')} ${m.surface?m.surface+'m²':''}</div>
+        <div style="font-size:.67rem;color:var(--g400)">📍 ${echapper(m.adresse||'—')} ${m.prix?'· '+m.prix+'€':''}</div>
       </div>
       <span style="background:${am.status==='visite'?'rgba(34,197,94,.1)':am.status==='programme'?'rgba(14,165,233,.1)':am.status==='refuse'?'rgba(239,68,68,.1)':'var(--g100)'};color:${am.status==='visite'?'var(--green)':am.status==='programme'?'#0EA5E9':am.status==='refuse'?'var(--red)':'var(--g600)'};font-size:.62rem;font-weight:700;padding:2px 8px;border-radius:8px;white-space:nowrap">${STATUS[am.status||'attente']||am.status}</span>
     </div>`;
@@ -6409,15 +6409,15 @@ function renderProspectMandats(p){
   const STATUS_LABELS={visite:'✅ Visité',programme:'📅 Visite programmée',interesse:'🔥 Intéressé',refuse:'❌ Refusé',attente:'⏳ En attente',offre:'💰 Offre faite',autre:'📎 Autre'};
   el.innerHTML=`
     <div class="dp-sec">
-      <div class="dp-sec-title">📋 Mandats proposés à ${p.prenom}</div>
+      <div class="dp-sec-title">📋 Mandats proposés à ${echapper(p.prenom)}</div>
       <div id="dp-mandat-list">
         ${p.assignedMandats.map((am,i)=>{
           const m=mandats.find(x=>x.id===am.id);if(!m)return'';
           return`<div style="background:#FAFAFA;border:1px solid var(--g200);border-radius:8px;padding:10px 12px;margin-bottom:8px">
             <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:8px">
               <div style="flex:1;min-width:0">
-                <div style="font-size:.8rem;font-weight:700;color:var(--g900)">${m.vendeur} — ${m.bien||'Bien'} ${m.surface?m.surface+'m²':''}</div>
-                <div style="font-size:.7rem;color:var(--g400)">📍 ${m.adresse||'—'} ${m.prix?'· <strong>'+m.prix+'€</strong>':''}</div>
+                <div style="font-size:.8rem;font-weight:700;color:var(--g900)">${echapper(m.vendeur)} — ${echapper(m.bien||'Bien')} ${m.surface?m.surface+'m²':''}</div>
+                <div style="font-size:.7rem;color:var(--g400)">📍 ${echapper(m.adresse||'—')} ${m.prix?'· <strong>'+m.prix+'€</strong>':''}</div>
               </div>
               <button class="btn-ghost-sm" onclick="removeAssignedMandat(${i})" style="font-size:.65rem;color:var(--red);flex-shrink:0">✕</button>
             </div>
@@ -6436,7 +6436,7 @@ function renderProspectMandats(p){
       <div class="dp-sec-title">➕ Affecter un mandat</div>
       <select class="fsel" id="add-mandat-sel" style="font-size:.78rem;margin-bottom:8px">
         <option value="">— Choisir un mandat —</option>
-        ${mandats.filter(m=>!p.assignedMandats.find(am=>am.id===m.id)).map(m=>`<option value="${m.id}">${m.vendeur} — ${m.bien||'Bien'} ${m.adresse?'· '+m.adresse.slice(0,30):''}${m.prix?' · '+m.prix+'€':''}</option>`).join('')}
+        ${mandats.filter(m=>!p.assignedMandats.find(am=>am.id===m.id)).map(m=>`<option value="${m.id}">${echapper(m.vendeur)} — ${echapper(m.bien||'Bien')} ${m.adresse?'· '+m.adresse.slice(0,30):''}${m.prix?' · '+m.prix+'€':''}</option>`).join('')}
       </select>
       <button class="btn btn-brand" style="width:100%;padding:8px" onclick="assignMandat()">➕ Affecter ce mandat</button>
     </div>`;
@@ -6469,14 +6469,14 @@ function removeAssignedMandat(idx){
 // Qualification prospect → opportunité
 function openQualify(id){
   const p=prospects.find(x=>x.id===id);if(!p)return;
-  const type=prompt(`Qualifier "${p.prenom} ${p.nom}" en :\n1 - Mandat de vente\n2 - Mandat de recherche\n\nEntrez 1 ou 2 :`)?.trim();
+  const type=prompt(`Qualifier "${echapper(p.prenom)} ${echapper(p.nom)}" en :\n1 - Mandat de vente\n2 - Mandat de recherche\n\nEntrez 1 ou 2 :`)?.trim();
   if(type==='1'){p.mandat='vente';}
   else if(type==='2'){p.mandat='recherche';}
   else return;
   const comm=prompt('Commission estimée (€) — laissez vide pour passer :');
   if(comm&&!isNaN(parseFloat(comm)))p.commission=parseFloat(comm);
   saveP_();renderList();updateDashKPIs();renderPipeline();
-  toast(`🎯 ${p.prenom} ${p.nom} qualifié en ${p.mandat==='vente'?'mandat de vente':'mandat de recherche'} !`);
+  toast(`🎯 ${echapper(p.prenom)} ${echapper(p.nom)} qualifié en ${p.mandat==='vente'?'mandat de vente':'mandat de recherche'} !`);
 }
 
 // ══════ PIPELINE ══════
@@ -6487,7 +6487,7 @@ function renderPipeline(){
     ${cards.map(p=>{const c=aCol(p);const od=(p.followups||[]).some(f=>!f.done&&isOd(f.date));const commEl=p.commission?`<span style="font-size:.63rem;font-weight:700;color:var(--green);background:var(--green-l);padding:1px 6px;border-radius:6px">${fmtEur(p.commission)}</span>`:'';
       return`<div class="k-card" onclick="openDet('${p.id}')">${od?`<div class="k-alert"></div>`:''}
         <div style="margin-bottom:4px;display:flex;gap:4px;flex-wrap:wrap"><span style="background:${p.mandat==='vente'?'#FFF7ED':'#EFF6FF'};color:${p.mandat==='vente'?'#C2410C':'#1D4ED8'};font-size:.58rem;font-weight:700;padding:1px 6px;border-radius:8px">${p.mandat==='vente'?'🏷️ Vente':'🔍 Rech.'}</span>${commEl}</div>
-        <div class="k-name">${p.prenom} ${p.nom}</div><div class="k-detail">${p.bien||'—'}${p.budget?'<br><strong style="color:var(--g900)">'+p.budget+'</strong>':''}</div>
+        <div class="k-name">${echapper(p.prenom)} ${echapper(p.nom)}</div><div class="k-detail">${echapper(p.bien||'—')}${p.budget?'<br><strong style="color:var(--g900)">'+p.budget+'</strong>':''}</div>
         <div class="k-footer"><div class="k-mini-av" style="background:${c}">${initials(p)}</div><span style="font-size:.6rem;color:var(--g400)">${p.createdAt}</span></div></div>`;
     }).join('')}
     <div class="col-add" onclick="openAddInStage('${key}')">＋ Ajouter</div></div>`;
@@ -7090,9 +7090,9 @@ function renderMandats(){
       <div class="m-card-body">
         <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
           ${m.numMandat?`<span style="font-family:var(--fd);font-size:.62rem;font-weight:800;color:var(--brand);background:rgba(var(--brand-rgb),.08);border:1px solid rgba(var(--brand-rgb),.2);padding:1px 7px;border-radius:6px;letter-spacing:.04em">${m.numMandat}</span>`:''}
-          <span class="m-card-title" style="margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${m.vendeur} — ${m.bien||'Bien'} ${m.surface?m.surface+'m²':''} ${m.pieces?m.pieces+'P':''}</span>
+          <span class="m-card-title" style="margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${echapper(m.vendeur)} — ${echapper(m.bien||'Bien')} ${m.surface?m.surface+'m²':''} ${m.pieces?m.pieces+'P':''}</span>
         </div>
-        <div class="m-card-addr">📍 ${m.adresse||'—'}</div>
+        <div class="m-card-addr">📍 ${echapper(m.adresse||'—')}</div>
         <div class="m-card-stats">
           <div class="m-card-stat"><div class="m-card-stat-lbl">Prix</div><div class="m-card-stat-val" style="color:var(--brand)">${m.prix?m.prix+' €':'—'}</div></div>
           <div class="m-card-stat"><div class="m-card-stat-lbl">Hono.</div><div class="m-card-stat-val">${m.hono?m.hono+'%':'—'}</div></div>
@@ -7323,8 +7323,8 @@ function renderMandatDetContent(m){
           ${expiring?`<span style="background:#FEF3C7;color:#B45309;font-size:.62rem;font-weight:700;padding:2px 8px;border-radius:10px">⚠️ Expire bientôt</span>`:''}
         </div>
         ${m.numMandat?`<div style="margin-bottom:5px"><span style="font-family:var(--fd);font-size:.72rem;font-weight:800;color:var(--brand);background:rgba(var(--brand-rgb),.08);border:1px solid rgba(var(--brand-rgb),.2);padding:3px 11px;border-radius:8px;letter-spacing:.05em"># ${m.numMandat}</span></div>`:''}
-        <div style="font-family:var(--fd);font-weight:700;font-size:1rem;color:var(--g900);margin-bottom:3px">${m.vendeur} — ${m.bien||'Bien'} ${m.surface?m.surface+'m²':''} ${m.pieces?m.pieces+'P':''}</div>
-        <div style="font-size:.78rem;color:var(--g400)">📍 ${m.adresse||'—'}</div>
+        <div style="font-family:var(--fd);font-weight:700;font-size:1rem;color:var(--g900);margin-bottom:3px">${echapper(m.vendeur)} — ${echapper(m.bien||'Bien')} ${m.surface?m.surface+'m²':''} ${m.pieces?m.pieces+'P':''}</div>
+        <div style="font-size:.78rem;color:var(--g400)">📍 ${echapper(m.adresse||'—')}</div>
       </div>
       <div style="display:flex;gap:6px;flex-shrink:0">
         <button class="btn-ghost-sm" onclick="editMandatFromDet('${m.id}')" title="Modifier" style="font-size:.75rem">✏️</button>
@@ -7349,7 +7349,7 @@ function renderMandatDetContent(m){
     <div class="mand-section">
       <div class="mand-section-title">🏠 Caractéristiques du bien</div>
       <div class="mand-info-grid">
-        <div class="mand-info-item"><div class="mand-info-lbl">Type</div><div class="mand-info-val">${m.bien||'—'}</div></div>
+        <div class="mand-info-item"><div class="mand-info-lbl">Type</div><div class="mand-info-val">${echapper(m.bien||'—')}</div></div>
         <div class="mand-info-item"><div class="mand-info-lbl">Surface</div><div class="mand-info-val">${m.surface?m.surface+' m²':'—'}</div></div>
         <div class="mand-info-item"><div class="mand-info-lbl">Pièces</div><div class="mand-info-val">${m.pieces?m.pieces+' pièces':'—'}</div></div>
         <div class="mand-info-item"><div class="mand-info-lbl">Chambres</div><div class="mand-info-val">${m.chambres?m.chambres+' ch.':'—'}</div></div>
@@ -7582,7 +7582,7 @@ function renderAgendaView(view){
   else if(view==='upcoming'){
     const sorted=rdvs.filter(r=>r.date>=new Date().toISOString().split('T')[0]).sort((a,b)=>a.date>b.date?1:-1);
     const el=document.getElementById('upcoming-content');if(!el)return;
-    el.innerHTML=sorted.length?`<div class="card card-p"><div class="card-title">📅 RDV à venir (${sorted.length})</div>${sorted.map(r=>{const t=RDV_TYPES[r.type]||RDV_TYPES.autre;return`<div class="rdv-item"><span class="rdv-time" style="min-width:80px;font-size:.72rem">${new Date(r.date+'T12:00').toLocaleDateString('fr-FR',{day:'2-digit',month:'short'})}</span><div class="rdv-info"><div class="rdv-title">${t.emoji} ${r.titre||r.type}</div><div class="rdv-sub">${r.prospect||''} ${r.heure?'· '+r.heure:''} ${r.adresse?'· '+r.adresse:''}</div></div><button class="btn-ghost-sm" onclick="deleteRdv('${r.id}')" title="Supprimer">🗑️</button></div>`;}).join('')}</div>`:`<div style="text-align:center;padding:48px;color:var(--g400)"><div style="font-size:2.5rem;margin-bottom:12px">📅</div><div style="font-family:var(--fd);font-weight:700;font-size:1rem;margin-bottom:6px">Aucun RDV planifié</div><button class="btn btn-brand" style="margin:16px auto 0" onclick="openAddRdv()">＋ Créer un RDV</button></div>`;
+    el.innerHTML=sorted.length?`<div class="card card-p"><div class="card-title">📅 RDV à venir (${sorted.length})</div>${sorted.map(r=>{const t=RDV_TYPES[r.type]||RDV_TYPES.autre;return`<div class="rdv-item"><span class="rdv-time" style="min-width:80px;font-size:.72rem">${new Date(r.date+'T12:00').toLocaleDateString('fr-FR',{day:'2-digit',month:'short'})}</span><div class="rdv-info"><div class="rdv-title">${t.emoji} ${echapper(r.titre||r.type)}</div><div class="rdv-sub">${r.prospect||''} ${r.heure?'· '+r.heure:''} ${r.adresse?'· '+r.adresse:''}</div></div><button class="btn-ghost-sm" onclick="deleteRdv('${r.id}')" title="Supprimer">🗑️</button></div>`;}).join('')}</div>`:`<div style="text-align:center;padding:48px;color:var(--g400)"><div style="font-size:2.5rem;margin-bottom:12px">📅</div><div style="font-family:var(--fd);font-weight:700;font-size:1rem;margin-bottom:6px">Aucun RDV planifié</div><button class="btn btn-brand" style="margin:16px auto 0" onclick="openAddRdv()">＋ Créer un RDV</button></div>`;
   }
   else if(view==='todo')renderTodoBoard();
   else if(view==='social')renderSocialPlan();
@@ -7649,7 +7649,7 @@ function renderWeekView(){
       const dur=r.duration||60;
       html+=`<div class="ag-event" style="top:${top}px;height:${dur}px;background:${t.color};color:#fff;border-left:3px solid rgba(255,255,255,.4)"
         onclick="event.stopPropagation();showRdvDetail('${r.id}')">
-        <div class="ag-event-title">${t.emoji} ${r.titre||t.label}</div>
+        <div class="ag-event-title">${t.emoji} ${echapper(r.titre||t.label)}</div>
         <div class="ag-event-sub">${r.heure||''} ${r.prospect?'· '+r.prospect:''}</div>
       </div>`;
     });
@@ -7702,7 +7702,7 @@ function renderUpcomingMini(){
         <div style="font-size:.82rem;font-weight:800;color:${t.color}">${d.getDate()}</div>
       </div>
       <div style="flex:1;min-width:0">
-        <div style="font-size:.75rem;font-weight:600;color:var(--g900);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${t.emoji} ${r.titre||t.label}</div>
+        <div style="font-size:.75rem;font-weight:600;color:var(--g900);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${t.emoji} ${echapper(r.titre||t.label)}</div>
         <div style="font-size:.67rem;color:var(--g400)">${r.heure||''} ${r.prospect?'· '+r.prospect:''}</div>
       </div>
     </div>`;
@@ -7729,7 +7729,7 @@ function quickAddRdv(date,heure){
 function showRdvDetail(id){
   const r=rdvs.find(x=>x.id===id);if(!r)return;
   const t=RDV_TYPES[r.type]||RDV_TYPES.autre;
-  const msg=`${t.emoji} ${r.titre||t.label}\n\nDate : ${r.date?new Date(r.date+'T12:00').toLocaleDateString('fr-FR'):'—'} à ${r.heure||'—'}\nClient : ${r.prospect||'—'}\nAdresse : ${r.adresse||'—'}\nNote : ${r.note||'—'}\n\nSupprimer ce RDV ?`;
+  const msg=`${t.emoji} ${echapper(r.titre||t.label)}\n\nDate : ${r.date?new Date(r.date+'T12:00').toLocaleDateString('fr-FR'):'—'} à ${r.heure||'—'}\nClient : ${r.prospect||'—'}\nAdresse : ${echapper(r.adresse||'—')}\nNote : ${echapper(r.note||'—')}\n\nSupprimer ce RDV ?`;
   if(confirm(msg))deleteRdv(id);
 }
 function deleteRdv(id){rdvs=rdvs.filter(x=>x.id!==id);saveR_();renderAgenda();toast('🗑️ RDV supprimé');}
@@ -7789,7 +7789,7 @@ function renderTodoBoard(){
 }
 function moveTodo(id,status){const t=todos.find(x=>x.id===id);if(t){t.status=status;saveTodos();renderTodoBoard();}toast('✅ Déplacé');}
 function deleteTodo(id){if(!confirm('Supprimer cette tâche ?'))return;todos=todos.filter(x=>x.id!==id);saveTodos();renderTodoBoard();}
-function openTodoDetail(id){const t=todos.find(x=>x.id===id);if(!t)return;const info=`${t.title}\nTag: ${t.tag||'—'} · Priorité: ${t.priority||'—'}\nÉchéance: ${t.due||'—'}\nProspect: ${t.prospect||'—'}\nNote: ${t.note||'—'}\n\nSupprimer ?`;if(confirm(info))deleteTodo(id);}
+function openTodoDetail(id){const t=todos.find(x=>x.id===id);if(!t)return;const info=`${t.title}\nTag: ${t.tag||'—'} · Priorité: ${t.priority||'—'}\nÉchéance: ${t.due||'—'}\nProspect: ${t.prospect||'—'}\nNote: ${echapper(t.note||'—')}\n\nSupprimer ?`;if(confirm(info))deleteTodo(id);}
 function openAddTodo(defaultCol){
   const col=defaultCol||'inbox';
   const title=prompt('Titre de la tâche :');if(!title)return;
@@ -8651,8 +8651,8 @@ function renderPipelineCommissions(){
     return`<div class="pipe-comm-row">
       <div class="pipe-comm-av" style="background:${c}">${p.prenom[0]}${p.nom[0]}</div>
       <div style="flex:1;min-width:0">
-        <div style="font-size:.8rem;font-weight:600;color:var(--g900)">${p.prenom} ${p.nom}</div>
-        <div style="font-size:.68rem;color:var(--g400)">${s.emoji} ${s.label} · ${p.bien||'—'}</div>
+        <div style="font-size:.8rem;font-weight:600;color:var(--g900)">${echapper(p.prenom)} ${echapper(p.nom)}</div>
+        <div style="font-size:.68rem;color:var(--g400)">${s.emoji} ${s.label} · ${echapper(p.bien||'—')}</div>
       </div>
       <div style="font-family:var(--fd);font-weight:700;font-size:.9rem;color:var(--brand)">${fmtEur(p.commission)}</div>
     </div>`;
@@ -8821,7 +8821,7 @@ function renderSharedMandats(){
   sel.innerHTML='<option value="">— Choisir —</option>'+mandats.map(m=>{
     const done=alreadyShared.has(m.id);
     return`<option value="${m.id}" ${done?'disabled style="color:var(--g300)"':''}>
-      ${done?'✓ ':''}${m.vendeur} — ${m.bien} ${m.surface||''} (${MANDAT_TYPES[m.type]?.label||m.type})${done?' · déjà partagé':''}
+      ${done?'✓ ':''}${echapper(m.vendeur)} — ${echapper(m.bien)} ${m.surface||''} (${MANDAT_TYPES[m.type]?.label||m.type})${done?' · déjà partagé':''}
     </option>`;
   }).join('');
 
@@ -10919,8 +10919,8 @@ async function renderAdminCRM(){
     const tb = document.getElementById('adm-crm-table');
     if(!tb) return;
     tb.innerHTML = list.map(p => `<div class="adm-row" style="grid-template-columns:1.5fr 1.5fr 1fr .8fr .8fr .8fr">
-      <div class="adm-cell bold">${p.prenom || ''} ${p.nom || ''}<div style="font-size:.67rem;color:rgba(255,255,255,.3)">${p.tel || ''}</div></div>
-      <div class="adm-cell" style="font-size:.75rem">${p.bien || '—'}</div>
+      <div class="adm-cell bold">${echapper(p.prenom || '')} ${echapper(p.nom || '')}<div style="font-size:.67rem;color:rgba(255,255,255,.3)">${echapper(p.tel || '')}</div></div>
+      <div class="adm-cell" style="font-size:.75rem">${echapper(p.bien || '—')}</div>
       <div class="adm-cell">${p.budget || '—'}</div>
       <div class="adm-cell">${p.commission ? (typeof fmtEur === 'function' ? fmtEur(parseFloat(p.commission)) : p.commission + '€') : '—'}</div>
       <div class="adm-cell"><span class="adm-badge ${(p.mandat === 'vente' || p.mandat === 'recherche') ? 'adm-badge-green' : 'adm-badge-gray'}">${(p.mandat === 'vente' || p.mandat === 'recherche') ? 'Pipeline' : 'Prospect'}</span></div>
