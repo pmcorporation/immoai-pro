@@ -4950,6 +4950,14 @@ async function renderLeads(){
     const nom  = ((p.prenom || '') + ' ' + (p.nom || '')).trim() || 'Sans nom';
     const aMoi = p._attribueA && p._attribueA === moi;
     const qui  = p._attribueA ? (nomDuMembre(p._attribueA) || 'un collègue') : null;
+
+    // Un commercial ne voit que ses propres leads : lui afficher son
+    // propre nom serait du bruit. La direction voit tout le monde et a
+    // besoin de savoir chez qui se trouve chaque fiche — le nom du
+    // titulaire est donc le bouton qui permet d'en changer.
+    const titulaire = !_estDirection() ? ''
+      : '<button class="lead-btn" type="button" onclick="ouvrirPanneau(\'' + p.id + '\',\'distribuer\')">'
+        + (aMoi ? '↗ Distribuer' : '👤 ' + echapper(qui || 'non attribué')) + '</button>';
     const tent = _tentatives(p);
 
     // La ville prime : elle occupe la place du titre. Sans elle, on
@@ -5001,9 +5009,7 @@ async function renderLeads(){
         + '<button class="lead-btn" type="button" onclick="ouvrirPanneau(\'' + p.id + '\',\'note\')">✎ Note</button>'
         + '<button class="lead-btn" type="button" onclick="ouvrirPanneau(\'' + p.id + '\',\'donner\')">↗ Donner</button>'
         + '<span class="lead-sep"></span>'
-        + (aMoi ? '<span class="lead-titulaire amoi">✓ à vous</span>'
-                : '<button class="lead-btn" type="button" onclick="prendreLead(\'' + p.id + '\')">'
-                  + (qui ? '↩ Reprendre à ' + echapper(qui) : '✋ Prendre') + '</button>')
+        + titulaire
         + '<button class="lead-btn valide" type="button" onclick="qualifierLead(\'' + p.id + '\')">→ Premier contact</button>'
         + '<button class="lead-btn discret" type="button" onclick="ouvrirPanneau(\'' + p.id + '\',\'ecarter\')" title="Écarter">✕</button>'
       + '</div>'
@@ -5021,7 +5027,6 @@ async function renderLeads(){
 async function sansReponse(id){
   const p = _lead(id);
   if(!p) return;
-  await assurerPrise(p);
   p.activities = p.activities || [];
   const n = _tentatives(p) + 1;
   p.activities.push({
@@ -5034,25 +5039,23 @@ async function sansReponse(id){
   toast('☎ Tentative ' + n + ' enregistrée');
 }
 
-// Qui travaille le lead le prend. Sans cela, un commercial qui note un
-// appel sur un lead attribué à un collègue voit sa modification
-// refusée par Postgres — la politique du vivier exige que la ligne
-// reste attribuée à celui qui écrit — et l'opération reste bloquée
-// dans la file, sans message. Le défaut était invisible pour la
-// direction, qui passe par est_direction() quoi qu'il arrive.
-//
-// Silencieuse à dessein : le commercial vient de décrocher son
-// téléphone, ce n'est pas le moment de lui demander de confirmer une
-// question d'attribution. La prise est inscrite au journal.
-async function assurerPrise(p){
-  const moi = currentUser && currentUser.sbId;
-  if(!p || !moi || p._attribueA === moi) return;
+async function distribuerLead(id, versId){
+  const p = _lead(id);
+  if(!p) return;
+  const cible = ((_equipe && _equipe.membres) || []).find(function(m){ return m.id === versId; });
   try{
     const sb = getSB();
-    if(!sb) return;
-    const { error } = await sb.rpc('prendre_lead', { p_prospect: p.id });
-    if(!error) p._attribueA = moi;
-  }catch(e){ /* le serveur tranchera ; l'écriture locale reste */ }
+    const { error } = await sb.rpc('distribuer_lead', { p_prospect: id, p_vers: versId });
+    if(error) throw new Error(error.message);
+    p._attribueA = versId;
+    _panneau = null;
+    renderLeads();
+    toast('↗ Confié à ' + ((cible && cible.prenom) || 'votre collègue'));
+  }catch(e){ toast('⚠️ ' + e.message); }
+}
+
+function _estDirection(){
+  return !!_equipe && ['proprietaire', 'direction'].indexOf(_equipe.monRole) >= 0;
 }
 
 function nomDuMembre(id){
@@ -5060,22 +5063,6 @@ function nomDuMembre(id){
   const m = _equipe.membres.find(function(x){ return x.id === id; });
   if(!m) return null;
   return ((m.prenom || '') + ' ' + (m.nom || '')).trim() || m.email;
-}
-
-// La prise passe par le serveur, pas par une écriture directe : c'est
-// l'instant où quelqu'un s'engage sur un contact payé. Si un collègue
-// a été plus rapide, il faut un refus clair plutôt qu'un écrasement
-// silencieux.
-async function prendreLead(id){
-  const sb = getSB();
-  try{
-    const { error } = await sb.rpc('prendre_lead', { p_prospect: id });
-    if(error) throw new Error(error.message);
-    const p = _lead(id);
-    if(p) p._attribueA = currentUser && currentUser.sbId;
-    renderLeads();
-    toast('✋ Lead pris — à vous de jouer');
-  }catch(e){ toast('⚠️ ' + e.message); renderLeads(); }
 }
 
 // ── Import d'un fichier ──
@@ -5292,7 +5279,6 @@ function _lead(id){ return prospects.find(function(p){ return p.id === id; }); }
 async function noterAppel(id){
   const p = _lead(id);
   if(!p) return;
-  await assurerPrise(p);
   p.activities = p.activities || [];
   p.activities.push({ type: 'call', note: 'Appel passé depuis les leads', date: new Date().toISOString() });
   saveP_();
@@ -5384,6 +5370,24 @@ function _panneauHtml(p){
       + '</div></div>';
   }
 
+  if(_panneau.type === 'distribuer'){
+    if(!_estDirection()) return '';
+    const membres = (_equipe && _equipe.membres) || [];
+    return '<div class="lead-panneau">'
+      + '<div class="lead-panneau-titre">Confier ce lead à</div>'
+      + '<div class="lead-choix">' + membres.map(function(m){
+          const n = ((m.prenom || '') + ' ' + (m.nom || '')).trim() || m.email;
+          const actuel = m.id === p._attribueA;
+          return '<button class="lead-puce' + (actuel ? ' actif' : '') + '" type="button" '
+               + 'onclick="distribuerLead(\'' + p.id + '\',\'' + m.id + '\')">'
+               + echapper(n) + (actuel ? ' ✓' : '') + '</button>';
+        }).join('') + '</div>'
+      + '<div class="lead-panneau-pied">'
+        + '<span class="lead-astuce">Le commercial ne verra ce lead qu\'une fois qu\'il lui sera confié</span>'
+        + '<button class="lead-btn" type="button" onclick="fermerPanneau()">Annuler</button>'
+      + '</div></div>';
+  }
+
   if(_panneau.type === 'ecarter'){
     return '<div class="lead-panneau">'
       + '<div class="lead-panneau-titre">Pourquoi écarter ce lead&nbsp;?</div>'
@@ -5406,7 +5410,6 @@ async function enregistrerNote(id){
   if(!p || !champ) return;
   const t = champ.value.trim();
   if(!t){ champ.focus(); return; }
-  await assurerPrise(p);
   p.activities = p.activities || [];
   // 'autre' et non 'call' : une note n'est pas une tentative d'appel.
   // Les compter ensemble gonflerait le nombre de relances et fausserait
@@ -5436,7 +5439,6 @@ async function confirmerDon(id, versId){
 async function confirmerEcart(id, motif){
   const p = _lead(id);
   if(!p) return;
-  await assurerPrise(p);
   p.perdu = true;
   p.motifPerte = String(motif || '').trim() || 'Non qualifié';
   saveP_();
@@ -5465,7 +5467,6 @@ async function confirmerQualification(id, nature){
   if(!p) return;
   // Prendre avant de qualifier : sinon la bascule d'étape est refusée
   // par la politique du vivier, et le lead resterait bloqué.
-  await assurerPrise(p);
 
   p.stage  = 'contact';
   p.mandat = (nature === 'vendeur') ? 'vente' : 'recherche';
