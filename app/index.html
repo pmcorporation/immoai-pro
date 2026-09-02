@@ -1726,6 +1726,45 @@ body{font-family:var(--fb);background:#FAFAFA;color:var(--g900);min-height:100vh
 }
 
 
+
+/* ══ LEADS ENTRANTS ══ */
+/* L'ancienneté est l'information principale de cet écran : un lead
+   publicitaire se joue à l'heure près, pas à la journée. Elle est
+   donc colorée, pas seulement écrite. */
+.lead-tete{display:flex;align-items:center;gap:22px;flex-wrap:wrap;margin-bottom:16px}
+.lead-compte{font-family:var(--fd);font-weight:800;font-size:1.9rem;color:var(--g900);line-height:1}
+.lead-delai{font-family:var(--fd);font-weight:800;font-size:1.9rem;line-height:1}
+.lead-delai-bloc{padding-left:22px;border-left:1px solid var(--g200)}
+.lead-compte-sous{font-size:.72rem;color:var(--g500);margin-top:4px}
+.lead-attrib{display:flex;align-items:center;gap:11px;flex-wrap:wrap;margin-bottom:16px;font-size:.82rem;color:var(--g600)}
+.lead-attrib select{width:auto;min-width:190px}
+
+.lead-carte{
+  background:var(--w);border:1px solid var(--g200);border-radius:var(--r);
+  padding:15px 17px;margin-bottom:9px;display:flex;gap:15px;align-items:flex-start;
+  border-left:3px solid var(--g300);transition:var(--tr);
+}
+.lead-carte:hover{box-shadow:var(--sh2)}
+.lead-carte.chaud{border-left-color:var(--green)}
+.lead-carte.tiede{border-left-color:var(--amber)}
+.lead-carte.froid{border-left-color:var(--red)}
+.lead-corps{flex:1;min-width:0}
+.lead-nom{font-family:var(--fd);font-weight:700;font-size:.94rem;color:var(--g900)}
+.lead-meta{font-size:.76rem;color:var(--g500);margin-top:3px;display:flex;gap:9px;flex-wrap:wrap}
+.lead-age{font-size:.71rem;font-weight:700;padding:2px 8px;border-radius:20px;white-space:nowrap}
+.lead-age.chaud{background:var(--green-l);color:var(--green)}
+.lead-age.tiede{background:var(--amber-l);color:var(--amber)}
+.lead-age.froid{background:var(--red-l);color:var(--red)}
+.lead-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:11px}
+.lead-notes{margin-top:11px;padding-top:11px;border-top:1px solid var(--g100)}
+.lead-note{font-size:.77rem;color:var(--g600);padding:5px 0;display:flex;gap:8px}
+.lead-note-date{color:var(--g400);font-size:.71rem;white-space:nowrap;flex:none}
+.lead-vide{padding:44px 20px;text-align:center;color:var(--g400);font-size:.85rem}
+@media(max-width:620px){
+  .lead-carte{flex-direction:column;gap:9px}
+  .lead-delai-bloc{padding-left:0;border-left:none}
+}
+
 /* ══ ANNUAIRE DE CONNEXION ══ */
 /* La photo prime, le nom la confirme : sur un écran de téléphone on
    reconnaît un visage avant de lire une ligne de texte. */
@@ -2062,6 +2101,10 @@ body{font-family:var(--fb);background:#FAFAFA;color:var(--g900);min-height:100vh
 
     <!-- CRM -->
     <div class="sb-section-label">CRM</div>
+    <button class="sb-btn" onclick="nav(this,'leads')" data-tip="Leads entrants">
+      <span class="sb-icon">◈</span><span class="sb-label">Leads</span>
+      <span class="sb-badge" id="sb-leads">0</span>
+    </button>
     <button class="sb-btn" onclick="nav(this,'crm')" data-tip="Prospects">
       <span class="sb-icon">◎</span><span class="sb-label">Prospects</span>
       <span class="sb-badge" id="sb-crm">0</span>
@@ -2337,6 +2380,35 @@ body{font-family:var(--fb);background:#FAFAFA;color:var(--g900);min-height:100vh
 </div>
 
 <!-- ══ CRM PROSPECTS ══ -->
+<!-- ══ LEADS ENTRANTS ══ -->
+<!-- Le sas avant le pipeline. Un lead publicitaire n'est pas encore
+     un prospect en premier contact : personne ne lui a parlé. Il
+     reste ici tant qu'il n'a pas été joint. -->
+<div id="v-leads" class="view">
+
+  <div class="lead-tete">
+    <div>
+      <div class="lead-compte" id="lead-compte">—</div>
+      <div class="lead-compte-sous">en attente d'un premier appel</div>
+    </div>
+    <div class="lead-delai-bloc">
+      <div class="lead-delai" id="lead-plus-vieux">—</div>
+      <div class="lead-compte-sous">le plus ancien</div>
+    </div>
+    <button class="btn btn-outline" type="button" onclick="renderLeads()">Actualiser</button>
+    <button class="btn btn-brand" type="button" onclick="ouvrirLeadManuel()">+ Ajouter</button>
+  </div>
+
+  <!-- Réservé à la direction : qui reçoit les leads entrants -->
+  <div class="card card-p lead-attrib" id="lead-attrib" style="display:none">
+    <span>Les nouveaux leads sont attribués à</span>
+    <select id="lead-attrib-sel" class="finput" onchange="definirAttribution()"></select>
+  </div>
+
+  <div id="lead-liste"></div>
+</div>
+
+
 <div id="v-crm" class="view">
   <div class="ph">
     <div class="ph-tag">👥 Prospects</div>
@@ -4244,9 +4316,10 @@ function toggleSidebar(){
 }
 
 // ══════════ NAVIGATION ══════════
-const ALL_VIEWS=['dashboard','crm','pipeline','mandats','agenda','equipe','finance','profile'];
+const ALL_VIEWS=['dashboard','leads','crm','pipeline','mandats','agenda','equipe','finance','profile'];
 const TB_TITLES={
   dashboard:['Tableau de <em>bord</em>','Dashboard'],
+  leads:['<em>Leads</em> entrants','À rappeler'],
   equipe:['Mon <em>équipe</em>','Commerciaux et attribution'],
   crm:['Mes <em>Prospects</em>','Prospects'],
   pipeline:['Mon <em>Pipeline</em>','Opportunités'],
@@ -4425,6 +4498,210 @@ const ROLES_LIBELLES = {
   direction:    'Direction',
   agent:        'Commercial',
 };
+
+// ══════════ LEADS ENTRANTS ══════════
+// Le sas avant le pipeline. Tant qu'un lead est ici, personne ne lui
+// a parlé — et chaque heure qui passe lui coûte de la valeur.
+
+// Les seuils viennent du métier, pas d'une convention : un lead
+// publicitaire rappelé dans l'heure n'a rien à voir avec le même
+// rappelé le lendemain. On les rend visibles plutôt que de les
+// laisser au jugement de chacun.
+const LEAD_SEUILS = { chaud: 1, tiede: 4 };   // en heures
+
+function leadAge(cree){
+  const h = (Date.now() - new Date(cree).getTime()) / 3600000;
+  const etat = h < LEAD_SEUILS.chaud ? 'chaud' : (h < LEAD_SEUILS.tiede ? 'tiede' : 'froid');
+  let texte;
+  if(h < 1)       texte = Math.max(1, Math.round(h * 60)) + ' min';
+  else if(h < 24) texte = Math.round(h) + ' h';
+  else            texte = Math.round(h / 24) + ' j';
+  return { etat: etat, texte: texte, heures: h };
+}
+
+function leadsEnAttente(){
+  return prospects
+    .filter(function(p){ return p.stage === 'nouveau' && !p._supprimeLe; })
+    .sort(function(a, b){ return new Date(a.createdAt || 0) - new Date(b.createdAt || 0); });
+}
+
+async function renderLeads(){
+  const zone = document.getElementById('lead-liste');
+  if(!zone) return;
+  const leads = leadsEnAttente();
+
+  document.getElementById('lead-compte').textContent = leads.length;
+  const vieux = document.getElementById('lead-plus-vieux');
+  if(leads.length){
+    const a = leadAge(leads[0].createdAt);
+    vieux.textContent = a.texte;
+    vieux.style.color = a.etat === 'chaud' ? 'var(--green)'
+                      : (a.etat === 'tiede' ? 'var(--amber)' : 'var(--red)');
+  } else {
+    vieux.textContent = '—';
+    vieux.style.color = 'var(--g400)';
+  }
+
+  majAttributionParDefaut();
+
+  if(!leads.length){
+    zone.innerHTML = '<div class="lead-vide">Aucun lead en attente.<br>'
+      + 'Les nouveaux leads publicitaires apparaîtront ici dès leur arrivée.</div>';
+    majBadgeLeads();
+    return;
+  }
+
+  zone.innerHTML = leads.map(function(p){
+    const a = leadAge(p.createdAt);
+    const nom = ((p.prenom || '') + ' ' + (p.nom || '')).trim() || 'Sans nom';
+    const meta = [];
+    if(p.tel)    meta.push('<span>📞 ' + echapper(p.tel) + '</span>');
+    if(p.email)  meta.push('<span>✉️ ' + echapper(p.email) + '</span>');
+    if(p.source) meta.push('<span>📣 ' + echapper(p.source) + '</span>');
+    if(p.bien)   meta.push('<span>🏠 ' + echapper(p.bien) + '</span>');
+
+    const notes = (p.activities || []).slice(-3).map(function(ac){
+      return '<div class="lead-note"><span class="lead-note-date">'
+           + new Date(ac.date || ac.created_at || Date.now()).toLocaleDateString('fr-FR')
+           + '</span><span>' + echapper(ac.note || '') + '</span></div>';
+    }).join('');
+
+    // tel: ouvre l'application téléphone du poste ou du mobile —
+    // l'agent ne recopie pas un numéro à la main.
+    const appel = p.tel
+      ? '<a class="btn btn-brand" href="tel:' + encodeURIComponent(p.tel) + '" '
+        + 'onclick="noterAppel(\'' + p.id + '\')">📞 Appeler</a>'
+      : '<button class="btn btn-outline" type="button" disabled>Pas de numéro</button>';
+
+    return '<div class="lead-carte ' + a.etat + '">'
+      + '<div class="lead-corps">'
+        + '<div class="lead-nom">' + echapper(nom) + '</div>'
+        + '<div class="lead-meta">' + meta.join('') + '</div>'
+        + (notes ? '<div class="lead-notes">' + notes + '</div>' : '')
+        + '<div class="lead-actions">'
+          + appel
+          + '<button class="btn btn-outline" type="button" onclick="ajouterNoteLead(\'' + p.id + '\')">✎ Note</button>'
+          + '<button class="btn btn-outline" type="button" onclick="qualifierLead(\'' + p.id + '\')">→ Premier contact</button>'
+          + '<button class="btn btn-outline" type="button" onclick="perdreLead(\'' + p.id + '\')">✕ Écarter</button>'
+        + '</div>'
+      + '</div>'
+      + '<span class="lead-age ' + a.etat + '">' + a.texte + '</span>'
+    + '</div>';
+  }).join('');
+
+  majBadgeLeads();
+}
+
+function majBadgeLeads(){
+  const b = document.getElementById('sb-leads');
+  if(!b) return;
+  const n = leadsEnAttente().length;
+  b.textContent = n;
+  b.style.background = n ? 'var(--red)' : '';
+  b.style.color      = n ? '#fff' : '';
+}
+
+function _lead(id){ return prospects.find(function(p){ return p.id === id; }); }
+
+// Tracer l'appel sans le demander : un commercial qui vient de
+// décrocher son téléphone ne remplira pas un formulaire d'abord.
+// C'est cette trace qui horodate le premier contact côté serveur.
+function noterAppel(id){
+  const p = _lead(id);
+  if(!p) return;
+  p.activities = p.activities || [];
+  p.activities.push({ type: 'call', note: 'Appel passé depuis les leads', date: new Date().toISOString() });
+  saveP_();
+}
+
+function ajouterNoteLead(id){
+  const p = _lead(id);
+  if(!p) return;
+  const n = prompt('Note sur ' + ((p.prenom || '') + ' ' + (p.nom || '')).trim() + ' :');
+  if(!n || !n.trim()) return;
+  p.activities = p.activities || [];
+  p.activities.push({ type: 'call', note: n.trim(), date: new Date().toISOString() });
+  saveP_();
+  renderLeads();
+  toast('Note enregistrée');
+}
+
+// Le seul geste qui compte : quelqu'un a parlé à cette personne. Le
+// serveur horodate premier_contact_le au passage, et le lead rejoint
+// le pipeline.
+function qualifierLead(id){
+  const p = _lead(id);
+  if(!p) return;
+  p.stage = 'contact';
+  saveP_();
+  renderLeads();
+  if(typeof renderList === 'function')     renderList();
+  if(typeof renderPipeline === 'function') renderPipeline();
+  toast('✅ ' + (p.prenom || 'Le lead') + ' passe en premier contact');
+}
+
+function perdreLead(id){
+  const p = _lead(id);
+  if(!p) return;
+  const motif = prompt('Pourquoi écarter ce lead ? (faux numéro, hors secteur, pas vendeur…)');
+  if(motif === null) return;
+  p.perdu = true;
+  p.motifPerte = motif.trim() || 'Non qualifié';
+  saveP_();
+  renderLeads();
+  toast('Lead écarté');
+}
+
+function ouvrirLeadManuel(){
+  const nom = prompt('Nom du lead (prénom nom) :');
+  if(!nom || !nom.trim()) return;
+  const tel = prompt('Téléphone :') || '';
+  const bout = nom.trim().split(/\s+/);
+  const p = {
+    id: 'p' + Date.now(),
+    prenom: bout[0],
+    nom: bout.slice(1).join(' ') || bout[0],
+    tel: tel.trim(),
+    stage: 'nouveau',
+    source: 'Saisie manuelle',
+    createdAt: new Date().toISOString(),
+    activities: []
+  };
+  prospects.push(p);
+  saveP_();
+  renderLeads();
+  toast('Lead ajouté');
+}
+
+// ── Qui reçoit les leads entrants (direction seule) ──
+async function majAttributionParDefaut(){
+  const bloc = document.getElementById('lead-attrib');
+  if(!bloc || !_equipe) return;
+  const direction = ['proprietaire', 'direction'].indexOf(_equipe.monRole) >= 0;
+  bloc.style.display = direction ? 'flex' : 'none';
+  if(!direction) return;
+
+  const sel = document.getElementById('lead-attrib-sel');
+  const actuel = _equipe.organisation && _equipe.organisation.attributionParDefaut;
+  sel.innerHTML = '<option value="">personne (ils restent en attente)</option>'
+    + (_equipe.membres || []).map(function(m){
+        const n = ((m.prenom || '') + ' ' + (m.nom || '')).trim() || m.email;
+        return '<option value="' + m.id + '"' + (m.id === actuel ? ' selected' : '') + '>'
+             + echapper(n) + '</option>';
+      }).join('');
+}
+
+async function definirAttribution(){
+  const sb = getSB();
+  const v = document.getElementById('lead-attrib-sel').value;
+  try{
+    const { error } = await sb.rpc('definir_attribution_par_defaut', { p_membre: v || null });
+    if(error) throw new Error(error.message);
+    toast('✅ Attribution mise à jour');
+    if(typeof renderEquipe === 'function') renderEquipe();
+  }catch(e){ toast('⚠️ ' + e.message); }
+}
+
 
 async function renderEquipe(){
   const sb = getSB();
@@ -4752,6 +5029,7 @@ function nav(btn,id){
   if(id==='profile')loadProfile();
   if(id==='equipe')renderEquipe();
   if(id==='dashboard')updateDashKPIs();
+  if(id==='leads')renderLeads();
   if(id==='pipeline')renderPipeline();
   if(id==='finance'){/* coming soon — no render needed */}
   document.querySelector('.content').scrollTop=0;
@@ -9017,6 +9295,7 @@ function relaunchOnboarding(){
 // ══════════ BOOT APP ══════════
 function bootApp(){
   initSectionsBarreLaterale();
+  majBadgeLeads();
   renderList();
   renderMandats();
   updateDashKPIs();
