@@ -5,3 +5,4 @@ supabase/.temp/
 .env.local
 .vercel
 identifiants-equipe.txt
+creer-equipe.sql
