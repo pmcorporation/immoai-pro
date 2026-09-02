@@ -293,6 +293,36 @@
     }
   }
 
+  /**
+   * Relit les tables filles des parents reçus. Une requête par table,
+   * jamais une par parent : cinquante leads feraient cent allers-
+   * retours, et l'écran attendrait.
+   */
+  async function lireEnfants(sb, schema, ids) {
+    const par = {};
+    const tables = Object.entries(schema.enfants || {});
+    if (!tables.length || !ids.length) return par;
+
+    const uuids = ids.filter(estUuid);
+    if (!uuids.length) return par;
+
+    for (const [nom, e] of tables) {
+      const { data, error } = await sb.from(e.table).select('*').in('prospect_id', uuids);
+      if (error || !data) continue;
+
+      for (const ligne of data) {
+        const parent = ligne.prospect_id;
+        par[parent] = par[parent] || {};
+        par[parent][nom] = par[parent][nom] || [];
+
+        const o = {};
+        for (const [champApp, colonne] of Object.entries(e.champs)) o[champApp] = ligne[colonne];
+        par[parent][nom].push(o);
+      }
+    }
+    return par;
+  }
+
   /** Ligne de base → objet applicatif. Réciproque de versBase(). */
   function versApp(entite, ligne) {
     const s = SCHEMAS[entite];
@@ -529,14 +559,35 @@
         if (error) { bilan.erreurs.push({ entite, message: error.message }); continue; }
         if (!data || !data.length) continue;
 
+        // Les tables filles ne portent pas d'updated_at : elles sont
+        // relues pour les parents reçus. Sans cela, versApp() rendrait
+        // un objet aux enfants vides, et l'affectation ci-dessous
+        // effacerait les notes et les tentatives d'appel prises
+        // localement — ce qui donnait l'impression qu'elles ne
+        // s'enregistraient pas.
+        const enfants = await lireEnfants(sb, s, data.map((l) => l.id));
+
         const liste = Cache.lire(entite);
         for (const ligne of data) {
           const obj = versApp(entite, ligne);
+          const recus = enfants[ligne.id];
+          if (recus) for (const nom of Object.keys(recus)) obj[nom] = recus[nom];
+
           const i = liste.findIndex((o) => o.id === obj.id);
           if (i < 0) { liste.push(obj); bilan.recus++; continue; }
+
           // Conflit : la version la plus récente gagne, mais on le signale.
           const localPlusRecent = liste[i]._maj && liste[i]._maj > obj._maj;
-          if (!localPlusRecent) { liste[i] = obj; bilan.recus++; }
+          if (!localPlusRecent) {
+            // Une modification locale non encore envoyée ne doit pas
+            // disparaître parce que le serveur a répondu entre-temps.
+            for (const nom of Object.keys(s.enfants || {})) {
+              const local = Array.isArray(liste[i][nom]) ? liste[i][nom] : [];
+              if (local.length > (obj[nom] || []).length) obj[nom] = local;
+            }
+            liste[i] = obj;
+            bilan.recus++;
+          }
         }
         Cache.ecrire(entite, liste);
       }

@@ -1874,6 +1874,46 @@ body{font-family:var(--fb);background:#FAFAFA;color:var(--g900);min-height:100vh
 .lead-btn[disabled]:hover{background:var(--w);color:var(--g700);border-color:var(--g200)}
 .lead-actions .lead-sep{flex:1;min-width:8px}
 
+/* ── Onglets et archive ── */
+.lead-onglets{display:flex;gap:4px;margin-bottom:18px;border-bottom:1px solid var(--g200)}
+.lead-onglet{
+  font-family:var(--fd);font-size:.87rem;font-weight:700;cursor:pointer;
+  padding:11px 18px;border:none;background:none;color:var(--g400);
+  border-bottom:2px solid transparent;margin-bottom:-1px;transition:var(--tr);
+  display:inline-flex;align-items:center;gap:9px;
+}
+.lead-onglet:hover{color:var(--g700)}
+.lead-onglet.actif{color:var(--g900);border-bottom-color:var(--g900)}
+.lead-onglet-n{
+  font-size:.72rem;font-weight:800;background:var(--g100);color:var(--g500);
+  padding:2px 8px;border-radius:20px;font-variant-numeric:tabular-nums;
+}
+.lead-onglet.actif .lead-onglet-n{background:var(--g900);color:#fff}
+
+.lead-filtres{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:16px}
+.lead-filtres .lead-puce b{
+  font-weight:800;margin-left:5px;opacity:.5;font-variant-numeric:tabular-nums;
+}
+.lead-puce.actif{background:var(--g900);border-color:var(--g900);color:#fff}
+.lead-puce.actif b{opacity:.65}
+
+/* Une fiche archivée ne réclame plus rien : ni couleur d'urgence, ni
+   grande typographie. Elle doit se parcourir, pas se traiter. */
+.lead-carte.archive{padding:17px 20px}
+.lead-carte.archive::before{background:var(--g200)}
+.lead-carte.archive:hover{transform:none;box-shadow:var(--sh1)}
+.lead-arch-ville{
+  font-family:var(--fd);font-weight:800;font-size:1.02rem;color:var(--g600);
+  text-transform:uppercase;letter-spacing:-.02em;
+}
+.lead-carte.archive .lead-nom{margin-top:4px;font-size:.85rem;color:var(--g500)}
+.lead-carte.archive .lead-actions{padding-top:13px}
+.lead-motif{
+  font-size:.71rem;font-weight:700;color:var(--red);background:var(--red-l);
+  padding:5px 11px;border-radius:30px;white-space:nowrap;
+}
+.lead-arch-date{font-size:.72rem;color:var(--g400);white-space:nowrap;font-variant-numeric:tabular-nums}
+
 /* ── Panneaux intégrés ── */
 /* Ils remplacent les boîtes du navigateur : la carte reste sous les
    yeux pendant qu'on écrit, et les motifs se cliquent au lieu de se
@@ -2581,6 +2621,7 @@ body{font-family:var(--fb);background:#FAFAFA;color:var(--g900);min-height:100vh
     <select id="lead-attrib-sel" class="finput" onchange="definirAttribution()"></select>
   </div>
 
+  <div class="lead-onglets" id="lead-onglets"></div>
   <div id="lead-liste"></div>
 </div>
 
@@ -4691,6 +4732,54 @@ const ROLES_LIBELLES = {
 // laisser au jugement de chacun.
 const LEAD_SEUILS = { chaud: 1, tiede: 4 };   // en heures
 
+// Écarter un lead n'est pas le supprimer. Un « faux numéro » qui
+// revient trois fois dit quelque chose de la campagne qui l'a produit,
+// et c'est en comptant les motifs qu'on décide d'arrêter de payer
+// pour une audience. L'archive est donc consultable, filtrable, et
+// réversible — on se trompe, et un lead écarté par erreur doit
+// pouvoir revenir dans le vivier.
+let _ongletLeads = 'actifs';
+let _filtreMotif = null;
+
+function leadsArchives(){
+  return prospects
+    .filter(function(p){ return p.stage === 'nouveau' && p.perdu && !p._supprimeLe; })
+    .sort(function(a, b){ return new Date(b.createdAt || 0) - new Date(a.createdAt || 0); });
+}
+
+function comptesMotifs(){
+  const c = {};
+  leadsArchives().forEach(function(p){
+    const m = p.motifPerte || 'Non précisé';
+    c[m] = (c[m] || 0) + 1;
+  });
+  return c;
+}
+
+function ongletLeads(nom){
+  _ongletLeads = nom;
+  _filtreMotif = null;
+  _panneau = null;
+  renderLeads();
+}
+
+function filtrerMotif(m){
+  _filtreMotif = (_filtreMotif === m) ? null : m;
+  renderLeads();
+}
+
+// Réversible : un lead écarté par erreur revient dans le vivier avec
+// son historique intact.
+function restaurerLead(id){
+  const p = _lead(id);
+  if(!p) return;
+  p.perdu = false;
+  p.motifPerte = null;
+  saveP_();
+  renderLeads();
+  toast('↩ ' + (p.prenom || 'Le lead') + ' est revenu dans le vivier');
+}
+
 function leadAge(cree){
   const h = (Date.now() - new Date(cree).getTime()) / 3600000;
   const etat = h < LEAD_SEUILS.chaud ? 'chaud' : (h < LEAD_SEUILS.tiede ? 'tiede' : 'froid');
@@ -4703,7 +4792,10 @@ function leadAge(cree){
 
 function leadsEnAttente(){
   return prospects
-    .filter(function(p){ return p.stage === 'nouveau' && !p._supprimeLe; })
+    // `perdu` exclut : un lead écarté vit dans l'archive, pas dans la
+    // liste à traiter. Sans ce filtre il resterait à rappeler après
+    // avoir été écarté, et le compteur mentirait.
+    .filter(function(p){ return p.stage === 'nouveau' && !p.perdu && !p._supprimeLe; })
     .sort(function(a, b){ return new Date(a.createdAt || 0) - new Date(b.createdAt || 0); });
 }
 
@@ -4731,6 +4823,10 @@ async function renderLeads(){
   await assurerEquipe();
 
   const leads = leadsEnAttente();
+  const archives = leadsArchives();
+  majOnglets(leads.length, archives.length);
+  if(_ongletLeads === 'archives'){ renderArchive(archives); return; }
+
   document.getElementById('lead-compte').textContent = leads.length;
 
   const vieux = document.getElementById('lead-plus-vieux');
@@ -4744,6 +4840,13 @@ async function renderLeads(){
     vieux.style.color = 'var(--g300)';
   }
 
+  // Revenir du mode archive : le bandeau retrouve son rôle d'alerte.
+  const vv = document.getElementById('lead-plus-vieux');
+  if(vv){
+    vv.style.fontSize = '';
+    const lib = vv.parentElement && vv.parentElement.querySelector('.lead-stat-lib');
+    if(lib) lib.textContent = 'le plus ancien';
+  }
   majAttributionParDefaut();
 
   if(!leads.length){
@@ -4956,6 +5059,83 @@ function importerLeads(evt){
     evt.target.value = '';
   };
   lect.readAsText(f, 'utf-8');
+}
+
+function majOnglets(nActifs, nArchives){
+  const z = document.getElementById('lead-onglets');
+  if(!z) return;
+  const item = function(cle, libelle, n){
+    return '<button class="lead-onglet' + (_ongletLeads === cle ? ' actif' : '') + '" '
+         + 'type="button" onclick="ongletLeads(\'' + cle + '\')">' + libelle
+         + '<span class="lead-onglet-n">' + n + '</span></button>';
+  };
+  z.innerHTML = item('actifs', 'À rappeler', nActifs) + item('archives', 'Archivés', nArchives);
+}
+
+function renderArchive(archives){
+  const zone = document.getElementById('lead-liste');
+  const comptes = comptesMotifs();
+
+  // Le bandeau ne parle plus d'urgence : dans l'archive, ce qui compte
+  // est le motif dominant. C'est lui qui dit quelle campagne produit
+  // du déchet, et sur laquelle il faut cesser de dépenser.
+  const dominant = Object.keys(comptes).sort(function(a, b){ return comptes[b] - comptes[a]; })[0];
+  document.getElementById('lead-compte').textContent = archives.length;
+  const v = document.getElementById('lead-plus-vieux');
+  v.textContent = dominant || '—';
+  v.style.color = 'var(--g400)';
+  v.style.fontSize = archives.length ? '1.3rem' : '';
+  const lib = v.parentElement && v.parentElement.querySelector('.lead-stat-lib');
+  if(lib) lib.textContent = 'motif dominant';
+
+  const bloc = document.getElementById('lead-attrib');
+  if(bloc) bloc.style.display = 'none';
+
+  if(!archives.length){
+    zone.innerHTML = '<div class="lead-vide"><strong>Aucun lead écarté.</strong>'
+      + 'Les leads que vous écartez sont conservés ici, avec leur motif.</div>';
+    return;
+  }
+
+  const motifs = Object.keys(comptes).sort(function(a, b){ return comptes[b] - comptes[a]; });
+  const filtres = '<div class="lead-filtres">'
+    + '<button class="lead-puce' + (_filtreMotif === null ? ' actif' : '') + '" type="button" '
+    + 'onclick="filtrerMotif(null)">Tous <b>' + archives.length + '</b></button>'
+    + motifs.map(function(m){
+        return '<button class="lead-puce' + (_filtreMotif === m ? ' actif' : '') + '" type="button" '
+             + 'onclick="filtrerMotif(\'' + m.replace(/'/g, "\\'") + '\')">'
+             + echapper(m) + ' <b>' + comptes[m] + '</b></button>';
+      }).join('') + '</div>';
+
+  const liste = _filtreMotif
+    ? archives.filter(function(p){ return (p.motifPerte || 'Non précisé') === _filtreMotif; })
+    : archives;
+
+  zone.innerHTML = filtres + liste.map(function(p){
+    const nom = ((p.prenom || '') + ' ' + (p.nom || '')).trim() || 'Sans nom';
+    const quand = p.createdAt
+      ? new Date(p.createdAt).toLocaleDateString('fr-FR', {day:'2-digit', month:'short'})
+      : '';
+    return '<div class="lead-carte archive">'
+      + '<div class="lead-haut">'
+        + '<div style="min-width:0">'
+          + '<div class="lead-arch-ville">' + echapper(p.adresse || 'Ville non renseignée') + '</div>'
+          + '<div class="lead-nom">' + echapper(nom)
+            + (p.tel ? ' · <span style="font-variant-numeric:tabular-nums">' + echapper(p.tel) + '</span>' : '')
+          + '</div>'
+        + '</div>'
+        + '<div class="lead-droite">'
+          + (p.source ? '<span class="lead-source">' + echapper(p.source) + '</span>' : '')
+          + '<span class="lead-motif">' + echapper(p.motifPerte || 'Non précisé') + '</span>'
+          + (quand ? '<span class="lead-arch-date">' + quand + '</span>' : '')
+        + '</div>'
+      + '</div>'
+      + '<div class="lead-actions">'
+        + '<button class="lead-btn" type="button" onclick="restaurerLead(\'' + p.id + '\')">'
+        + '↩ Remettre dans le vivier</button>'
+      + '</div>'
+    + '</div>';
+  }).join('');
 }
 
 function majBadgeLeads(){
