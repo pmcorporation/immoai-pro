@@ -1874,6 +1874,25 @@ body{font-family:var(--fb);background:#FAFAFA;color:var(--g900);min-height:100vh
 .lead-btn[disabled]:hover{background:var(--w);color:var(--g700);border-color:var(--g200)}
 .lead-actions .lead-sep{flex:1;min-width:8px}
 
+/* Le choix de la nature : deux cibles larges, pas deux options dans
+   une liste. C'est le geste le plus important de l'écran — celui qui
+   fait entrer un lead payé dans le pipeline. */
+.lead-nature{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:11px}
+.lead-nature-btn{
+  display:flex;flex-direction:column;gap:3px;text-align:left;cursor:pointer;
+  padding:14px 17px;border-radius:var(--r);border:1px solid var(--g200);
+  background:var(--w);transition:var(--tr);font-family:var(--fb);
+}
+.lead-nature-btn:hover{
+  background:var(--g900);border-color:var(--g900);transform:translateY(-2px);
+  box-shadow:0 6px 16px rgba(0,0,0,.12);
+}
+.lead-nature-t{font-family:var(--fd);font-weight:800;font-size:.95rem;color:var(--g900)}
+.lead-nature-s{font-size:.75rem;color:var(--g500)}
+.lead-nature-btn:hover .lead-nature-t{color:#fff}
+.lead-nature-btn:hover .lead-nature-s{color:rgba(255,255,255,.6)}
+@media(max-width:640px){ .lead-nature{grid-template-columns:1fr} }
+
 /* ── Onglets et archive ── */
 .lead-onglets{display:flex;gap:4px;margin-bottom:18px;border-bottom:1px solid var(--g200)}
 .lead-onglet{
@@ -5225,6 +5244,27 @@ function _panneauHtml(p){
       + '</div></div>';
   }
 
+  if(_panneau.type === 'qualifier'){
+    return '<div class="lead-panneau">'
+      + '<div class="lead-panneau-titre">Vous venez de lui parler. Que cherche-t-il&nbsp;?</div>'
+      + '<div class="lead-nature">'
+        + '<button class="lead-nature-btn" type="button" onclick="confirmerQualification(\'' + p.id + '\',\'vendeur\')">'
+          + '<span class="lead-nature-t">Vendeur</span>'
+          + '<span class="lead-nature-s">Estimation, puis mandat</span>'
+        + '</button>'
+        + '<button class="lead-nature-btn" type="button" onclick="confirmerQualification(\'' + p.id + '\',\'acheteur\')">'
+          + '<span class="lead-nature-t">Acheteur</span>'
+          + '<span class="lead-nature-s">Recherche un bien</span>'
+        + '</button>'
+      + '</div>'
+      + '<textarea class="lead-champ" id="pan-qualif-note" rows="2" '
+      + 'placeholder="Ce qu\'il vous a dit (facultatif)"></textarea>'
+      + '<div class="lead-panneau-pied">'
+        + '<span class="lead-astuce">Le choix détermine la colonne du pipeline</span>'
+        + '<button class="lead-btn" type="button" onclick="fermerPanneau()">Annuler</button>'
+      + '</div></div>';
+  }
+
   if(_panneau.type === 'ecarter'){
     return '<div class="lead-panneau">'
       + '<div class="lead-panneau-titre">Pourquoi écarter ce lead&nbsp;?</div>'
@@ -5284,16 +5324,39 @@ function confirmerEcart(id, motif){
 // Le seul geste qui compte : quelqu'un a parlé à cette personne. Le
 // serveur horodate premier_contact_le au passage, et le lead rejoint
 // le pipeline.
+// Le pipeline ne montre que les prospects portant un type de mandat :
+//
+//   const isPipeline = p => p.mandat === 'vente' || p.mandat === 'recherche';
+//
+// Un lead qualifié sans ce champ quittait donc l'écran Leads sans
+// jamais réapparaître dans le pipeline. Il fallait le renseigner, et
+// le seul moment où quelqu'un le sait vraiment est celui-ci : l'agent
+// vient de raccrocher. Demander plus tard, c'est ne jamais l'obtenir.
 function qualifierLead(id){
+  ouvrirPanneau(id, 'qualifier');
+}
+
+function confirmerQualification(id, nature){
   const p = _lead(id);
   if(!p) return;
-  p.stage = 'contact';
+
+  p.stage  = 'contact';
+  p.mandat = (nature === 'vendeur') ? 'vente' : 'recherche';
+  p.prospectType = nature;
+
+  const champ = document.getElementById('pan-qualif-note');
+  const t = champ && champ.value.trim();
+  if(t){
+    p.activities = p.activities || [];
+    p.activities.push({ type: 'call', note: t, date: new Date().toISOString() });
+  }
+
   saveP_();
   _panneau = null;
   renderLeads();
   if(typeof renderList === 'function')     renderList();
   if(typeof renderPipeline === 'function') renderPipeline();
-  toast('✅ ' + (p.prenom || 'Le lead') + ' passe en premier contact');
+  toast('✅ ' + (p.prenom || 'Le lead') + ' est dans votre pipeline');
 }
 
 // ── Ajout manuel, en ligne plutôt qu'en cascade de boîtes ──
@@ -5986,6 +6049,10 @@ function renderList(){
   renderCrmStats();updateDashKPIs();
   const tb=document.getElementById('tbody'),em=document.getElementById('crm-empty');
   let list=prospects.filter(p=>{
+    // Un lead pas encore joint vit dans l'onglet Leads. L'afficher
+    // aussi ici le ferait compter deux fois et brouillerait le
+    // décompte des prospects réellement travaillés.
+    if(p.stage==='nouveau') return false;
     const q=searchQ.toLowerCase();
     const ms=!q||(p.prenom+' '+p.nom+' '+(p.bien||'')+' '+(p.adresse||'')).toLowerCase().includes(q);
     const od=(p.followups||[]).some(f=>!f.done&&isOd(f.date));
