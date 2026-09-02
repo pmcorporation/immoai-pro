@@ -4273,6 +4273,12 @@ function rafraichirDepuisCouche(){
   mandats   = Donnees.mandats.liste();
   rdvs      = Donnees.rdvs.liste();
   try{renderList();}catch(_){}
+  // L'écran Leads a été ajouté après cette fonction : sans cette
+  // ligne, un lead reçu par webhook arrivait bien en mémoire mais
+  // l'écran ne se redessinait jamais. La pastille restait à zéro et
+  // le commercial ne voyait rien arriver.
+  try{renderLeads();}catch(_){}
+  try{majBadgeLeads();}catch(_){}
   try{renderMandats();}catch(_){}
   try{renderAgenda();}catch(_){}
   try{updateDashKPIs();}catch(_){}
