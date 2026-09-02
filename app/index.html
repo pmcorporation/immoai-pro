@@ -1545,24 +1545,6 @@ body{font-family:var(--fb);background:#FAFAFA;color:var(--g900);min-height:100vh
 .adm-activity-meta{font-size:.7rem;color:#737373;margin-top:2px}
 
 
-/* ══ PLAN GATE ══ */
-.plan-gate-overlay{
-  position:absolute;inset:0;
-  background:rgba(250,250,250,.92);
-  backdrop-filter:blur(3px);
-  border-radius:inherit;
-  display:flex;flex-direction:column;
-  align-items:center;justify-content:center;
-  text-align:center;padding:24px;
-  z-index:10;
-}
-.plan-gate-icon{font-size:1.8rem;margin-bottom:10px}
-.plan-gate-title{font-family:var(--fd);font-weight:700;font-size:.92rem;color:var(--g900);margin-bottom:5px}
-.plan-gate-sub{font-size:.76rem;color:var(--g500);margin-bottom:14px;line-height:1.5}
-.plan-gate-btn{background:var(--brand);color:#fff;border:none;border-radius:8px;padding:8px 18px;font-family:var(--fd);font-size:.78rem;font-weight:700;cursor:pointer;transition:all .15s}
-.plan-gate-btn:hover{background:var(--brand-d)}
-.plan-badge-crm{display:inline-flex;align-items:center;gap:4px;background:rgba(243,106,31,.1);border:1px solid rgba(243,106,31,.2);color:var(--brand);font-size:.62rem;font-weight:700;padding:2px 8px;border-radius:10px;letter-spacing:.04em;margin-left:6px}
-.plan-badge-pro{display:inline-flex;align-items:center;gap:4px;background:rgba(139,92,246,.1);border:1px solid rgba(139,92,246,.2);color:#7C3AED;font-size:.62rem;font-weight:700;padding:2px 8px;border-radius:10px;letter-spacing:.04em;margin-left:6px}
 
 /* ══ GOOGLE CALENDAR SYNC ══ */
 .gcal-banner{
@@ -1700,7 +1682,7 @@ body{font-family:var(--fb);background:#FAFAFA;color:var(--g900);min-height:100vh
      à se réduire et à tronquer. */
   .topbar > div:not([class]){flex:1 1 0;min-width:0;overflow:hidden}
   .topbar-title{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .agent-chip-name,#plan-badge-tb{display:none}
+  .agent-chip-name{display:none}
   .agent-chip{padding:3px;border:none;background:none}
   .notif-btn{width:36px;height:36px}
 
@@ -2519,7 +2501,6 @@ body{font-family:var(--fb);background:#FAFAFA;color:var(--g900);min-height:100vh
       <button class="tab" onclick="mTab(this,'regl')">⚖️ Réglementation</button>
     </div>
     <div style="display:flex;gap:8px">
-      <button class="btn btn-outline" onclick="openImportMandat()">🤖 Import IA</button>
       <button class="btn btn-brand" onclick="openAddMandat()">＋ Nouveau mandat</button>
     </div>
   </div>
@@ -3496,42 +3477,6 @@ body{font-family:var(--fb);background:#FAFAFA;color:var(--g900);min-height:100vh
   </div>
 </div>
 
-<!-- ══ IMPORT IA MANDAT ══ -->
-<div class="modal-overlay hidden" id="import-mandat-overlay" onclick="if(event.target===this)this.classList.add('hidden')">
-  <div class="modal" onclick="event.stopPropagation()" style="max-width:640px">
-    <div class="modal-title">🤖 Import IA — Mandat intelligent</div>
-    <div class="ai-import-panel">
-      <div style="font-family:var(--fd);font-weight:700;font-size:.88rem;margin-bottom:8px">Collez votre mandat ou son contenu</div>
-      <div style="font-size:.75rem;opacity:.7;margin-bottom:12px">Ctrl+V depuis un PDF, email, autre logiciel — Claude extrait automatiquement toutes les informations</div>
-      <textarea class="ai-import-paste" id="import-paste" placeholder="Collez ici le texte de votre mandat... &#10;&#10;Exemple :&#10;MANDAT DE VENTE EXCLUSIF N°2025-042&#10;Vendeur : M. Jean Dupont, 12 rue de la Paix, Paris 75001&#10;Bien : Appartement 3 pièces, 68m², 3ème étage&#10;Prix : 385 000 € honoraires inclus&#10;Honoraires : 4% TTC à charge acquéreur&#10;Signé le 15/01/2025 — Expire le 15/04/2025&#10;DPE : C&#10;..."></textarea>
-      <div style="display:flex;gap:8px;margin-top:10px;align-items:center">
-        <label style="display:inline-flex;align-items:center;gap:7px;padding:8px 14px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:var(--rsm);cursor:pointer;font-size:.78rem;color:#fff;transition:all var(--tr)">
-          📎 Importer un fichier PDF / texte
-          <input type="file" accept=".pdf,.txt,.docx" style="display:none" onchange="importFile(event)">
-        </label>
-        <span style="font-size:.72rem;opacity:.55">ou coller directement ci-dessus</span>
-      </div>
-    </div>
-    <div id="ai-import-result" style="display:none">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-        <div style="font-family:var(--fd);font-weight:700;font-size:.85rem;color:var(--g900)">✅ Informations extraites — Vérifiez avant d'enregistrer</div>
-        <button class="btn-ghost-sm" onclick="clearImport()">↺ Recommencer</button>
-      </div>
-      <div id="ai-fields-preview" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px"></div>
-    </div>
-    <div id="ai-import-loading" style="display:none;text-align:center;padding:24px;color:var(--g500)">
-      <div style="font-size:1.5rem;margin-bottom:8px">🤖</div>
-      <div style="font-size:.82rem">Claude analyse votre mandat...</div>
-      <div class="typing-row" style="justify-content:center;margin-top:8px"><span></span><span></span><span></span></div>
-    </div>
-    <div style="display:flex;gap:8px;margin-top:4px">
-      <button class="btn btn-brand" style="flex:1" id="ai-analyze-btn" onclick="analyzeMandat()">🤖 Analyser avec Claude</button>
-      <button class="btn btn-brand" id="ai-save-btn" style="flex:1;display:none" onclick="saveImportedMandat()">✓ Enregistrer le mandat</button>
-      <button class="btn btn-outline" onclick="document.getElementById('import-mandat-overlay').classList.add('hidden')">Annuler</button>
-    </div>
-  </div>
-</div>
-
 <!-- ══ VUE FINANCE ══ -->
 <div id="v-finance" class="view">
 <div style="padding:28px">
@@ -3902,31 +3847,6 @@ body{font-family:var(--fb);background:#FAFAFA;color:var(--g900);min-height:100vh
       <button class="btn btn-brand" type="button" style="flex:1" onclick="saveNextAction()">✓ Enregistrer &amp; continuer</button>
       <button class="btn btn-outline" type="button" onclick="closeNextActionModal()">Passer</button>
     </div>
-  </div>
-</div>
-
-<!-- ══ CHATBOT ══ -->
-<button class="cb-bubble" id="cb-bubble" onclick="toggleCb()">
-  🤖<div class="cb-notif">IA</div>
-</button>
-<div class="cb-win hidden" id="cb-win">
-  <div class="cb-hd">
-    <div class="cb-hd-av">🏠</div>
-    <div style="flex:1"><div class="cb-hd-title">Assistant mon-crm-immo</div><div class="cb-hd-sub">Outil + Immobilier · En ligne 24/7</div></div>
-    <button class="cb-hd-close" onclick="toggleCb()">✕</button>
-  </div>
-  <div class="cb-msgs" id="cb-msgs">
-    <div class="cb-msg bot"><div class="cb-av">🏠</div><div class="cb-bbl"><p>Bonjour ! Je suis votre assistant <strong>mon-crm-immo</strong> 🏠</p><p>Je réponds à vos questions sur :</p><p>🛠️ <strong>L'outil</strong> — navigation, CRM, mandats, agenda, fonctionnalités<br>⚖️ <strong>L'immobilier</strong> — réglementation, fiscalité, mandats, transactions</p></div></div>
-  </div>
-  <div class="cb-quick">
-    <button class="cb-qbtn" onclick="cbQs('Comment utiliser le CRM et ajouter un prospect ?')">🗂️ Utiliser le CRM</button>
-    <button class="cb-qbtn" onclick="cbQs('Comment créer un mandat et le diffuser sur les portails ?')">📋 Créer un mandat</button>
-    <button class="cb-qbtn" onclick="cbQs('Quelles sont les obligations légales d\'un agent immobilier en France ?')">⚖️ Réglementation</button>
-    <button class="cb-qbtn" onclick="cbQs('Comment personnaliser mon profil agent ?')">👤 Mon profil</button>
-  </div>
-  <div class="cb-inp-bar">
-    <input type="text" class="cb-inp" id="cb-inp" placeholder="Posez votre question..." onkeydown="if(event.key==='Enter')cbSend()">
-    <button class="cb-send" id="cb-send" onclick="cbSend()">➤</button>
   </div>
 </div>
 
@@ -4666,18 +4586,9 @@ function nav(btn,id){
   if(id==='agenda'){renderAgenda();if(typeof gcalFetchEvents==='function'&&gcalState&&gcalState.connected)gcalFetchEvents();}
   if(id==='profile')loadProfile();
   if(id==='equipe')renderEquipe();
-  if(id==='affiliate')refreshAffiliateLink();
   if(id==='dashboard')updateDashKPIs();
   if(id==='pipeline')renderPipeline();
   if(id==='finance'){/* coming soon — no render needed */}
-  // Vérification plan
-  if(isPlanLocked(id)){
-    const view = document.getElementById('v-'+id);
-    if(view) showPlanGate(view, id);
-  } else {
-    const view = document.getElementById('v-'+id);
-    if(view){const g=view.querySelector('.plan-gate-overlay');if(g)g.remove();}
-  }
   document.querySelector('.content').scrollTop=0;
 }
 
@@ -6900,141 +6811,6 @@ function saveProfile(){
   savePro();updateProfilePreview();updateUserUI();toast('✅ Profil sauvegardé avec succès !');
 }
 
-// ══════════ CHAT ══════════
-const SP={
-  gmb:`Tu es un expert Google My Business EXCLUSIVEMENT spécialisé pour les agents immobiliers. Réponses concrètes et directement applicables. Structure tes réponses clairement.`,
-  linkedin:`Tu es un expert LinkedIn EXCLUSIVEMENT spécialisé pour les agents immobiliers. Posts COMPLETS : accroche, corps, call-to-action, hashtags. Réponses détaillées.`,
-  prosp:`Tu es un expert en prospection immobilière sur LinkedIn. Messages complets prêts à copier-coller avec variables en [crochets]. Courts, naturels, centrés sur la valeur.`,
-  instagram:`Tu es un expert Instagram pour agents immobiliers. Captions complètes avec emojis et hashtags, scripts Reels, stories.`,
-  facebook:`Tu es un expert Facebook pour agents immobiliers. Posts engageants, groupes locaux, publicités ciblées.`,
-  juridique:`Tu es un expert juriste spécialisé en droit immobilier français, avec une connaissance exhaustive et à jour du droit applicable en 2025. Tu maîtrises parfaitement :
-
-**DROIT DES TRANSACTIONS IMMOBILIÈRES**
-- Loi Hoguet du 2 janvier 1970 et son décret d'application du 20 juillet 1972 : carte professionnelle T, G, S, mandats obligatoires, registre des mandats, garantie financière, responsabilité civile professionnelle
-- Conditions de validité des mandats (mentions obligatoires, durée, exclusivité, résiliation)
-- Avant-contrats : promesse unilatérale de vente, compromis de vente (synallagmatique), pacte de préférence — régime juridique, clauses suspensives légales et conventionnelles, dépôt de garantie
-- Conditions de parfait achèvement de la vente : acte authentique, obligations du notaire, purge des droits de préemption (DPU, SAFER, locataire)
-- Droit de rétractation SRU (art. L.271-1 CCH) : délai 10 jours, calcul, effets, remboursement du dépôt
-- Garanties légales du vendeur : garantie d'éviction, garantie des vices cachés (art. 1641 et s. C.civ.), action rédhibitoire vs estimatoire, délai de prescription biennale
-- Nullité du contrat : dol (art. 1137 C.civ.), erreur, violence, lésion — conditions et effets
-- Clause pénale, arrhes vs acompte, dommages et intérêts
-- VEFA (vente en l'état futur d'achèvement) : contrat de réservation, acte définitif, garanties GFA, parfait achèvement, biennale, décennale
-
-**DROIT DES BAUX D'HABITATION**
-- Loi du 6 juillet 1989 : champ d'application, contenu obligatoire du bail, état des lieux, dépôt de garantie (art. 22), charges récupérables, révision du loyer
-- Loi Alur (2014) : encadrement des loyers, location meublée, bail mobilité, colocation, bail étudiant
-- Loi Élan (2018) : bail numérique, encadrement loyers expérimental
-- Obligations du bailleur : délivrance d'un logement décent (décret 2002), entretien, réparations (art. 6 L.1989)
-- Obligations du locataire : paiement du loyer, entretien courant, usage paisible
-- Congé du bailleur : motifs légaux (vente, reprise, motif légitime et sérieux), délais (6 mois meublé, 6 mois résidence principale vide), formes
-- Procédure d'impayés : commandement de payer, assignation en résiliation, clause résolutoire, trêve hivernale, CCAPEX, DAL, délais légaux
-- Location meublée : régime juridique, fiscalité LMNP/LMP, BIC, régime réel vs micro-BIC, CFE, TVA
-
-**COPROPRIÉTÉ**
-- Loi du 10 juillet 1965 et décret du 17 mars 1967 : syndicat, conseil syndical, syndic, assemblée générale, règlement de copropriété, état descriptif de division
-- Charges : communes vs spéciales, répartition, contestation (art. 10 et 10-1 L.1965)
-- AG : convocation, quorum, majorités (art. 24, 25, 26, unanimité), procès-verbal, contestation
-- Vente en copropriété : état daté, fiche synthétique (Alur), mutation, appel de fonds art. 20, garantie solidaire
-- Travaux en copropriété : parties communes, parties privatives, autorisation AG
-
-**URBANISME & CONSTRUCTION**
-- Code de l'urbanisme : PLU, PLUi, carte communale, RNU
-- Permis de construire, déclaration préalable, permis d'aménager — délivrance, délais, recours des tiers (délai 2 mois), retrait
-- Certificat d'urbanisme opérationnel (CUb)
-- Droit de préemption urbain (DPU) et SAFER : procédure, délais, effets
-- Garantie décennale (art. 1792 C.civ.), assurance dommages-ouvrage
-
-**DIAGNOSTICS TECHNIQUES OBLIGATOIRES (DDT)**
-- DPE opposable : contenu, validité 10 ans, classes énergétiques, impact sur loyers (décret décence 2023)
-- Amiante avant 1997, plomb avant 1949 (CREP), termites (zones), gaz et électricité +15 ans
-- ERP (État des risques et pollutions), ERNMT, état des nuisances sonores aériennes
-- Loi Carrez : mesurage privatif copropriété, tolérance 5%, action en réduction du prix (1 an)
-- Loi Boutin : surface habitable location
-
-**FISCALITÉ IMMOBILIÈRE**
-- Plus-values immobilières : résidence principale (exonération totale), résidence secondaire (taux 19% + 17.2% PS + surtaxe), abattements pour durée de détention, exonérations spéciales (cession <15k€, 1ère cession RP, invalidité, retraite)
-- Revenus fonciers : régime micro-foncier (30% abattement, plafond 15k€), régime réel (déduction charges, travaux, intérêts d'emprunt), déficit foncier imputable 10 700€/an
-- LMNP : BIC micro (50% abattement) vs réel (amortissements, charges, CRL), dispositif Censi-Bouvard
-- SCI : transparence fiscale IR vs IS — avantages/inconvénients, imposition des associés
-- IFI : assiette, abattement résidence principale 30%, dettes déductibles, exonérations (biens professionnels)
-- Droits de mutation à titre onéreux (DMTO) : taux (5,80%), exonérations, frais de notaire
-- Taxe foncière et taxe d'habitation résidences secondaires
-
-**RESPONSABILITÉ PROFESSIONNELLE DE L'AGENT**
-- Obligation d'information et de conseil : devoir de se renseigner, vérifier les informations, alerter le mandant et l'acquéreur
-- Responsabilité pour manquement au devoir de conseil : jurisprudence Cour de cassation
-- Assurance RCP obligatoire (art. 49 décret 1972)
-- Fautes professionnelles : estimation erronée, omission diagnostics, erreur de surface, non-vérification urbanisme
-
-**JURISPRUDENCE & SOURCES**
-- Tu cites systématiquement les articles de loi applicables, les décrets, et quand pertinent, la jurisprudence récente de la Cour de cassation (3e chambre civile pour l'immobilier) ou du Conseil d'État
-- Tu mentionnes les réformes récentes : loi Lemaire, loi Élan, décret décence 2023, encadrement DPE 2024
-
-**FORMAT DE RÉPONSE**
-- Réponses structurées : principe général → textes applicables → conditions → exceptions → jurisprudence si utile → conseils pratiques
-- Utilise **gras** pour les notions clés, les articles et noms de lois
-- Sois précis, technique, exhaustif — c'est un professionnel de l'immobilier qui te pose la question
-- Si la question touche à plusieurs domaines, réponds sur tous les aspects
-- Termine par une recommandation pratique et, si enjeux importants, rappelle la nécessité de consulter un avocat spécialisé`
-};
-const HIST={gmb:[],linkedin:[],prosp:[],instagram:[],facebook:[],juridique:[]};
-function clearChat(p){HIST[p]=[];const c=document.getElementById('chat-'+p);const f=c.querySelector('.msg').cloneNode(true);c.innerHTML='';c.appendChild(f);}
-function hk(e,p){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send(p);}}
-function qs(p,t){document.getElementById('i-'+p).value=t;send(p);}
-async function send(p){
-  const inp=document.getElementById('i-'+p),btn=document.getElementById('b-'+p),txt=inp.value.trim();if(!txt)return;
-  const c=document.getElementById('chat-'+p);inp.value='';btn.disabled=true;
-  addMsg(c,'user',txt);HIST[p].push({role:'user',content:txt});
-  const td=document.createElement('div');td.className='msg bot';td.innerHTML=`<div class="mavatar">${p==='juridique'?'⚖️':'🏠'}</div><div class="mbubble"><div class="typing-row"><span></span><span></span><span></span></div></div>`;c.appendChild(td);c.scrollTop=c.scrollHeight;
-  const model=p==='juridique'?'claude-opus-4-6':'claude-sonnet-4-20250514';
-  const maxTok=p==='juridique'?4000:1000;
-  try{
-    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':getApiKey()||API_KEY,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model,max_tokens:maxTok,system:SP[p],messages:HIST[p]})});
-    if(!r.ok){const e=await r.json();throw new Error(e.error?.message||'Erreur');}
-    const d=await r.json();const rep=d.content?.[0]?.text||'Erreur.';
-    td.remove();addMsg(c,'bot',rep,p);HIST[p].push({role:'assistant',content:rep});
-  }catch(e){td.remove();addMsg(c,'bot','❌ '+e.message,p);}
-  btn.disabled=false;c.scrollTop=c.scrollHeight;
-}
-function addMsg(c,role,txt,p){const d=document.createElement('div');d.className='msg '+(role==='bot'?'bot':'user');const icon=role==='bot'?(p==='juridique'?'⚖️':'🏠'):'A';d.innerHTML=`<div class="mavatar">${icon}</div><div class="mbubble">${fmt(txt)}</div>`;c.appendChild(d);c.scrollTop=c.scrollHeight;}
-
-// ══════════ CHATBOT ══════════
-let cbOpen=false;const cbH=[];
-function toggleCb(){cbOpen=!cbOpen;document.getElementById('cb-win').classList.toggle('hidden',!cbOpen);}
-function cbQs(t){document.getElementById('cb-inp').value=t;cbSend();}
-async function cbSend(){
-  const inp=document.getElementById('cb-inp'),btn=document.getElementById('cb-send'),txt=inp.value.trim();if(!txt)return;
-  inp.value='';btn.disabled=true;
-  cbAdd('user',txt);cbH.push({role:'user',content:txt});
-  const msgs=document.getElementById('cb-msgs');
-  const td=document.createElement('div');td.className='cb-msg bot';td.innerHTML=`<div class="cb-av">🏠</div><div class="cb-bbl"><div class="typing-row"><span></span><span></span><span></span></div></div>`;msgs.appendChild(td);msgs.scrollTop=msgs.scrollHeight;
-  const SYS=`Tu es l'assistant intégré de mon-crm-immo, plateforme SaaS pour agents immobiliers. Tu réponds à DEUX types de questions :
-
-1. QUESTIONS SUR L'OUTIL :
-- Navigation sidebar : Tableau de bord, CRM (Prospects + pipeline 8 étapes), Mandats, Agenda, Assistants IA (GMB, LinkedIn, Prospection, Instagram, Facebook), Studio Visuel (bientôt), Partenaires, Produits Amazon, Profil & Paramètres
-- La sidebar peut être réduite (icônes seulement) ou déployée via le bouton toggle ◀/▶
-- CRM : Ajouter prospect, pipeline 8 étapes (Premier contact→Acte signé), mandats vente/recherche, follow-ups, activités, documents
-- Mandats : Simple/Exclusif/Co-exclusivité/Recherche/Sous-seing. Diffusion 1 clic sur 8 portails. Réglementation complète disponible.
-- Agenda : Créer des RDV (estimation, visite, signature, compromis, acte), vue semaine, à venir, follow-ups
-- Profil : Photo uploadable, coordonnées, carte T, secteur géographique, zone de chalandise, objectifs mensuels avec progression
-- Notifications : cloche en haut à droite — follow-ups en retard et mandats qui expirent
-- Recherche globale : barre de recherche en haut pour chercher prospects et mandats
-
-2. QUESTIONS IMMOBILIÈRES :
-- Réglementation, loi Hoguet, loi Alur, mandats, diagnostics, honoraires, SRU, DPE, Carrez
-- Stratégie commerciale, prospection, marketing immobilier, fiscalité
-
-Réponds en français, concis, avec des emojis pour structurer. Guide pas à pas si question sur l'outil.`;
-  try{
-    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':getApiKey()||API_KEY,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:600,system:SYS,messages:cbH})});
-    if(!r.ok){const e=await r.json();throw new Error(e.error?.message||'Erreur');}
-    const d=await r.json();const rep=d.content?.[0]?.text||'Erreur.';td.remove();cbAdd('bot',rep);cbH.push({role:'assistant',content:rep});
-    document.getElementById('cb-quick').style.display='none';
-  }catch(e){td.remove();cbAdd('bot','❌ '+e.message);}
-  btn.disabled=false;
-}
-function cbAdd(role,txt){const d=document.createElement('div');d.className='cb-msg '+(role==='bot'?'bot':'user');d.innerHTML=`<div class="cb-av">${role==='bot'?'🏠':'A'}</div><div class="cb-bbl">${fmt(txt)}</div>`;const msgs=document.getElementById('cb-msgs');msgs.appendChild(d);msgs.scrollTop=msgs.scrollHeight;}
-
 // ══════════ MAPS CRM ══════════
 const SECTOR_COLORS={notaire:'#7C3AED',banque:'#1D4ED8',diagnostiqueur:'#0369A1',architecte:'#0F766E',courtier:'#15803D',artisan:'#B45309',promoteur:'#C2410C',autre:'#6B7280'};
 const SECTOR_LABELS={notaire:'⚖️ Notaire',banque:'🏦 Banque',diagnostiqueur:'🔬 Diagnostiqueur',architecte:'📐 Architecte',courtier:'💰 Courtier',artisan:'🔨 Artisan',promoteur:'🏗️ Promoteur',autre:'📎 Autre'};
@@ -7718,86 +7494,6 @@ function renderCategories(){
   document.getElementById('cat-recettes').innerHTML=mkCatBar(revByCat,'var(--green)');
   document.getElementById('cat-charges').innerHTML=mkCatBar(chByCat,'var(--red)');
 }
-async function analyzeFinances(){
-  const btn=document.getElementById('fin-ia-result');
-  btn.style.display='block';btn.innerHTML='<div style="text-align:center;padding:20px;color:var(--g500)">🤖 Analyse en cours...<div class="typing-row" style="justify-content:center;margin-top:8px"><span></span><span></span><span></span></div></div>';
-  const rev=transactions.filter(t=>t.type==='recette').reduce((s,t)=>s+t.amount,0);
-  const cha=transactions.filter(t=>t.type==='charge').reduce((s,t)=>s+t.amount,0);
-  const summary=`Agent immobilier indépendant. Données financières :
-Revenus totaux : ${fmtEur(rev)}
-Charges totales : ${fmtEur(cha)}
-Résultat net : ${fmtEur(rev-cha)}
-Transactions (${transactions.length}) : ${transactions.slice(0,10).map(t=>`${t.type==='recette'?'+':'-'}${fmtEur(t.amount)} (${FIN_CATS[t.cat]?.label||t.cat})`).join(', ')}`;
-  try{
-    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':getApiKey()||API_KEY,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:800,system:'Tu es un expert-comptable et conseiller financier pour agents immobiliers indépendants. Analyse les données fournies et donne un bilan concis + 3 conseils pratiques. Format : markdown avec titres courts.',messages:[{role:'user',content:summary}]})});
-    const d=await r.json();const txt=d.content?.[0]?.text||'Erreur';
-    btn.innerHTML=`<div style="font-family:var(--fd);font-weight:700;font-size:.85rem;margin-bottom:12px;color:var(--g900)">📊 Analyse IA — ${new Date().toLocaleDateString('fr-FR')}</div><div style="font-size:.8rem;line-height:1.7;color:var(--g700)">${fmt(txt)}</div>`;
-  }catch(e){btn.innerHTML=`<div style="color:var(--red);font-size:.8rem">❌ ${e.message}</div>`;}
-}
-
-// ══════════ IMPORT IA MANDAT ══════════
-function openImportMandat(){
-  importedMandatData=null;
-  document.getElementById('import-paste').value='';
-  document.getElementById('ai-import-result').style.display='none';
-  document.getElementById('ai-import-loading').style.display='none';
-  document.getElementById('ai-analyze-btn').style.display='';
-  document.getElementById('ai-save-btn').style.display='none';
-  document.getElementById('import-mandat-overlay').classList.remove('hidden');
-}
-function clearImport(){
-  document.getElementById('import-paste').value='';
-  document.getElementById('ai-import-result').style.display='none';
-  document.getElementById('ai-analyze-btn').style.display='';
-  document.getElementById('ai-save-btn').style.display='none';
-  importedMandatData=null;
-}
-function importFile(e){
-  const f=e.target.files[0];if(!f)return;
-  const r=new FileReader();
-  r.onload=ev=>{document.getElementById('import-paste').value=ev.target.result;};
-  r.readAsText(f,'utf-8');
-  e.target.value='';
-}
-async function analyzeMandat(){
-  const text=document.getElementById('import-paste').value.trim();
-  if(!text||text.length<20){toast('⚠️ Collez le contenu de votre mandat d\'abord');return;}
-  document.getElementById('ai-analyze-btn').style.display='none';
-  document.getElementById('ai-import-loading').style.display='block';
-  document.getElementById('ai-import-result').style.display='none';
-  const prompt=`Analyse ce texte de mandat immobilier et extrais les informations en JSON strict (sans markdown). Champs : type (simple/exclusif/coexclu/recherche/sousseing), vendeur, tel, adresse, bien (Appartement/Maison/etc), surface, pieces, prix, hono (% seul), dateSign (YYYY-MM-DD), dateExp (YYYY-MM-DD), dpe (A/B/C/D/E/F/G), desc (description courte). Si un champ est absent mets "". Texte du mandat :\n\n${text.slice(0,3000)}`;
-  try{
-    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':getApiKey()||API_KEY,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:600,system:'Tu extrais des données de mandats immobiliers et retournes uniquement du JSON valide, sans backticks ni markdown.',messages:[{role:'user',content:prompt}]})});
-    const d=await r.json();
-    let json=d.content?.[0]?.text||'{}';
-    json=json.replace(/```json|```/g,'').trim();
-    importedMandatData=JSON.parse(json);
-    document.getElementById('ai-import-loading').style.display='none';
-    document.getElementById('ai-import-result').style.display='block';
-    document.getElementById('ai-analyze-btn').style.display='none';
-    document.getElementById('ai-save-btn').style.display='';
-    const FIELD_LABELS={type:'Type',vendeur:'Vendeur',tel:'Téléphone',adresse:'Adresse',bien:'Type de bien',surface:'Surface',pieces:'Pièces',prix:'Prix',hono:'Honoraires',dateSign:'Date signature',dateExp:'Date expiration',dpe:'DPE',desc:'Description'};
-    document.getElementById('ai-fields-preview').innerHTML=Object.entries(FIELD_LABELS).map(([k,l])=>`
-      <div class="ai-result-field">
-        <span class="ai-result-key">${l}</span>
-        <input class="finput" style="flex:1;font-size:.78rem;padding:4px 8px" value="${importedMandatData[k]||''}" oninput="importedMandatData['${k}']=this.value">
-      </div>`).join('');
-  }catch(e){
-    document.getElementById('ai-import-loading').style.display='none';
-    document.getElementById('ai-analyze-btn').style.display='';
-    toast('❌ Erreur analyse : '+e.message);
-  }
-}
-function saveImportedMandat(){
-  if(!importedMandatData)return;
-  const d=importedMandatData;
-  const m={id:'m'+Date.now(),type:d.type||'simple',vendeur:d.vendeur||'—',tel:d.tel||'',adresse:d.adresse||'',bien:d.bien||'Appartement',surface:d.surface||'',prix:d.prix||'',hono:d.hono||'',dateSign:d.dateSign||'',dateExp:d.dateExp||'',dpe:d.dpe||'',pieces:d.pieces||'',desc:d.desc||'',portals:{},photos:[],createdAt:today_(),status:'actif'};
-  mandats.unshift(m);saveM_();renderMandats();
-  document.getElementById('import-mandat-overlay').classList.add('hidden');
-  importedMandatData=null;
-  buildNotifs();toast('✅ Mandat importé et enregistré !');
-}
-
 // ══════════ MANDATS PARTAGÉS ══════════
 // ══════════ MANDATS PARTAGÉS RÉSEAU ══════════
 let sharedActiveFilters={type:'all',zone:'all',search:'',sort:'date-desc'};
@@ -8152,59 +7848,6 @@ function refreshMapFilters(){
 // ══════════════════════════════════════════
 // AUTH — Connexion / Déconnexion / Logs / Reset
 // ══════════════════════════════════════════
-
-// ══════════════════════════
-// AFFILIATION — FirstPromoter
-// ══════════════════════════
-function getAffiliateSlug(){
-  try{
-    if(currentUser && currentUser.email){
-      // slug = partie avant le @ de l'email, en minuscule + sans caractères spéciaux
-      return currentUser.email.split('@')[0].toLowerCase().replace(/[^a-z0-9]/g,'');
-    }
-  }catch(e){}
-  return '';
-}
-function getAffiliateLink(){
-  const slug = getAffiliateSlug();
-  if(!slug) return 'https://mon-crm-immo.fr';
-  return 'https://mon-crm-immo.fr/?fpr=' + encodeURIComponent(slug);
-}
-function refreshAffiliateLink(){
-  const input = document.getElementById('affiliate-link-input');
-  if(input) input.value = getAffiliateLink();
-}
-function copyAffiliateLink(){
-  const link = getAffiliateLink();
-  navigator.clipboard.writeText(link).then(function(){
-    const btn = document.getElementById('affiliate-copy-btn');
-    if(!btn) return;
-    const original = btn.innerHTML;
-    btn.innerHTML = '✓ Copié !';
-    btn.style.background = 'var(--green)';
-    setTimeout(function(){
-      btn.innerHTML = original;
-      btn.style.background = '';
-    }, 1800);
-  }).catch(function(){
-    alert('Lien : ' + link);
-  });
-}
-function shareAff(channel){
-  const link = getAffiliateLink();
-  const text = "Salut ! Je te recommande mon-crm-immo, le CRM tout-en-un pour agents immobiliers. 20% de réduction avec mon lien : ";
-  let url = '';
-  if(channel === 'whatsapp'){
-    url = 'https://wa.me/?text=' + encodeURIComponent(text + link);
-  } else if(channel === 'email'){
-    url = 'mailto:?subject=' + encodeURIComponent('Découvre mon-crm-immo (CRM pour agents immobiliers)') + '&body=' + encodeURIComponent(text + link);
-  } else if(channel === 'linkedin'){
-    url = 'https://www.linkedin.com/sharing/share-offsite/?url=' + encodeURIComponent(link);
-  } else if(channel === 'twitter'){
-    url = 'https://twitter.com/intent/tweet?text=' + encodeURIComponent(text) + '&url=' + encodeURIComponent(link);
-  }
-  if(url) window.open(url, '_blank');
-}
 
 // Variables AUTH (déclarées ici, pas redéclarées)
 authUsers = JSON.parse(localStorage.getItem('immoai_users') || '[]');
@@ -8597,16 +8240,6 @@ function _finishLogin(user, remCb){
   const app=document.getElementById('app-root');
   if(app)app.style.display='flex';
   updateUserUI(); updateStorageIndicator(); startClock(); bootApp();
-
-  // 🎁 Démarrer le monitoring trial (bandeau countdown + écran expiré)
-  if(typeof startTrialMonitoring === 'function') startTrialMonitoring();
-
-  // Charger le plan depuis Supabase (source de vérité)
-  if(typeof refreshUserPlan === 'function'){
-    refreshUserPlan().then(plan => {
-      if(plan && typeof updatePlanBadge === 'function') updatePlanBadge();
-    }).catch(_ => {});
-  }
 }
 
 async function doRegister(){
@@ -8798,178 +8431,6 @@ function updateUserUI(){
       if(el && !el.querySelector('img')) el.innerHTML = imgHTML;
     });
   }
-}
-
-// ═══════════════════════════════════════════════════════════════
-// 🎁 SYSTÈME ESSAI GRATUIT 3 MOIS
-// Vérifie trial_ends_at et affiche bandeau ou écran de blocage
-// ═══════════════════════════════════════════════════════════════
-let _trialCheckInterval = null;
-
-/**
- * L'essai appartient à l'ORGANISATION, pas à l'utilisateur.
- *
- * L'ancienne version lisait profiles.trial_ends_at, donc un essai par
- * personne : dans une agence de cinq commerciaux, chacun démarrait le
- * sien, et un agent invité dans une agence déjà abonnée se voyait
- * offrir un essai avec bandeau de compte à rebours. Une agence essaie
- * une fois, pas une fois par tête.
- *
- * mon_abonnement() tranche côté serveur — le client n'a plus à
- * recalculer si l'abonnement prime sur l'essai.
- */
-async function checkTrialStatus(){
-  if(!currentUser || !currentUser.sbId) return null;
-  try {
-    const sb = getSB();
-    if(!sb) return null;
-    const { data, error } = await sb.rpc('mon_abonnement');
-    if(error || !data) return null;
-    return data;
-  } catch(e){
-    console.warn('checkTrialStatus :', e);
-    return null;
-  }
-}
-
-function renderTrialBanner(profile){
-  // Supprimer ancien bandeau s'il existe
-  const old = document.getElementById('trial-banner');
-  if(old) old.remove();
-  if(!profile || !profile.trial_ends_at) return;
-  // Si abonnement payant actif → pas de bandeau
-  if(profile.subscription_status === 'active' && profile.plan !== 'free') return;
-  const now = new Date();
-  const endDate = new Date(profile.trial_ends_at);
-  const daysLeft = Math.ceil((endDate - now) / (1000 * 60 * 60 * 24));
-  if(daysLeft < 0) return; // Expiré → écran fullscreen prend le relais
-  // Couleur selon urgence
-  let bg, color, icon, message;
-  if(daysLeft <= 7){
-    bg = 'linear-gradient(135deg, #DC2626, #B91C1C)';
-    color = '#fff';
-    icon = '⚠️';
-    message = `Plus que <strong>${daysLeft} jour${daysLeft>1?'s':''}</strong> d'essai gratuit`;
-  } else if(daysLeft <= 30){
-    bg = 'linear-gradient(135deg, #F59E0B, #D97706)';
-    color = '#fff';
-    icon = '⏰';
-    message = `<strong>${daysLeft} jours</strong> restants dans votre essai`;
-  } else {
-    bg = 'linear-gradient(135deg, #3B82F6, #2563EB)';
-    color = '#fff';
-    icon = '🎁';
-    message = `Essai gratuit <strong>${daysLeft} jours</strong> restants`;
-  }
-  const banner = document.createElement('div');
-  banner.id = 'trial-banner';
-  banner.style.cssText = `position:fixed;top:0;left:0;right:0;z-index:9000;background:${bg};color:${color};padding:9px 16px;font-size:.78rem;font-family:var(--fb);display:flex;align-items:center;justify-content:center;gap:14px;box-shadow:0 2px 12px rgba(0,0,0,.15)`;
-  banner.innerHTML = `
-    <span style="font-size:1rem">${icon}</span>
-    <span>${message} — Plan <strong>${(profile.plan||'starter').toUpperCase()}</strong></span>
-    <button onclick="showTrialUpgradeModal()" style="background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);color:#fff;padding:5px 14px;border-radius:7px;font-size:.74rem;font-weight:700;cursor:pointer;font-family:var(--fb)">Passer au plan payant →</button>
-  `;
-  document.body.appendChild(banner);
-  // Ajouter du padding-top au body pour pas masquer le contenu
-  document.body.style.paddingTop = '38px';
-}
-
-function showTrialUpgradeModal(){
-  // Petite modal de choix entre Starter et Pro
-  const existing = document.getElementById('trial-upgrade-modal');
-  if(existing) existing.remove();
-  const modal = document.createElement('div');
-  modal.id = 'trial-upgrade-modal';
-  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(6px);z-index:10500;display:flex;align-items:center;justify-content:center;padding:20px';
-  modal.innerHTML = `
-    <div style="background:#fff;border-radius:18px;padding:32px;max-width:520px;width:100%;box-shadow:0 32px 80px rgba(0,0,0,.3)">
-      <div style="font-family:var(--fd);font-weight:800;font-size:1.3rem;color:#0F0F11;margin-bottom:8px;text-align:center">🚀 Continuez l'aventure</div>
-      <div style="font-size:.85rem;color:#525252;margin-bottom:24px;text-align:center;line-height:1.5">Choisissez votre plan pour conserver l'accès à toutes les fonctionnalités</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px">
-        <a href="https://buy.stripe.com/6oU3cwddXgIt4TNd38aMU01" target="_blank" style="background:#FAFAFA;border:2px solid #E5E7EB;border-radius:12px;padding:18px;text-decoration:none;text-align:center;transition:all .15s" onmouseover="this.style.borderColor='#F08A6E';this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='#E5E7EB';this.style.transform=''">
-          <div style="font-family:var(--fd);font-weight:800;font-size:1rem;color:#0F0F11;margin-bottom:4px">Starter</div>
-          <div style="font-family:var(--fd);font-weight:800;font-size:1.8rem;color:#F08A6E;letter-spacing:-.03em">35€<span style="font-size:.7rem;color:#9CA3AF;font-weight:500">/mois</span></div>
-          <div style="font-size:.7rem;color:#737373;margin-top:8px">CRM complet • Mandats illimités</div>
-        </a>
-        <a href="https://buy.stripe.com/aFafZi2zjfEp2LF7IOaMU00" target="_blank" style="background:linear-gradient(145deg,#2A211B,#1a1a2e);border:2px solid rgba(240,138,110,.4);border-radius:12px;padding:18px;text-decoration:none;text-align:center;color:#fff;transition:all .15s;position:relative" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">
-          <div style="position:absolute;top:-8px;right:8px;background:#F08A6E;color:#fff;font-size:.55rem;font-weight:800;padding:3px 8px;border-radius:20px">POPULAIRE</div>
-          <div style="font-family:var(--fd);font-weight:800;font-size:1rem;color:#fff;margin-bottom:4px">Pro</div>
-          <div style="font-family:var(--fd);font-weight:800;font-size:1.8rem;color:#F08A6E;letter-spacing:-.03em">75€<span style="font-size:.7rem;color:rgba(255,255,255,.5);font-weight:500">/mois</span></div>
-          <div style="font-size:.7rem;color:rgba(255,255,255,.7);margin-top:8px">+ Expert Juridique IA</div>
-        </a>
-      </div>
-      <button onclick="document.getElementById('trial-upgrade-modal').remove()" style="width:100%;padding:11px;background:transparent;border:1px solid #E5E7EB;border-radius:8px;font-family:var(--fb);font-size:.78rem;color:#525252;cursor:pointer">Plus tard</button>
-    </div>
-  `;
-  document.body.appendChild(modal);
-}
-
-function showTrialExpiredScreen(profile){
-  // Supprimer si déjà affiché
-  const existing = document.getElementById('trial-expired-screen');
-  if(existing) return;
-  const screen = document.createElement('div');
-  screen.id = 'trial-expired-screen';
-  screen.style.cssText = 'position:fixed;inset:0;background:linear-gradient(135deg,#0F1117 0%,#1a1f2e 100%);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px;font-family:var(--fb)';
-  screen.innerHTML = `
-    <div style="background:rgba(255,255,255,.04);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.1);border-radius:24px;padding:48px;max-width:560px;width:100%;text-align:center;box-shadow:0 32px 80px rgba(0,0,0,.4)">
-      <div style="font-size:3.5rem;margin-bottom:16px">⏰</div>
-      <div style="font-family:var(--fd);font-weight:800;font-size:1.7rem;color:#fff;letter-spacing:-.02em;margin-bottom:10px">Votre essai gratuit a expiré</div>
-      <div style="font-size:.92rem;color:rgba(255,255,255,.65);line-height:1.6;margin-bottom:30px">Vos données sont <strong style="color:#fff">conservées intactes</strong>.<br>Choisissez un plan pour continuer à utiliser <strong style="color:#F08A6E">mon-crm-immo</strong>.</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px">
-        <a href="https://buy.stripe.com/6oU3cwddXgIt4TNd38aMU01" target="_blank" style="background:rgba(255,255,255,.05);border:2px solid rgba(255,255,255,.15);border-radius:14px;padding:22px;text-decoration:none;text-align:center;transition:all .15s" onmouseover="this.style.borderColor='#F08A6E';this.style.background='rgba(240,138,110,.1)'" onmouseout="this.style.borderColor='rgba(255,255,255,.15)';this.style.background='rgba(255,255,255,.05)'">
-          <div style="font-family:var(--fd);font-weight:800;font-size:1.05rem;color:#fff;margin-bottom:6px">Starter</div>
-          <div style="font-family:var(--fd);font-weight:800;font-size:2rem;color:#F08A6E;letter-spacing:-.03em;margin-bottom:8px">35€<span style="font-size:.75rem;color:rgba(255,255,255,.4);font-weight:500">/mois</span></div>
-          <div style="font-size:.72rem;color:rgba(255,255,255,.6);line-height:1.4">CRM complet<br>Mandats illimités<br>Assistants IA</div>
-        </a>
-        <a href="https://buy.stripe.com/aFafZi2zjfEp2LF7IOaMU00" target="_blank" style="background:linear-gradient(145deg,rgba(240,138,110,.15),rgba(240,138,110,.05));border:2px solid rgba(240,138,110,.5);border-radius:14px;padding:22px;text-decoration:none;text-align:center;position:relative;transition:all .15s" onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 12px 30px rgba(240,138,110,.3)'" onmouseout="this.style.transform='';this.style.boxShadow=''">
-          <div style="position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:#F08A6E;color:#fff;font-size:.6rem;font-weight:800;padding:4px 10px;border-radius:20px">⭐ RECOMMANDÉ</div>
-          <div style="font-family:var(--fd);font-weight:800;font-size:1.05rem;color:#fff;margin-bottom:6px">Pro</div>
-          <div style="font-family:var(--fd);font-weight:800;font-size:2rem;color:#F08A6E;letter-spacing:-.03em;margin-bottom:8px">75€<span style="font-size:.75rem;color:rgba(255,255,255,.4);font-weight:500">/mois</span></div>
-          <div style="font-size:.72rem;color:rgba(255,255,255,.6);line-height:1.4">Tout Starter +<br>Expert Juridique IA<br>Support prioritaire</div>
-        </a>
-      </div>
-      <button onclick="logoutFromExpired()" style="width:100%;padding:13px;background:transparent;border:1px solid rgba(255,255,255,.15);border-radius:10px;font-family:var(--fb);font-size:.82rem;color:rgba(255,255,255,.6);cursor:pointer;transition:all .15s" onmouseover="this.style.borderColor='rgba(255,255,255,.3)';this.style.color='#fff'" onmouseout="this.style.borderColor='rgba(255,255,255,.15)';this.style.color='rgba(255,255,255,.6)'">Me déconnecter</button>
-      <div style="margin-top:24px;padding-top:20px;border-top:1px solid rgba(255,255,255,.08);font-size:.7rem;color:rgba(255,255,255,.4)">
-        Besoin d'aide ? Contactez <a href="mailto:contact@mon-crm-immo.fr" style="color:#F08A6E;text-decoration:none">contact@mon-crm-immo.fr</a>
-      </div>
-    </div>
-  `;
-  document.body.appendChild(screen);
-}
-
-function logoutFromExpired(){
-  try { const sb = getSB(); if(sb) sb.auth.signOut(); } catch(_){}
-  sessionStorage.clear();
-  window.location.reload();
-}
-
-async function runTrialCheck(){
-  const abo = await checkTrialStatus();
-  if(!abo) return;
-
-  // Le serveur a déjà tranché : abonne | essai | essai_termine |
-  // sans_abonnement | sans_organisation. Le client se contente
-  // d'afficher, il ne recalcule rien.
-  if(abo.etat === 'abonne' || abo.etat === 'sans_organisation') {
-    const b = document.getElementById('trial-banner');
-    if(b) b.remove();
-    return;
-  }
-
-  if(!abo.actif){ showTrialExpiredScreen(abo); return; }
-
-  if(abo.etat === 'essai'){
-    // Le bandeau attend trial_ends_at : on le lui donne sous ce nom.
-    renderTrialBanner({ ...abo, trial_ends_at: abo.essaiFinLe, plan: abo.plan });
-  }
-}
-
-// Démarrer la vérification trial au chargement + toutes les 5 min
-function startTrialMonitoring(){
-  if(_trialCheckInterval) clearInterval(_trialCheckInterval);
-  runTrialCheck();
-  _trialCheckInterval = setInterval(runTrialCheck, 5 * 60 * 1000);
 }
 
 // Ancien alias
@@ -9174,188 +8635,9 @@ function relaunchOnboarding(){
 }
 
 
-// ══ PLAN MANAGEMENT ══
-// Cache en mémoire pour éviter trop d'allers-retours Supabase
-let _planCache = null;
-let _planCacheTs = 0;
-
-async function refreshUserPlan(){
-  // Source de vérité = Supabase profiles.plan
-  if(currentUser?.sbId){
-    try {
-      const sb = getSB();
-      if(sb){
-        const { data } = await sb.from('profiles')
-          .select('plan, subscription_status')
-          .eq('id', currentUser.sbId)
-          .maybeSingle();
-        if(data){
-          const plan = (data.subscription_status === 'active') ? (data.plan || 'free') : 'free';
-          _planCache = plan;
-          _planCacheTs = Date.now();
-          // Sync localStorage pour fallback offline
-          const subs = JSON.parse(localStorage.getItem('immoai_subs') || '{}');
-          subs[currentUser.sbId] = plan;
-          subs[currentUser.id]   = plan;
-          localStorage.setItem('immoai_subs', JSON.stringify(subs));
-          return plan;
-        }
-      }
-    } catch(e){ console.warn('refreshUserPlan error:', e); }
-  }
-  return null;
-}
-
-function getUserCurrentPlan(){
-  // Cache mémoire (5 min)
-  if(_planCache && (Date.now() - _planCacheTs) < 5*60*1000) return _planCache;
-
-  // Fallback localStorage
-  const subs    = JSON.parse(localStorage.getItem('immoai_subs') || '{}');
-  const session = JSON.parse(sessionStorage.getItem('immoai_session') || 'null');
-  if(!session) return 'free';
-
-  // Trigger refresh async pour la prochaine fois
-  if(currentUser?.sbId) refreshUserPlan().catch(_ => {});
-
-  return subs[session.sbId] || subs[session.id] || 'free';
-}
-
-// ══════════ MISE EN VEILLE DES MODULES IA ══════════
-// Le produit se recentre sur le CRM et l'acquisition de prospects
-// publicitaires. Les assistants IA sont désactivés, pas supprimés :
-// leur code reste intact et il suffit de repasser ce drapeau à true.
-//
-// La désactivation est totale et volontairement redondante — menu,
-// cartes du tableau de bord, navigation, chatbot, écran de clé API —
-// pour qu'aucun chemin détourné ne rouvre une fonctionnalité qui
-// exigeait du client sa propre clé Anthropic.
-const MODULES_IA_ACTIFS = false;
-
-const MODULES_IA = ['gmb','linkedin','prosp','instagram','facebook','juridique','visual'];
-
-// Modules hors du recentrage produit. Même traitement que les IA :
-// retirés de l'interface, conservés dans le code.
-const MODULES_RETIRES = ['partners','products'];
-
-/**
- * Met les assistants en veille sans les faire disparaître.
- *
- * On garde la section visible et repliée : l'agent voit que ces
- * modules existent et qu'ils reviendront. Les masquer entièrement
- * donnerait l'impression qu'ils n'ont jamais existé — et pour un
- * client qui les a vus dans une démonstration, c'est déroutant.
- *
- * Ce qui disparaît en revanche : le chatbot flottant et l'écran de
- * saisie de la clé Anthropic. Ce ne sont pas des modules qu'on
- * annonce, c'est de la plomberie qui réclamait au client sa propre
- * clé API — la raison même de la mise en veille.
- */
-function appliquerVeilleIA(){
-  if(MODULES_IA_ACTIFS) return;
-
-  // Pastille « en pause » sur l'en-tête de section, pour que l'état se
-  // comprenne sans avoir à ouvrir chaque module.
-  const sec = document.querySelector('.sb-section[data-section="ia"]');
-  if(sec && !sec.querySelector('.sb-badge-pause')){
-    const tete = sec.querySelector('.sb-section-head');
-    const chevron = tete && tete.querySelector('.sb-chevron');
-    if(tete && chevron){
-      const pastille = document.createElement('span');
-      pastille.className = 'sb-badge sb-badge-pause';
-      pastille.textContent = 'en pause';
-      pastille.style.cssText = 'background:rgba(255,255,255,.08);color:rgba(255,255,255,.45);'
-        + 'font-size:.58rem;padding:2px 6px;border-radius:4px;letter-spacing:.04em;margin-right:6px';
-      tete.insertBefore(pastille, chevron);
-    }
-  }
-
-  // Modules hors sujet depuis le recentrage sur le CRM et l'acquisition.
-  MODULES_RETIRES.forEach(function(m){
-    const btn = document.querySelector('.sb-btn[onclick*="\'' + m + '\'"]');
-    if(btn) btn.style.display = 'none';
-    document.querySelectorAll('.tool-card[onclick*="\'' + m + '\'"]').forEach(function(c){
-      c.style.display = 'none';
-    });
-  });
-
-  // Le chatbot consomme la même clé API que les assistants.
-  const bulle = document.getElementById('cb-bubble');
-  if(bulle) bulle.style.display = 'none';
-  const fen = document.getElementById('cb-win');
-  if(fen) fen.classList.add('hidden');
-
-  // Écran de saisie de la clé Anthropic : plus jamais proposé.
-  const ecranCle = document.getElementById('api-key-screen');
-  if(ecranCle) ecranCle.style.display = 'none';
-}
-
-const PLAN_ACCESS = {
-  // CRM plan: accès CRM complet, mandats, agenda
-  // Pro plan: tout
-  crm_only_modules: ['gmb','linkedin','prosp','instagram','facebook','juridique'],
-};
-
-function isPlanLocked(module){
-  // Les assistants sont en veille pour tout le monde, quel que soit le
-  // plan : ils dépendaient d'une clé Anthropic fournie par le client.
-  if(!MODULES_IA_ACTIFS && MODULES_IA.includes(module)) return true;
-  const plan = getUserCurrentPlan();
-  if(plan === 'pro' || plan === 'agency') return false;
-  return PLAN_ACCESS.crm_only_modules.includes(module);
-}
-
-function showPlanGate(viewEl, module){
-  const existing = viewEl.querySelector('.plan-gate-overlay');
-  if(existing) existing.remove();
-
-  const gate = document.createElement('div');
-  gate.className = 'plan-gate-overlay';
-
-  // Deux situations distinctes : un module en veille produit, et un
-  // module réservé à un plan supérieur. Promettre « passez à Pro » pour
-  // le premier serait mensonger — aucun plan ne le débloque.
-  const enVeille = !MODULES_IA_ACTIFS && MODULES_IA.includes(module);
-
-  if(enVeille){
-    gate.innerHTML = `
-      <div class="plan-gate-icon">🌙</div>
-      <div class="plan-gate-title">Module en pause</div>
-      <div class="plan-gate-sub">Les assistants IA sont temporairement retirés du produit.<br>
-        Nous concentrons le développement sur le CRM et l'acquisition de prospects publicitaires.</div>
-      <button class="plan-gate-btn" onclick="navTo('dashboard')">Retour au tableau de bord</button>
-    `;
-  } else {
-    gate.innerHTML = `
-      <div class="plan-gate-icon">🔒</div>
-      <div class="plan-gate-title">Fonctionnalité incluse dans un plan supérieur</div>
-      <div class="plan-gate-sub">Cette fonctionnalité n'est pas comprise dans votre abonnement actuel.</div>
-      <button class="plan-gate-btn" onclick="window.open('/tarifs','_blank')">Voir les tarifs →</button>
-    `;
-  }
-
-  viewEl.style.position = 'relative';
-  viewEl.appendChild(gate);
-}
-
-// Ajouter badge plan dans la topbar
-function updatePlanBadge(){
-  const plan = getUserCurrentPlan();
-  const chip = document.getElementById('tc-name');
-  if(chip && !document.getElementById('plan-badge-tb')){
-    const badge = document.createElement('span');
-    badge.id = 'plan-badge-tb';
-    badge.className = plan==='pro'||plan==='agency' ? 'plan-badge-pro' : 'plan-badge-crm';
-    badge.textContent = plan==='pro'||plan==='agency' ? 'Pro' : 'CRM';
-    chip.parentElement.appendChild(badge);
-  }
-}
-
 // ══════════ BOOT APP ══════════
 function bootApp(){
-  appliquerVeilleIA();
   initSectionsBarreLaterale();
-  updatePlanBadge();
   renderList();
   renderMandats();
   updateDashKPIs();
@@ -9382,7 +8664,6 @@ function bootApp(){
       updateUserUI();startClock();updateStorageIndicator();
       bootApp();
       chargerDonnees().catch(function(_){});
-      if(typeof startTrialMonitoring === 'function') startTrialMonitoring();
     }catch(e){sessionStorage.removeItem('immoai_session');}
   } else {
     document.getElementById('app-root').style.display='none';
@@ -9396,7 +8677,6 @@ function bootApp(){
         document.getElementById('login-screen').classList.add('hidden');
         document.getElementById('app-root').style.display='flex';
         updateUserUI();startClock();updateStorageIndicator();bootApp();
-        if(typeof startTrialMonitoring === 'function') startTrialMonitoring();
         return;
       }
       if(_r&&_r.email){
