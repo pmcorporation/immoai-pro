@@ -1893,6 +1893,13 @@ body{font-family:var(--fb);background:#FAFAFA;color:var(--g900);min-height:100vh
 .lead-nature-btn:hover .lead-nature-s{color:rgba(255,255,255,.6)}
 @media(max-width:640px){ .lead-nature{grid-template-columns:1fr} }
 
+/* « Jamais appelé » est la tranche qui coûte de l'argent : elle se
+   distingue des autres même quand elle n'est pas sélectionnée. */
+.lead-puce.jamais{border-color:var(--red);color:var(--red)}
+.lead-puce.jamais b{opacity:.6}
+.lead-puce.jamais:hover{background:var(--red);border-color:var(--red);color:#fff}
+.lead-puce.jamais.actif{background:var(--red);border-color:var(--red);color:#fff}
+
 /* ── Onglets et archive ── */
 .lead-onglets{display:flex;gap:4px;margin-bottom:18px;border-bottom:1px solid var(--g200)}
 .lead-onglet{
@@ -4757,6 +4764,35 @@ const LEAD_SEUILS = { chaud: 1, tiede: 4 };   // en heures
 // pour une audience. L'archive est donc consultable, filtrable, et
 // réversible — on se trompe, et un lead écarté par erreur doit
 // pouvoir revenir dans le vivier.
+// Filtre par nombre de tentatives. C'est la mesure de la discipline
+// de relance : dans l'immobilier, ce n'est pas le premier appel qui
+// décroche l'estimation, c'est le troisième. Un lead appelé une fois
+// puis abandonné et un lead relancé cinq fois sont deux situations
+// opposées — les afficher pêle-mêle empêche de voir laquelle domine.
+let _filtreAppels = null;   // null | 0 | 1 | 2 | 3 | 4 | 5 | '5+'
+
+function _tranche(n){ return n > 5 ? '5+' : n; }
+
+function comptesAppels(liste){
+  const c = {};
+  liste.forEach(function(p){
+    const t = _tranche(_tentatives(p));
+    c[t] = (c[t] || 0) + 1;
+  });
+  return c;
+}
+
+function filtrerAppels(v){
+  _filtreAppels = (String(_filtreAppels) === String(v)) ? null : v;
+  _panneau = null;
+  renderLeads();
+}
+
+const LIBELLES_APPELS = {
+  0: 'Jamais appelé', 1: '1 appel', 2: '2 appels',
+  3: '3 appels', 4: '4 appels', 5: '5 appels', '5+': 'Plus de 5',
+};
+
 let _ongletLeads = 'actifs';
 let _filtreMotif = null;
 
@@ -4778,6 +4814,7 @@ function comptesMotifs(){
 function ongletLeads(nom){
   _ongletLeads = nom;
   _filtreMotif = null;
+  _filtreAppels = null;
   _panneau = null;
   renderLeads();
 }
@@ -4877,7 +4914,20 @@ async function renderLeads(){
 
   const moi = currentUser && currentUser.sbId;
 
-  zone.innerHTML = _formulaireAjout() + leads.map(function(p){
+  const vus = (_filtreAppels === null) ? leads
+    : leads.filter(function(p){ return String(_tranche(_tentatives(p))) === String(_filtreAppels); });
+
+  if(!vus.length){
+    zone.innerHTML = _formulaireAjout() + filtresAppels(leads)
+      + '<div class="lead-vide"><strong>Aucun lead dans cette tranche.</strong>'
+      + (_filtreAppels === 0
+          ? 'Tous vos leads ont été appelés au moins une fois.'
+          : 'Choisissez une autre tranche ou revenez à « Tous ».') + '</div>';
+    majBadgeLeads();
+    return;
+  }
+
+  zone.innerHTML = _formulaireAjout() + filtresAppels(leads) + vus.map(function(p){
     const a    = leadAge(p.createdAt);
     const nom  = ((p.prenom || '') + ' ' + (p.nom || '')).trim() || 'Sans nom';
     const aMoi = p._attribueA && p._attribueA === moi;
@@ -5078,6 +5128,34 @@ function importerLeads(evt){
     evt.target.value = '';
   };
   lect.readAsText(f, 'utf-8');
+}
+
+// Les tranches vides ne sont pas affichées : une rangée de zéros
+// occupe la place sans rien apprendre. « Jamais appelé » fait
+// exception — c'est la tranche qu'on doit voir même à zéro, parce que
+// zéro y est une bonne nouvelle.
+function filtresAppels(leads){
+  if(!leads.length) return '';
+  const c = comptesAppels(leads);
+  const tranches = [0, 1, 2, 3, 4, 5, '5+'].filter(function(t){
+    return t === 0 || c[t];
+  });
+  if(tranches.length <= 1) return '';
+
+  const puce = function(v, libelle, n, classe){
+    const actif = String(_filtreAppels) === String(v) ? ' actif' : '';
+    return '<button class="lead-puce' + actif + (classe || '') + '" type="button" '
+         + 'onclick="filtrerAppels(' + (typeof v === 'string' ? "'" + v + "'" : v) + ')">'
+         + libelle + ' <b>' + n + '</b></button>';
+  };
+
+  return '<div class="lead-filtres">'
+    + '<button class="lead-puce' + (_filtreAppels === null ? ' actif' : '') + '" type="button" '
+    + 'onclick="filtrerAppels(null)">Tous <b>' + leads.length + '</b></button>'
+    + tranches.map(function(t){
+        return puce(t, LIBELLES_APPELS[t], c[t] || 0, t === 0 ? ' jamais' : '');
+      }).join('')
+    + '</div>';
 }
 
 function majOnglets(nActifs, nArchives){
