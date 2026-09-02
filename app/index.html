@@ -3093,7 +3093,7 @@ body{font-family:var(--fb);background:var(--g100);color:var(--g900);min-height:1
       <div class="gcal-banner-icon">📅</div>
       <div>
         <div class="gcal-banner-title">Google Calendar</div>
-        <div class="gcal-banner-sub" id="gcal-banner-sub">Connectez votre Google Calendar pour synchroniser vos RDV</div>
+        <div class="gcal-banner-sub" id="gcal-banner-sub">Synchronisation Google Calendar en cours de refonte — vos RDV restent dans le CRM</div>
       </div>
     </div>
     <div style="display:flex;align-items:center;gap:10px;flex-shrink:0">
@@ -3101,8 +3101,10 @@ body{font-family:var(--fb);background:var(--g100);color:var(--g900);min-height:1
         <div class="gcal-sync-dot synced" id="gcal-sync-dot"></div>
         <span id="gcal-sync-label">Synchronisé</span>
       </div>
-      <button class="gcal-connect-btn" id="gcal-main-btn" onclick="gcalConnect()">
-        <span>🔗</span> Connecter Google Calendar
+      <button class="gcal-connect-btn" id="gcal-main-btn" disabled
+              style="opacity:.45;cursor:not-allowed"
+              title="La connexion Google est en cours de refonte : l'ancienne version remplaçait votre session par une session Google.">
+        <span>🔒</span> Google Calendar — bientôt
       </button>
       <button class="gcal-connect-btn disconnect" id="gcal-disconnect-btn" style="display:none" onclick="gcalDisconnect()">
         Déconnecter
@@ -11908,7 +11910,7 @@ function initGcalBanner() {
     banner.classList.remove('connected');
     if(btn) { btn.className='gcal-connect-btn'; btn.innerHTML='<span>🔗</span> Connecter Google Calendar'; }
     if(disconnectBtn) disconnectBtn.style.display='none';
-    if(sub) sub.textContent='Connectez votre Google Calendar pour synchroniser vos RDV';
+    if(sub) sub.textContent='Synchronisation Google Calendar en cours de refonte — vos RDV restent dans le CRM';
     if(syncStatus) syncStatus.style.display='none';
     if(importBtn) importBtn.style.display='none';
   }
