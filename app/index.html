@@ -8037,11 +8037,15 @@ function getDevice(){
 }
 
 // ══════════ ANNUAIRE DE CONNEXION ══════════
-// Roster de l'agence. Provisoirement en dur : tant que la vue
-// Supabase `annuaire` n'est pas posée, l'écran doit fonctionner. Le
-// jour où elle existe, seul chargerAnnuaire() change — le reste de
-// l'écran ne connaît que la forme des objets, pas leur provenance.
-const ANNUAIRE = [
+// La liste vient de la base : toute personne créée depuis l'écran
+// Équipe apparaît ici sans qu'on touche au code.
+//
+// La constante ci-dessous n'est plus la source, seulement le filet.
+// Elle sert au premier démarrage — avant que le moindre compte
+// existe — et si la base est injoignable. Un écran de connexion qui
+// se vide parce qu'un réseau a hoqueté serait pire que légèrement
+// périmé.
+const ANNUAIRE_REPLI = [
   {prenom:'Alexis',   nom:'Lacroix',          role:'Gérant',      mail:'alexis@manalex-immobilier.fr'},
   {prenom:'Isabelle', nom:'Lacroix',          role:'Administratif',mail:'isabelle@manalex-immobilier.fr'},
   {prenom:'Didier',   nom:'Lacroix',          role:'Négociateur',  mail:'didier@manalex-immobilier.fr'},
@@ -8050,10 +8054,37 @@ const ANNUAIRE = [
   {prenom:'Tiffani',  nom:'Barlerin Portier', role:'Négociatrice', mail:'tiffani@manalex-immobilier.fr'},
 ];
 
+let ANNUAIRE = ANNUAIRE_REPLI.slice();
+
+// Les rôles techniques ne veulent rien dire pour qui se connecte :
+// on affiche la fonction, pas le niveau de droits.
+const ANNU_FONCTIONS = {proprietaire:'Gérant', direction:'Administratif', agent:'Négociateur'};
+
 // La photo est nommée d'après la partie locale de l'adresse. Pas de
 // colonne à tenir à jour : ajouter quelqu'un, c'est déposer un fichier.
 function annuPhoto(m){ return 'img/equipe/' + m.mail.split('@')[0] + '.jpg'; }
 function annuInitiales(m){ return (m.prenom[0] + m.nom[0]).toUpperCase(); }
+
+// Interroge la base, puis redessine. Volontairement tolérante : si
+// l'appel échoue ou ne renvoie personne, le repli reste affiché
+// plutôt que de laisser une grille vide devant l'agent.
+async function rafraichirAnnuaire(){
+  try{
+    const sb = getSB();
+    if(!sb) return;
+    const { data, error } = await sb.rpc('annuaire_connexion');
+    if(error || !data || !data.length) return;
+    ANNUAIRE = data.map(function(l){
+      return {
+        prenom: l.prenom,
+        nom:    l.nom,
+        mail:   l.email,
+        role:   ANNU_FONCTIONS[l.role] || l.role
+      };
+    });
+    chargerAnnuaire();
+  }catch(e){ /* le repli tient l'écran */ }
+}
 
 function chargerAnnuaire(){
   const g = document.getElementById('annu-grille');
@@ -8997,7 +9028,8 @@ function bootApp(){
 
 // ══════════ INIT ══════════
 (function(){
-  chargerAnnuaire();   // la grille des visages, avant toute décision d'écran
+  chargerAnnuaire();      // le repli, tout de suite : jamais de grille vide
+  rafraichirAnnuaire();   // puis la vraie liste, depuis la base
   const session=sessionStorage.getItem('immoai_session');
   if(session){
     try{
