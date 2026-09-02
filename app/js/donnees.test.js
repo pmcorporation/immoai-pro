@@ -168,5 +168,57 @@ console.log('\n── Création puis suppression avant la première synchro ─�
     apres.find((o) => o.type === 'maj').objet.id === 'dddddddd-1111-2222-3333-444444444444');
 })();
 
+// ══════════════════════════════════════════════════════════════
+// L'ATTRIBUTION NE CHANGE PAS DE MAIN À LA SAUVEGARDE
+// ══════════════════════════════════════════════════════════════
+// Le repli sur l'utilisateur courant réattribuait tout lead sauvegardé
+// à celui qui le sauvegardait : un lead de Simon devenait celui du
+// gérant dès qu'il y touchait. Toute la traçabilité en dépend.
+(function () {
+  console.log('\n▸ Attribution');
+
+  const SIMON  = 'aaaaaaaa-1111-2222-3333-444444444444';
+  const GERANT = 'bbbbbbbb-1111-2222-3333-444444444444';
+  const ctx = { orgId: 'cccccccc-1111-2222-3333-444444444444', userId: GERANT };
+
+  const leadDeSimon = { id: 'eeeeeeee-1111-2222-3333-444444444444',
+                        prenom: 'Céline', nom: 'Ravier', stage: 'nouveau',
+                        _attribueA: SIMON };
+  const l1 = D._versBase('prospects', leadDeSimon, ctx);
+  t('un lead attribué à Simon le reste quand le gérant sauvegarde',
+    l1.attribue_a === SIMON, l1.attribue_a);
+
+  const ficheNeuve = { id: 'ffffffff-1111-2222-3333-444444444444',
+                       prenom: 'Nouveau', nom: 'Contact', stage: 'contact' };
+  const l2 = D._versBase('prospects', ficheNeuve, ctx);
+  t('une fiche sans titulaire revient à celui qui la crée',
+    l2.attribue_a === GERANT, l2.attribue_a);
+
+  const sansContexte = D._versBase('prospects', leadDeSimon, null);
+  t('sans contexte, aucune attribution n\'est inventée',
+    sansContexte.attribue_a === undefined, sansContexte.attribue_a);
+})();
+
+// ══════════════════════════════════════════════════════════════
+// LES ENFANTS NE POLLUENT PAS LA LIGNE DU PARENT
+// ══════════════════════════════════════════════════════════════
+// Les activités partent par leur propre table. Si elles se glissaient
+// dans la ligne du prospect, PostgREST rejetterait l'envoi entier.
+(function () {
+  console.log('\n▸ Tables filles');
+
+  const avecEnfants = {
+    id: '11111111-aaaa-bbbb-cccc-dddddddddddd',
+    prenom: 'Thomas', nom: 'Girard', stage: 'nouveau',
+    activities: [{ type: 'call', note: 'Pas de réponse', date: '2026-09-02' }],
+    notes: [{ text: 'Rappeler ce soir', date: '2026-09-02' }],
+  };
+  const ligne = D._versBase('prospects', avecEnfants, null);
+  t('le tableau des activités ne part pas dans la ligne du prospect',
+    !('activities' in ligne) && !('activites' in ligne), Object.keys(ligne));
+  t('le tableau des notes non plus',
+    !('notes' in ligne), Object.keys(ligne));
+})();
+
 console.log(`\n${ok} réussis, ${ko} échoués`);
 process.exit(ko ? 1 : 0);

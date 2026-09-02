@@ -226,11 +226,71 @@
     }
 
     if (contexte) {
-      if (contexte.orgId)  ligne.org_id     = contexte.orgId;
-      if (contexte.userId) ligne.attribue_a = ligne.attribue_a || contexte.userId;
+      if (contexte.orgId) ligne.org_id = contexte.orgId;
+
+      // _attribueA est un champ de service, absent de `colonnes` :
+      // ligne.attribue_a était donc toujours vide ici, et le repli
+      // sur l'utilisateur courant réattribuait le lead à quiconque
+      // le sauvegardait. Un lead de Simon devenait celui du gérant
+      // dès qu'il y touchait — et l'imputabilité s'effondrait en
+      // silence. Le titulaire connu prime ; le repli ne sert qu'aux
+      // fiches réellement nouvelles.
+      if (obj._attribueA)       ligne.attribue_a = obj._attribueA;
+      else if (contexte.userId) ligne.attribue_a = contexte.userId;
     }
 
     return ligne;
+  }
+
+  /**
+   * Les tableaux enfants — notes, activités — étaient déclarés dans
+   * les schémas mais jamais écrits : versBase() ne transmet que les
+   * colonnes, et les enfants n'en sont pas. Une note prise sur un
+   * lead vivait donc dans le seul navigateur qui l'avait saisie, et
+   * le déclencheur qui horodate le premier contact ne se déclenchait
+   * jamais.
+   *
+   * On insère uniquement ce que le serveur ne connaît pas encore. Une
+   * activité est un fait daté : elle ne se modifie pas, elle s'ajoute.
+   * Comparer sur (type, note, date) suffit donc à éviter les doublons
+   * sans avoir à leur inventer un identifiant.
+   */
+  async function envoyerEnfants(sb, schema, parentId, objet) {
+    if (!parentId || !estUuid(parentId)) return;
+
+    for (const [nom, e] of Object.entries(schema.enfants || {})) {
+      const locales = Array.isArray(objet[nom]) ? objet[nom] : [];
+      if (!locales.length) continue;
+
+      const { data: distantes, error } = await sb.from(e.table)
+        .select('*').eq('prospect_id', parentId);
+      if (error) continue;
+
+      const empreinte = (o, champs) => Object.keys(champs)
+        .map((k) => String(o[champs[k]] ?? o[k] ?? '')).join('|');
+
+      const deja = new Set((distantes || []).map((d) => {
+        return Object.values(e.champs).map((c) => String(d[c] ?? '')).join('|');
+      }));
+
+      const nouvelles = locales.filter((l) => {
+        const cle = Object.keys(e.champs).map((k) => String(l[k] ?? '')).join('|');
+        return !deja.has(cle);
+      });
+      if (!nouvelles.length) continue;
+
+      const lignes = nouvelles.map((l) => {
+        const r = { prospect_id: parentId };
+        for (const [champApp, colonne] of Object.entries(e.champs)) {
+          let v = l[champApp];
+          if (colonne === 'date_activite' && v) v = String(v).slice(0, 10);
+          if (v !== undefined && v !== '') r[colonne] = v;
+        }
+        return r;
+      });
+
+      await sb.from(e.table).insert(lignes);
+    }
   }
 
   /** Ligne de base → objet applicatif. Réciproque de versBase(). */
@@ -448,6 +508,7 @@
             // Un identifiant hérité a été remplacé par un uuid serveur :
             // on répercute dans le cache pour ne pas créer de doublon.
             if (data && data.id !== op.id) remplacerId(op.entite, op.id, data.id);
+            await envoyerEnfants(sb, s, data ? data.id : op.id, op.objet);
           }
           File.retirer(op);
           bilan.envoyes++;
