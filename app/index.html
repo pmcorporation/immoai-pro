@@ -1728,43 +1728,99 @@ body{font-family:var(--fb);background:#FAFAFA;color:var(--g900);min-height:100vh
 
 
 /* ══ LEADS ENTRANTS ══ */
-/* L'ancienneté est l'information principale de cet écran : un lead
-   publicitaire se joue à l'heure près, pas à la journée. Elle est
-   donc colorée, pas seulement écrite. */
-.lead-tete{display:flex;align-items:center;gap:22px;flex-wrap:wrap;margin-bottom:16px}
-.lead-compte{font-family:var(--fd);font-weight:800;font-size:1.9rem;color:var(--g900);line-height:1}
-.lead-delai{font-family:var(--fd);font-weight:800;font-size:1.9rem;line-height:1}
-.lead-delai-bloc{padding-left:22px;border-left:1px solid var(--g200)}
-.lead-compte-sous{font-size:.72rem;color:var(--g500);margin-top:4px}
-.lead-attrib{display:flex;align-items:center;gap:11px;flex-wrap:wrap;margin-bottom:16px;font-size:.82rem;color:var(--g600)}
+/* Hiérarchie de l'écran : d'abord la ville, ensuite le nom, ensuite
+   le reste. Un commercial ne décide pas d'appeler sur un nom — il
+   décide sur un secteur. On ne se déplace pas à quarante minutes
+   pour une estimation, et cet arbitrage se fait en une seconde. */
+
+.lead-bandeau{
+  display:flex;align-items:stretch;gap:0;flex-wrap:wrap;
+  background:var(--w);border:1px solid var(--g200);border-radius:var(--rxl);
+  padding:4px;margin-bottom:18px;box-shadow:var(--sh1);
+}
+.lead-stat{padding:14px 22px;border-right:1px solid var(--g100)}
+.lead-stat:last-of-type{border-right:none}
+.lead-stat-val{font-family:var(--fd);font-weight:800;font-size:1.6rem;line-height:1.1;color:var(--g900)}
+.lead-stat-lib{font-size:.68rem;color:var(--g500);text-transform:uppercase;letter-spacing:.07em;margin-top:3px}
+.lead-bandeau-actions{margin-left:auto;display:flex;align-items:center;gap:8px;padding:0 8px}
+
+.lead-attrib{display:flex;align-items:center;gap:11px;flex-wrap:wrap;margin-bottom:18px;font-size:.82rem;color:var(--g600)}
 .lead-attrib select{width:auto;min-width:190px}
 
+/* La carte. Le liseré gauche porte l'urgence : c'est la seule chose
+   qu'on perçoit sans lire, en faisant défiler. */
 .lead-carte{
-  background:var(--w);border:1px solid var(--g200);border-radius:var(--r);
-  padding:15px 17px;margin-bottom:9px;display:flex;gap:15px;align-items:flex-start;
-  border-left:3px solid var(--g300);transition:var(--tr);
+  position:relative;background:var(--w);
+  border:1px solid var(--g200);border-left:4px solid var(--g300);
+  border-radius:var(--rxl);padding:18px 20px;margin-bottom:12px;
+  transition:var(--tr);
 }
-.lead-carte:hover{box-shadow:var(--sh2)}
+.lead-carte:hover{box-shadow:var(--sh2);border-color:var(--g300)}
 .lead-carte.chaud{border-left-color:var(--green)}
 .lead-carte.tiede{border-left-color:var(--amber)}
 .lead-carte.froid{border-left-color:var(--red)}
-.lead-corps{flex:1;min-width:0}
-.lead-nom{font-family:var(--fd);font-weight:700;font-size:.94rem;color:var(--g900)}
-.lead-meta{font-size:.76rem;color:var(--g500);margin-top:3px;display:flex;gap:9px;flex-wrap:wrap}
-.lead-age{font-size:.71rem;font-weight:700;padding:2px 8px;border-radius:20px;white-space:nowrap}
+
+.lead-haut{display:flex;align-items:flex-start;gap:14px;margin-bottom:13px}
+.lead-ville{
+  font-family:var(--fd);font-weight:800;font-size:1.02rem;letter-spacing:-.01em;
+  color:var(--g900);text-transform:uppercase;line-height:1.15;
+}
+.lead-ville.absente{color:var(--g300);font-weight:700;text-transform:none;font-style:italic}
+.lead-nom{font-size:.9rem;font-weight:600;color:var(--g700);margin-top:2px}
+.lead-projet{font-size:.8rem;color:var(--g500);margin-top:5px;line-height:1.45}
+
+.lead-droite{margin-left:auto;display:flex;align-items:center;gap:8px;flex:none}
+.lead-age{font-size:.72rem;font-weight:800;padding:4px 10px;border-radius:20px;white-space:nowrap}
 .lead-age.chaud{background:var(--green-l);color:var(--green)}
 .lead-age.tiede{background:var(--amber-l);color:var(--amber)}
 .lead-age.froid{background:var(--red-l);color:var(--red)}
-.lead-titulaire{font-size:.75rem;font-weight:700;padding:6px 11px;border-radius:var(--rsm);white-space:nowrap}
+.lead-source{font-size:.68rem;font-weight:700;color:var(--g500);background:var(--g100);
+  padding:4px 9px;border-radius:20px;white-space:nowrap}
+
+.lead-contact{display:flex;gap:16px;flex-wrap:wrap;font-size:.82rem;color:var(--g600);margin-bottom:12px}
+.lead-contact a{color:var(--g900);text-decoration:none;font-weight:600}
+.lead-contact a:hover{text-decoration:underline}
+
+/* Le compteur de tentatives : trois appels sans réponse racontent
+   autre chose qu'un lead ignoré, et méritent d'être vus. */
+.lead-tentatives{
+  display:inline-flex;align-items:center;gap:6px;font-size:.74rem;font-weight:700;
+  color:var(--amber);background:var(--amber-l);padding:4px 10px;border-radius:20px;margin-bottom:12px;
+}
+.lead-titulaire{font-size:.72rem;font-weight:700;padding:4px 10px;border-radius:20px;white-space:nowrap;
+  background:var(--g100);color:var(--g600)}
 .lead-titulaire.amoi{background:var(--green-l);color:var(--green)}
-.lead-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:11px}
-.lead-notes{margin-top:11px;padding-top:11px;border-top:1px solid var(--g100)}
-.lead-note{font-size:.77rem;color:var(--g600);padding:5px 0;display:flex;gap:8px}
-.lead-note-date{color:var(--g400);font-size:.71rem;white-space:nowrap;flex:none}
-.lead-vide{padding:44px 20px;text-align:center;color:var(--g400);font-size:.85rem}
-@media(max-width:620px){
-  .lead-carte{flex-direction:column;gap:9px}
-  .lead-delai-bloc{padding-left:0;border-left:none}
+
+.lead-notes{margin-bottom:12px;padding:11px 13px;background:var(--g50);border-radius:var(--r)}
+.lead-note{font-size:.78rem;color:var(--g600);padding:3px 0;display:flex;gap:9px;line-height:1.45}
+.lead-note-date{color:var(--g400);font-size:.71rem;white-space:nowrap;flex:none;font-variant-numeric:tabular-nums}
+
+.lead-actions{display:flex;gap:7px;flex-wrap:wrap;align-items:center;
+  padding-top:13px;border-top:1px solid var(--g100)}
+.lead-btn{
+  font-family:var(--fb);font-size:.79rem;font-weight:600;cursor:pointer;
+  padding:8px 13px;border-radius:var(--rsm);border:1px solid var(--g200);
+  background:var(--w);color:var(--g700);transition:var(--tr);white-space:nowrap;
+  display:inline-flex;align-items:center;gap:6px;text-decoration:none;
+}
+.lead-btn:hover{background:var(--g50);border-color:var(--g300);color:var(--g900)}
+.lead-btn.primaire{background:var(--brand);border-color:var(--brand);color:#fff}
+.lead-btn.primaire:hover{background:var(--brand-d);border-color:var(--brand-d)}
+.lead-btn.valide{background:var(--green);border-color:var(--green);color:#fff}
+.lead-btn.valide:hover{opacity:.88}
+.lead-btn.discret{color:var(--g400);border-color:transparent}
+.lead-btn.discret:hover{color:var(--red);background:var(--red-l);border-color:transparent}
+.lead-btn[disabled]{opacity:.4;cursor:not-allowed}
+.lead-actions .lead-sep{flex:1}
+
+.lead-vide{padding:56px 20px;text-align:center;color:var(--g400);font-size:.86rem;line-height:1.7}
+.lead-vide strong{display:block;font-family:var(--fd);font-size:1.05rem;color:var(--g600);margin-bottom:6px}
+
+@media(max-width:640px){
+  .lead-bandeau-actions{margin-left:0;padding:8px;width:100%}
+  .lead-haut{flex-wrap:wrap}
+  .lead-droite{margin-left:0;width:100%}
+  .lead-actions .lead-sep{display:none}
 }
 
 /* ══ ANNUAIRE DE CONNEXION ══ */
@@ -2388,21 +2444,23 @@ body{font-family:var(--fb);background:#FAFAFA;color:var(--g900);min-height:100vh
      reste ici tant qu'il n'a pas été joint. -->
 <div id="v-leads" class="view">
 
-  <div class="lead-tete">
-    <div>
-      <div class="lead-compte" id="lead-compte">—</div>
-      <div class="lead-compte-sous">en attente d'un premier appel</div>
+  <div class="lead-bandeau">
+    <div class="lead-stat">
+      <div class="lead-stat-val" id="lead-compte">—</div>
+      <div class="lead-stat-lib">à rappeler</div>
     </div>
-    <div class="lead-delai-bloc">
-      <div class="lead-delai" id="lead-plus-vieux">—</div>
-      <div class="lead-compte-sous">le plus ancien</div>
+    <div class="lead-stat">
+      <div class="lead-stat-val" id="lead-plus-vieux">—</div>
+      <div class="lead-stat-lib">le plus ancien</div>
     </div>
+    <div class="lead-bandeau-actions">
     <button class="btn btn-outline" type="button" onclick="renderLeads()">Actualiser</button>
     <label class="btn btn-outline" style="cursor:pointer;margin:0">
       ⬆ Importer
       <input type="file" accept=".csv,text/csv" style="display:none" onchange="importerLeads(event)">
     </label>
     <button class="btn btn-brand" type="button" onclick="ouvrirLeadManuel()">+ Ajouter</button>
+    </div>
   </div>
 
   <!-- Réservé à la direction : qui reçoit les leads entrants -->
@@ -4531,12 +4589,32 @@ function leadsEnAttente(){
     .sort(function(a, b){ return new Date(a.createdAt || 0) - new Date(b.createdAt || 0); });
 }
 
+// L'équipe n'est chargée qu'en ouvrant l'écran Équipe. Sans elle, la
+// carte affiche « un collègue » au lieu du nom — inutilisable pour
+// décider si l'on reprend un lead. On la charge donc à la demande.
+async function assurerEquipe(){
+  if(_equipe) return _equipe;
+  try{
+    const sb = getSB();
+    if(!sb) return null;
+    const { data } = await sb.rpc('mon_equipe');
+    if(data && !data.erreur) _equipe = data;
+  }catch(e){ /* la carte se rabattra sur « un collègue » */ }
+  return _equipe;
+}
+
+function _tentatives(p){
+  return (p.activities || []).filter(function(a){ return a.type === 'call'; }).length;
+}
+
 async function renderLeads(){
   const zone = document.getElementById('lead-liste');
   if(!zone) return;
-  const leads = leadsEnAttente();
+  await assurerEquipe();
 
+  const leads = leadsEnAttente();
   document.getElementById('lead-compte').textContent = leads.length;
+
   const vieux = document.getElementById('lead-plus-vieux');
   if(leads.length){
     const a = leadAge(leads[0].createdAt);
@@ -4545,184 +4623,136 @@ async function renderLeads(){
                       : (a.etat === 'tiede' ? 'var(--amber)' : 'var(--red)');
   } else {
     vieux.textContent = '—';
-    vieux.style.color = 'var(--g400)';
+    vieux.style.color = 'var(--g300)';
   }
 
   majAttributionParDefaut();
 
   if(!leads.length){
-    zone.innerHTML = '<div class="lead-vide">Aucun lead en attente.<br>'
-      + 'Les nouveaux leads publicitaires apparaîtront ici dès leur arrivée.</div>';
+    zone.innerHTML = '<div class="lead-vide"><strong>Rien à rappeler.</strong>'
+      + 'Les leads publicitaires arriveront ici dès qu\'ils laisseront leurs coordonnées.</div>';
     majBadgeLeads();
     return;
   }
 
-  zone.innerHTML = leads.map(function(p){
-    const a = leadAge(p.createdAt);
-    const nom = ((p.prenom || '') + ' ' + (p.nom || '')).trim() || 'Sans nom';
-    const meta = [];
-    if(p.tel)    meta.push('<span>📞 ' + echapper(p.tel) + '</span>');
-    if(p.email)  meta.push('<span>✉️ ' + echapper(p.email) + '</span>');
-    if(p.source) meta.push('<span>📣 ' + echapper(p.source) + '</span>');
-    if(p.bien)   meta.push('<span>🏠 ' + echapper(p.bien) + '</span>');
+  const moi = currentUser && currentUser.sbId;
 
-    const notes = (p.activities || []).slice(-3).map(function(ac){
+  zone.innerHTML = leads.map(function(p){
+    const a    = leadAge(p.createdAt);
+    const nom  = ((p.prenom || '') + ' ' + (p.nom || '')).trim() || 'Sans nom';
+    const aMoi = p._attribueA && p._attribueA === moi;
+    const qui  = p._attribueA ? (nomDuMembre(p._attribueA) || 'un collègue') : null;
+    const tent = _tentatives(p);
+
+    // La ville prime : elle occupe la place du titre. Sans elle, on
+    // le dit franchement plutôt que de laisser un vide — c'est une
+    // information manquante, pas un détail.
+    const ville = p.adresse
+      ? '<div class="lead-ville">' + echapper(p.adresse) + '</div>'
+      : '<div class="lead-ville absente">Ville non renseignée</div>';
+
+    const contact = [];
+    if(p.tel)   contact.push('<span>📞 <a href="tel:' + encodeURIComponent(p.tel) + '">'
+                             + echapper(p.tel) + '</a></span>');
+    if(p.email) contact.push('<span>✉️ <a href="mailto:' + encodeURIComponent(p.email) + '">'
+                             + echapper(p.email) + '</a></span>');
+
+    const notes = (p.activities || []).slice(-2).map(function(ac){
       return '<div class="lead-note"><span class="lead-note-date">'
-           + new Date(ac.date || ac.created_at || Date.now()).toLocaleDateString('fr-FR')
+           + new Date(ac.date || Date.now()).toLocaleDateString('fr-FR',
+               {day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})
            + '</span><span>' + echapper(ac.note || '') + '</span></div>';
     }).join('');
 
-    // tel: ouvre l'application téléphone du poste ou du mobile —
-    // l'agent ne recopie pas un numéro à la main.
-    // Dans un vivier partagé, savoir qui s'en occupe évite deux
-    // commerciaux sur le même contact. Et quand personne ne l'a pris,
-    // le bouton doit être le geste le plus visible de la carte.
-    const moi     = currentUser && currentUser.sbId;
-    const aMoi    = p._attribueA && p._attribueA === moi;
-    const titulaire = p._attribueA ? (nomDuMembre(p._attribueA) || 'un collègue') : null;
-    const prise = aMoi
-      ? '<span class="lead-titulaire amoi">✓ à vous</span>'
-      : '<button class="btn btn-brand" type="button" onclick="prendreLead(\'' + p.id + '\')">'
-        + (titulaire ? '↩ Reprendre (' + echapper(titulaire) + ')' : '✋ Prendre ce lead') + '</button>';
-
     const appel = p.tel
-      ? '<a class="btn btn-brand" href="tel:' + encodeURIComponent(p.tel) + '" '
+      ? '<a class="lead-btn primaire" href="tel:' + encodeURIComponent(p.tel) + '" '
         + 'onclick="noterAppel(\'' + p.id + '\')">📞 Appeler</a>'
-      : '<button class="btn btn-outline" type="button" disabled>Pas de numéro</button>';
+      : '<button class="lead-btn" type="button" disabled>Pas de numéro</button>';
 
     return '<div class="lead-carte ' + a.etat + '">'
-      + '<div class="lead-corps">'
-        + '<div class="lead-nom">' + echapper(nom) + '</div>'
-        + '<div class="lead-meta">' + meta.join('') + '</div>'
-        + (notes ? '<div class="lead-notes">' + notes + '</div>' : '')
-        + '<div class="lead-actions">'
-          + prise
-          + appel
-          + '<button class="btn btn-outline" type="button" onclick="ajouterNoteLead(\'' + p.id + '\')">✎ Note</button>'
-          + '<button class="btn btn-outline" type="button" onclick="qualifierLead(\'' + p.id + '\')">→ Premier contact</button>'
-          + '<button class="btn btn-outline" type="button" onclick="perdreLead(\'' + p.id + '\')">✕ Écarter</button>'
+      + '<div class="lead-haut">'
+        + '<div style="min-width:0">'
+          + ville
+          + '<div class="lead-nom">' + echapper(nom) + '</div>'
+          + (p.bien ? '<div class="lead-projet">' + echapper(p.bien) + '</div>' : '')
+        + '</div>'
+        + '<div class="lead-droite">'
+          + (p.source ? '<span class="lead-source">' + echapper(p.source) + '</span>' : '')
+          + '<span class="lead-age ' + a.etat + '">' + a.texte + '</span>'
         + '</div>'
       + '</div>'
-      + '<span class="lead-age ' + a.etat + '">' + a.texte + '</span>'
+
+      + (contact.length ? '<div class="lead-contact">' + contact.join('') + '</div>' : '')
+      + (tent ? '<div class="lead-tentatives">☎ ' + tent + ' tentative'
+                + (tent > 1 ? 's' : '') + ' sans réponse</div>' : '')
+      + (notes ? '<div class="lead-notes">' + notes + '</div>' : '')
+
+      + '<div class="lead-actions">'
+        + appel
+        + '<button class="lead-btn" type="button" onclick="sansReponse(\'' + p.id + '\')">☎ Sans réponse</button>'
+        + '<button class="lead-btn" type="button" onclick="ajouterNoteLead(\'' + p.id + '\')">✎ Note</button>'
+        + '<button class="lead-btn" type="button" onclick="donnerLead(\'' + p.id + '\')">↗ Donner</button>'
+        + '<span class="lead-sep"></span>'
+        + (aMoi ? '<span class="lead-titulaire amoi">✓ à vous</span>'
+                : '<button class="lead-btn" type="button" onclick="prendreLead(\'' + p.id + '\')">'
+                  + (qui ? '↩ Reprendre à ' + echapper(qui) : '✋ Prendre') + '</button>')
+        + '<button class="lead-btn valide" type="button" onclick="qualifierLead(\'' + p.id + '\')">→ Premier contact</button>'
+        + '<button class="lead-btn discret" type="button" onclick="perdreLead(\'' + p.id + '\')" title="Écarter">✕</button>'
+      + '</div>'
     + '</div>';
   }).join('');
 
   majBadgeLeads();
 }
 
-function nomDuMembre(id){
-  if(!_equipe || !_equipe.membres) return null;
-  const m = _equipe.membres.find(function(x){ return x.id === id; });
-  if(!m) return null;
-  return ((m.prenom || '') + ' ' + (m.nom || '')).trim() || m.email;
+// Un appel qui ne décroche pas est un fait, pas un échec : c'est la
+// preuve que le lead a été traité dans les temps. Sans ce bouton, le
+// commercial n'a aucune raison de le consigner — et le délai de
+// premier contact resterait vide alors qu'il a fait son travail.
+function sansReponse(id){
+  const p = _lead(id);
+  if(!p) return;
+  p.activities = p.activities || [];
+  const n = _tentatives(p) + 1;
+  p.activities.push({
+    type: 'call',
+    note: 'Appelé — pas de réponse (tentative ' + n + ')',
+    date: new Date().toISOString()
+  });
+  saveP_();
+  renderLeads();
+  toast('☎ Tentative ' + n + ' enregistrée');
 }
 
-// La prise passe par le serveur, pas par une écriture directe : c'est
-// l'instant où quelqu'un s'engage sur un contact payé. Si un collègue
-// a été plus rapide, il faut un refus clair plutôt qu'un écrasement
-// silencieux.
-async function prendreLead(id){
-  const sb = getSB();
+// Donner est permis, prendre ne l'est pas : le serveur vérifie qu'on
+// cède bien un lead qu'on détient.
+async function donnerLead(id){
+  const p = _lead(id);
+  if(!p) return;
+  await assurerEquipe();
+  const membres = (_equipe && _equipe.membres || []).filter(function(m){
+    return m.id !== (currentUser && currentUser.sbId);
+  });
+  if(!membres.length){ toast('Aucun collègue à qui céder ce lead'); return; }
+
+  const liste = membres.map(function(m, k){
+    return (k + 1) + '. ' + (((m.prenom || '') + ' ' + (m.nom || '')).trim() || m.email);
+  }).join('\n');
+  const rep = prompt('Donner ce lead à :\n\n' + liste + '\n\nNuméro :');
+  if(rep === null) return;
+  const cible = membres[parseInt(rep, 10) - 1];
+  if(!cible){ toast('⚠️ Numéro invalide'); return; }
+
   try{
-    const { error } = await sb.rpc('prendre_lead', { p_prospect: id });
+    const sb = getSB();
+    const { error } = await sb.rpc('ceder_lead', { p_prospect: id, p_vers: cible.id });
     if(error) throw new Error(error.message);
-    const p = _lead(id);
-    if(p) p._attribueA = currentUser && currentUser.sbId;
+    p._attribueA = cible.id;
     renderLeads();
-    toast('✋ Lead pris — à vous de jouer');
+    toast('↗ Lead donné à ' + (cible.prenom || 'votre collègue'));
   }catch(e){ toast('⚠️ ' + e.message); renderLeads(); }
 }
 
-// ── Import d'un fichier ──
-// Un export de régie ou de portail arrive en CSV. Plutôt que
-// d'imposer un gabarit, on reconnaît les intitulés courants : c'est
-// la même tolérance que côté serveur pour les webhooks.
-const IMPORT_ALIAS = {
-  prenom: ['prenom','prénom','firstname','first name','first_name'],
-  nom:    ['nom','lastname','last name','last_name','surname','nom complet','full name','fullname','name'],
-  tel:    ['tel','telephone','téléphone','phone','phone number','mobile','portable'],
-  email:  ['email','mail','courriel','e-mail','adresse email'],
-  bien:   ['bien','projet','property','type de bien','message','recherche'],
-  source: ['source','origine','campagne','campaign'],
-};
-
-function _colonne(entetes, cible){
-  const norm = function(v){ return String(v||'').toLowerCase().trim().replace(/^"|"$/g,''); };
-  for(const alias of IMPORT_ALIAS[cible]){
-    const i = entetes.findIndex(function(h){ return norm(h) === alias; });
-    if(i >= 0) return i;
-  }
-  return -1;
-}
-
-// Découpe une ligne CSV en respectant les guillemets : une adresse
-// « Lyon, 3e » ne doit pas devenir deux colonnes.
-function _decouper(ligne, sep){
-  const out = []; let cur = ''; let entre = false;
-  for(let i = 0; i < ligne.length; i++){
-    const c = ligne[i];
-    if(c === '"'){ 
-      if(entre && ligne[i+1] === '"'){ cur += '"'; i++; } else entre = !entre;
-    } else if(c === sep && !entre){ out.push(cur); cur = ''; }
-    else cur += c;
-  }
-  out.push(cur);
-  return out.map(function(v){ return v.trim(); });
-}
-
-function importerLeads(evt){
-  const f = evt.target.files && evt.target.files[0];
-  if(!f) return;
-  const lect = new FileReader();
-  lect.onload = function(){
-    const lignes = String(lect.result).split(/\r?\n/).filter(function(l){ return l.trim(); });
-    if(lignes.length < 2){ toast('⚠️ Fichier vide ou sans données'); return; }
-
-    // Les exports français utilisent souvent le point-virgule.
-    const sep = (lignes[0].match(/;/g) || []).length > (lignes[0].match(/,/g) || []).length ? ';' : ',';
-    const entetes = _decouper(lignes[0], sep);
-    const col = {};
-    for(const k in IMPORT_ALIAS) col[k] = _colonne(entetes, k);
-
-    if(col.tel < 0 && col.email < 0){
-      toast('⚠️ Aucune colonne téléphone ni email reconnue');
-      evt.target.value = '';
-      return;
-    }
-
-    let ajoutes = 0, doublons = 0;
-    const existants = new Set(prospects.map(function(p){ return (p.tel || p.email || '').replace(/\s/g,''); }));
-
-    lignes.slice(1).forEach(function(l){
-      const c = _decouper(l, sep);
-      const val = function(k){ return col[k] >= 0 ? (c[col[k]] || '') : ''; };
-      const tel = val('tel'), email = val('email');
-      const cle = (tel || email).replace(/\s/g,'');
-      if(!cle) return;
-      if(existants.has(cle)){ doublons++; return; }
-      existants.add(cle);
-
-      let prenom = val('prenom'), nom = val('nom');
-      if(!prenom && nom){ const b = nom.split(/\s+/); prenom = b[0]; nom = b.slice(1).join(' ') || b[0]; }
-
-      prospects.push({
-        id: 'p' + Date.now() + Math.round(Math.random()*1e6),
-        prenom: prenom || 'Lead', nom: nom || prenom || 'sans nom',
-        tel: tel, email: email, bien: val('bien'),
-        source: val('source') || ('Import ' + f.name),
-        stage: 'nouveau', createdAt: new Date().toISOString(), activities: []
-      });
-      ajoutes++;
-    });
-
-    saveP_();
-    renderLeads();
-    toast('✅ ' + ajoutes + ' lead' + (ajoutes > 1 ? 's' : '') + ' importé'
-          + (ajoutes > 1 ? 's' : '') + (doublons ? ' · ' + doublons + ' doublon(s) ignoré(s)' : ''));
-    evt.target.value = '';
-  };
-  lect.readAsText(f, 'utf-8');
-}
 
 function majBadgeLeads(){
   const b = document.getElementById('sb-leads');

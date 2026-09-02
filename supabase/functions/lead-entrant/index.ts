@@ -54,6 +54,7 @@ interface Lead {
   email?: string;
   source: string;
   bien?: string;
+  ville?: string;
   note?: string;
   reference?: string;   // identifiant chez la source, pour ne pas doublonner
 }
@@ -98,6 +99,10 @@ function normaliser(c: Record<string, unknown>, source: string): Lead {
     tel:   pioche("phone", "phonenumber", "tel", "telephone", "téléphone", "mobile"),
     email: pioche("email", "mail", "courriel"),
     bien:  pioche("bien", "property", "typedebien", "projet", "message"),
+    // La ville décide qui rappelle : un commercial ne se déplace pas
+    // à quarante minutes pour une estimation. C'est la première chose
+    // qu'on regarde sur une fiche.
+    ville: pioche("ville", "city", "commune", "localite", "localité", "secteur", "zone", "codepostal"),
     note:  pioche("note", "commentaire", "comments"),
     source,
     reference: pioche("leadid", "id", "reference"),
@@ -169,6 +174,7 @@ async function enregistrer(leads: Lead[]): Promise<{ crees: number; ignores: num
       tel: l.tel || null,
       email: l.email || null,
       bien: l.bien || null,
+      secteur: l.ville || null,
       note: l.note || null,
       source: l.source,
       etape: "nouveau",
