@@ -1,0 +1,12 @@
+# Vercel publie par défaut TOUT le dépôt à la racine du domaine.
+# Migrations, sources des fonctions serveur et scripts d'administration
+# y seraient donc téléchargeables par quiconque connaît l'URL, une fois
+# la protection SSO retirée. Rien de tout cela n'a à être servi : seuls
+# app/ et public/ sont nécessaires au navigateur.
+supabase/
+scripts/
+*.sql
+*.md
+CLAUDE.md
+README.md
+.claude/

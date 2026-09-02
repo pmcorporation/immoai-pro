@@ -4849,6 +4849,21 @@ function comptesAppels(liste){
   return c;
 }
 
+// Le rang plutôt que la valeur : un motif est saisi librement par un
+// agent, et le glisser dans un attribut onclick revient à lui laisser
+// écrire du code — échapper l'apostrophe ne sert à rien quand
+// l'attribut est délimité par des guillemets doubles. Un entier, lui,
+// ne s'échappe pas.
+function filtrerMotifRang(k){
+  const m = (window._motifsAffiches || [])[k];
+  if(m !== undefined) filtrerMotif(m);
+}
+
+function confirmerEcartRang(id, k){
+  const m = MOTIFS_ECART[k];
+  if(m !== undefined) confirmerEcart(id, m);
+}
+
 function filtrerAppels(v){
   _filtreAppels = (String(_filtreAppels) === String(v)) ? null : v;
   _panneau = null;
@@ -5311,11 +5326,15 @@ function renderArchive(archives){
   const filtres = '<div class="lead-filtres">'
     + '<button class="lead-puce' + (_filtreMotif === null ? ' actif' : '') + '" type="button" '
     + 'onclick="filtrerMotif(null)">Tous <b>' + archives.length + '</b></button>'
-    + motifs.map(function(m){
+    + motifs.map(function(m, k){
         return '<button class="lead-puce' + (_filtreMotif === m ? ' actif' : '') + '" type="button" '
-             + 'onclick="filtrerMotif(\'' + m.replace(/'/g, "\\'") + '\')">'
+             + 'onclick="filtrerMotifRang(' + k + ')">'
              + echapper(m) + ' <b>' + comptes[m] + '</b></button>';
       }).join('') + '</div>';
+  // Le rang plutôt que la valeur : un motif est saisi librement par
+  // un agent, et le glisser dans un attribut onclick revient à lui
+  // laisser écrire du code. Un entier ne s'échappe pas.
+  window._motifsAffiches = motifs;
 
   const liste = _filtreMotif
     ? archives.filter(function(p){ return (p.motifPerte || 'Non précisé') === _filtreMotif; })
@@ -5477,9 +5496,9 @@ function _panneauHtml(p){
   if(_panneau.type === 'ecarter'){
     return '<div class="lead-panneau">'
       + '<div class="lead-panneau-titre">Pourquoi écarter ce lead&nbsp;?</div>'
-      + '<div class="lead-choix">' + MOTIFS_ECART.map(function(m){
-          return '<button class="lead-puce" type="button" onclick="confirmerEcart(\'' + p.id
-               + '\',\'' + m.replace(/'/g, "\\'") + '\')">' + echapper(m) + '</button>';
+      + '<div class="lead-choix">' + MOTIFS_ECART.map(function(m, k){
+          return '<button class="lead-puce" type="button" onclick="confirmerEcartRang(\'' + p.id
+               + '\',' + k + ')">' + echapper(m) + '</button>';
         }).join('') + '</div>'
       + '<input class="lead-champ" id="pan-motif" placeholder="Autre motif…" '
       + 'onkeydown="if(event.key===\'Enter\')confirmerEcart(\'' + p.id + '\', this.value)">'
