@@ -1874,6 +1874,41 @@ body{font-family:var(--fb);background:#FAFAFA;color:var(--g900);min-height:100vh
 .lead-btn[disabled]:hover{background:var(--w);color:var(--g700);border-color:var(--g200)}
 .lead-actions .lead-sep{flex:1;min-width:8px}
 
+/* ── Panneaux intégrés ── */
+/* Ils remplacent les boîtes du navigateur : la carte reste sous les
+   yeux pendant qu'on écrit, et les motifs se cliquent au lieu de se
+   taper — un motif choisi dans une liste se compte, un motif inventé
+   ne se compte pas. */
+.lead-panneau{
+  margin-top:15px;padding-top:16px;border-top:1px dashed var(--g200);
+  animation:leadPanneau .16s ease both;
+}
+@keyframes leadPanneau{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+.lead-panneau-titre{
+  font-family:var(--fd);font-weight:700;font-size:.82rem;color:var(--g700);margin-bottom:11px;
+}
+.lead-champ{
+  width:100%;font-family:var(--fb);font-size:.85rem;color:var(--g900);
+  background:var(--w);border:1px solid var(--g300);border-radius:var(--rsm);
+  padding:10px 13px;margin-bottom:10px;transition:var(--tr);resize:vertical;
+}
+.lead-champ:focus{outline:none;border-color:var(--g900);box-shadow:0 0 0 3px var(--g100)}
+.lead-champ::placeholder{color:var(--g400)}
+.lead-choix{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:11px}
+.lead-puce{
+  font-family:var(--fb);font-size:.79rem;font-weight:600;cursor:pointer;
+  padding:8px 14px;border-radius:30px;border:1px solid var(--g200);
+  background:var(--w);color:var(--g700);transition:var(--tr);
+}
+.lead-puce:hover{background:var(--g900);border-color:var(--g900);color:#fff;transform:translateY(-1px)}
+.lead-panneau-pied{display:flex;gap:8px;align-items:center;justify-content:flex-end;flex-wrap:wrap}
+.lead-astuce{margin-right:auto;font-size:.72rem;color:var(--g400)}
+.lead-grille{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.lead-grille .lead-champ{margin-bottom:0}
+.lead-ajout{border-style:dashed;border-color:var(--g300)}
+.lead-ajout::before{background:var(--g900)}
+@media(max-width:640px){ .lead-grille{grid-template-columns:1fr} }
+
 .lead-vide{
   padding:76px 24px;text-align:center;color:var(--g400);font-size:.87rem;line-height:1.75;
   background:var(--w);border:1px dashed var(--g200);border-radius:var(--rxl);
@@ -4712,7 +4747,7 @@ async function renderLeads(){
   majAttributionParDefaut();
 
   if(!leads.length){
-    zone.innerHTML = '<div class="lead-vide"><strong>Rien à rappeler.</strong>'
+    zone.innerHTML = _formulaireAjout() + '<div class="lead-vide"><strong>Rien à rappeler.</strong>'
       + 'Les leads publicitaires arriveront ici dès qu\'ils laisseront leurs coordonnées.</div>';
     majBadgeLeads();
     return;
@@ -4720,7 +4755,7 @@ async function renderLeads(){
 
   const moi = currentUser && currentUser.sbId;
 
-  zone.innerHTML = leads.map(function(p){
+  zone.innerHTML = _formulaireAjout() + leads.map(function(p){
     const a    = leadAge(p.createdAt);
     const nom  = ((p.prenom || '') + ' ' + (p.nom || '')).trim() || 'Sans nom';
     const aMoi = p._attribueA && p._attribueA === moi;
@@ -4773,15 +4808,16 @@ async function renderLeads(){
       + '<div class="lead-actions">'
         + appel
         + '<button class="lead-btn" type="button" onclick="sansReponse(\'' + p.id + '\')">☎ Sans réponse</button>'
-        + '<button class="lead-btn" type="button" onclick="ajouterNoteLead(\'' + p.id + '\')">✎ Note</button>'
-        + '<button class="lead-btn" type="button" onclick="donnerLead(\'' + p.id + '\')">↗ Donner</button>'
+        + '<button class="lead-btn" type="button" onclick="ouvrirPanneau(\'' + p.id + '\',\'note\')">✎ Note</button>'
+        + '<button class="lead-btn" type="button" onclick="ouvrirPanneau(\'' + p.id + '\',\'donner\')">↗ Donner</button>'
         + '<span class="lead-sep"></span>'
         + (aMoi ? '<span class="lead-titulaire amoi">✓ à vous</span>'
                 : '<button class="lead-btn" type="button" onclick="prendreLead(\'' + p.id + '\')">'
                   + (qui ? '↩ Reprendre à ' + echapper(qui) : '✋ Prendre') + '</button>')
         + '<button class="lead-btn valide" type="button" onclick="qualifierLead(\'' + p.id + '\')">→ Premier contact</button>'
-        + '<button class="lead-btn discret" type="button" onclick="perdreLead(\'' + p.id + '\')" title="Écarter">✕</button>'
+        + '<button class="lead-btn discret" type="button" onclick="ouvrirPanneau(\'' + p.id + '\',\'ecarter\')" title="Écarter">✕</button>'
       + '</div>'
+      + _panneauHtml(p)
     + '</div>';
   }).join('');
 
@@ -4806,36 +4842,6 @@ function sansReponse(id){
   renderLeads();
   toast('☎ Tentative ' + n + ' enregistrée');
 }
-
-// Donner est permis, prendre ne l'est pas : le serveur vérifie qu'on
-// cède bien un lead qu'on détient.
-async function donnerLead(id){
-  const p = _lead(id);
-  if(!p) return;
-  await assurerEquipe();
-  const membres = (_equipe && _equipe.membres || []).filter(function(m){
-    return m.id !== (currentUser && currentUser.sbId);
-  });
-  if(!membres.length){ toast('Aucun collègue à qui céder ce lead'); return; }
-
-  const liste = membres.map(function(m, k){
-    return (k + 1) + '. ' + (((m.prenom || '') + ' ' + (m.nom || '')).trim() || m.email);
-  }).join('\n');
-  const rep = prompt('Donner ce lead à :\n\n' + liste + '\n\nNuméro :');
-  if(rep === null) return;
-  const cible = membres[parseInt(rep, 10) - 1];
-  if(!cible){ toast('⚠️ Numéro invalide'); return; }
-
-  try{
-    const sb = getSB();
-    const { error } = await sb.rpc('ceder_lead', { p_prospect: id, p_vers: cible.id });
-    if(error) throw new Error(error.message);
-    p._attribueA = cible.id;
-    renderLeads();
-    toast('↗ Lead donné à ' + (cible.prenom || 'votre collègue'));
-  }catch(e){ toast('⚠️ ' + e.message); renderLeads(); }
-}
-
 
 function nomDuMembre(id){
   if(!_equipe || !_equipe.membres) return null;
@@ -4974,16 +4980,125 @@ function noterAppel(id){
   saveP_();
 }
 
-function ajouterNoteLead(id){
+// ══════════ PANNEAUX INTÉGRÉS ══════════
+// Les boîtes du navigateur ont trois défauts : elles bloquent la page,
+// elles ne se stylent pas, et elles ne proposent rien — l'agent doit
+// taper un motif que ses collègues écriront autrement, ce qui rend le
+// champ inexploitable ensuite. Un panneau dans la carte règle les
+// trois : on garde le contexte sous les yeux, et on clique un motif
+// plutôt que de l'inventer.
+let _panneau = null;   // { id, type }
+
+function ouvrirPanneau(id, type){
+  _panneau = (_panneau && _panneau.id === id && _panneau.type === type) ? null : { id: id, type: type };
+  renderLeads();
+  // Le focus suit l'ouverture : sans lui il faudrait un clic de plus
+  // pour commencer à écrire.
+  setTimeout(function(){
+    const c = document.querySelector('.lead-panneau textarea, .lead-panneau input');
+    if(c) c.focus();
+  }, 30);
+}
+
+function fermerPanneau(){ _panneau = null; renderLeads(); }
+
+// Les motifs les plus fréquents, cliquables. Un motif choisi dans une
+// liste se compte ; un motif tapé à la main ne se compte pas.
+const MOTIFS_ECART = ['Faux numéro', 'Hors secteur', 'Pas vendeur',
+                      'Déjà vendu', 'Ne répond plus', 'Doublon'];
+
+function _panneauHtml(p){
+  if(!_panneau || _panneau.id !== p.id) return '';
+
+  if(_panneau.type === 'note'){
+    return '<div class="lead-panneau">'
+      + '<div class="lead-panneau-titre">Note sur ' + echapper(p.prenom || '') + '</div>'
+      + '<textarea class="lead-champ" id="pan-note" rows="3" '
+      + 'placeholder="Ce qui a été dit, ce qu\'il faut retenir…" '
+      + 'onkeydown="if(event.key===\'Enter\'&&(event.metaKey||event.ctrlKey))enregistrerNote(\'' + p.id + '\')"></textarea>'
+      + '<div class="lead-panneau-pied">'
+        + '<span class="lead-astuce">⌘ + Entrée pour enregistrer</span>'
+        + '<button class="lead-btn" type="button" onclick="fermerPanneau()">Annuler</button>'
+        + '<button class="lead-btn primaire" type="button" onclick="enregistrerNote(\'' + p.id + '\')">Enregistrer</button>'
+      + '</div></div>';
+  }
+
+  if(_panneau.type === 'donner'){
+    const autres = (_equipe && _equipe.membres || []).filter(function(m){
+      return m.id !== (currentUser && currentUser.sbId);
+    });
+    if(!autres.length){
+      return '<div class="lead-panneau"><div class="lead-panneau-titre">'
+        + 'Aucun collègue à qui céder ce lead.</div>'
+        + '<div class="lead-panneau-pied"><button class="lead-btn" type="button" '
+        + 'onclick="fermerPanneau()">Fermer</button></div></div>';
+    }
+    return '<div class="lead-panneau">'
+      + '<div class="lead-panneau-titre">Donner ce lead à</div>'
+      + '<div class="lead-choix">' + autres.map(function(m){
+          const n = ((m.prenom || '') + ' ' + (m.nom || '')).trim() || m.email;
+          return '<button class="lead-puce" type="button" onclick="confirmerDon(\'' + p.id
+               + '\',\'' + m.id + '\')">' + echapper(n) + '</button>';
+        }).join('') + '</div>'
+      + '<div class="lead-panneau-pied">'
+        + '<button class="lead-btn" type="button" onclick="fermerPanneau()">Annuler</button>'
+      + '</div></div>';
+  }
+
+  if(_panneau.type === 'ecarter'){
+    return '<div class="lead-panneau">'
+      + '<div class="lead-panneau-titre">Pourquoi écarter ce lead&nbsp;?</div>'
+      + '<div class="lead-choix">' + MOTIFS_ECART.map(function(m){
+          return '<button class="lead-puce" type="button" onclick="confirmerEcart(\'' + p.id
+               + '\',\'' + m.replace(/'/g, "\\'") + '\')">' + echapper(m) + '</button>';
+        }).join('') + '</div>'
+      + '<input class="lead-champ" id="pan-motif" placeholder="Autre motif…" '
+      + 'onkeydown="if(event.key===\'Enter\')confirmerEcart(\'' + p.id + '\', this.value)">'
+      + '<div class="lead-panneau-pied">'
+        + '<button class="lead-btn" type="button" onclick="fermerPanneau()">Annuler</button>'
+      + '</div></div>';
+  }
+  return '';
+}
+
+function enregistrerNote(id){
   const p = _lead(id);
-  if(!p) return;
-  const n = prompt('Note sur ' + ((p.prenom || '') + ' ' + (p.nom || '')).trim() + ' :');
-  if(!n || !n.trim()) return;
+  const champ = document.getElementById('pan-note');
+  if(!p || !champ) return;
+  const t = champ.value.trim();
+  if(!t){ champ.focus(); return; }
   p.activities = p.activities || [];
-  p.activities.push({ type: 'call', note: n.trim(), date: new Date().toISOString() });
+  p.activities.push({ type: 'call', note: t, date: new Date().toISOString() });
   saveP_();
+  _panneau = null;
   renderLeads();
   toast('Note enregistrée');
+}
+
+async function confirmerDon(id, versId){
+  const p = _lead(id);
+  if(!p) return;
+  const cible = (_equipe && _equipe.membres || []).find(function(m){ return m.id === versId; });
+  try{
+    const sb = getSB();
+    const { error } = await sb.rpc('ceder_lead', { p_prospect: id, p_vers: versId });
+    if(error) throw new Error(error.message);
+    p._attribueA = versId;
+    _panneau = null;
+    renderLeads();
+    toast('↗ Lead donné à ' + ((cible && cible.prenom) || 'votre collègue'));
+  }catch(e){ toast('⚠️ ' + e.message); }
+}
+
+function confirmerEcart(id, motif){
+  const p = _lead(id);
+  if(!p) return;
+  p.perdu = true;
+  p.motifPerte = String(motif || '').trim() || 'Non qualifié';
+  saveP_();
+  _panneau = null;
+  renderLeads();
+  toast('Lead écarté — ' + p.motifPerte);
 }
 
 // Le seul geste qui compte : quelqu'un a parlé à cette personne. Le
@@ -4994,43 +5109,67 @@ function qualifierLead(id){
   if(!p) return;
   p.stage = 'contact';
   saveP_();
+  _panneau = null;
   renderLeads();
   if(typeof renderList === 'function')     renderList();
   if(typeof renderPipeline === 'function') renderPipeline();
   toast('✅ ' + (p.prenom || 'Le lead') + ' passe en premier contact');
 }
 
-function perdreLead(id){
-  const p = _lead(id);
-  if(!p) return;
-  const motif = prompt('Pourquoi écarter ce lead ? (faux numéro, hors secteur, pas vendeur…)');
-  if(motif === null) return;
-  p.perdu = true;
-  p.motifPerte = motif.trim() || 'Non qualifié';
-  saveP_();
-  renderLeads();
-  toast('Lead écarté');
-}
+// ── Ajout manuel, en ligne plutôt qu'en cascade de boîtes ──
+let _ajoutOuvert = false;
 
 function ouvrirLeadManuel(){
-  const nom = prompt('Nom du lead (prénom nom) :');
-  if(!nom || !nom.trim()) return;
-  const tel = prompt('Téléphone :') || '';
-  const bout = nom.trim().split(/\s+/);
-  const p = {
-    id: 'p' + Date.now(),
-    prenom: bout[0],
-    nom: bout.slice(1).join(' ') || bout[0],
-    tel: tel.trim(),
-    stage: 'nouveau',
-    source: 'Saisie manuelle',
-    createdAt: new Date().toISOString(),
-    activities: []
-  };
-  prospects.push(p);
-  saveP_();
+  _ajoutOuvert = !_ajoutOuvert;
   renderLeads();
-  toast('Lead ajouté');
+  setTimeout(function(){
+    const c = document.getElementById('naj-prenom');
+    if(c) c.focus();
+  }, 30);
+}
+
+function _formulaireAjout(){
+  if(!_ajoutOuvert) return '';
+  return '<div class="lead-carte lead-ajout">'
+    + '<div class="lead-panneau-titre">Nouveau lead</div>'
+    + '<div class="lead-grille">'
+      + '<input class="lead-champ" id="naj-prenom" placeholder="Prénom">'
+      + '<input class="lead-champ" id="naj-nom" placeholder="Nom">'
+      + '<input class="lead-champ" id="naj-ville" placeholder="Ville">'
+      + '<input class="lead-champ" id="naj-tel" placeholder="Téléphone" inputmode="tel">'
+      + '<input class="lead-champ" id="naj-email" placeholder="Email" inputmode="email">'
+      + '<input class="lead-champ" id="naj-source" placeholder="Source (ex. appel entrant)">'
+    + '</div>'
+    + '<input class="lead-champ" id="naj-bien" placeholder="Son projet en une phrase" '
+    + 'onkeydown="if(event.key===\'Enter\')enregistrerNouveauLead()">'
+    + '<div class="lead-panneau-pied">'
+      + '<button class="lead-btn" type="button" onclick="ouvrirLeadManuel()">Annuler</button>'
+      + '<button class="lead-btn primaire" type="button" onclick="enregistrerNouveauLead()">Ajouter le lead</button>'
+    + '</div></div>';
+}
+
+function enregistrerNouveauLead(){
+  const v = function(id){ const e = document.getElementById(id); return e ? e.value.trim() : ''; };
+  const prenom = v('naj-prenom'), nom = v('naj-nom');
+  const tel = v('naj-tel'), email = v('naj-email');
+
+  // Un lead sans moyen de le joindre n'est pas un lead.
+  if(!prenom && !nom){ toast('⚠️ Indiquez au moins un nom'); return; }
+  if(!tel && !email){ toast('⚠️ Il faut un téléphone ou un email'); return; }
+
+  prospects.push({
+    id: 'p' + Date.now(),
+    prenom: prenom || nom, nom: nom || prenom,
+    tel: tel, email: email,
+    adresse: v('naj-ville'), bien: v('naj-bien'),
+    source: v('naj-source') || 'Saisie manuelle',
+    stage: 'nouveau', createdAt: new Date().toISOString(),
+    perdu: false, activities: []
+  });
+  saveP_();
+  _ajoutOuvert = false;
+  renderLeads();
+  toast('✅ Lead ajouté');
 }
 
 // ── Qui reçoit les leads entrants (direction seule) ──
