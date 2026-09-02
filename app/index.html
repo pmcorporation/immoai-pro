@@ -1755,6 +1755,8 @@ body{font-family:var(--fb);background:#FAFAFA;color:var(--g900);min-height:100vh
 .lead-age.chaud{background:var(--green-l);color:var(--green)}
 .lead-age.tiede{background:var(--amber-l);color:var(--amber)}
 .lead-age.froid{background:var(--red-l);color:var(--red)}
+.lead-titulaire{font-size:.75rem;font-weight:700;padding:6px 11px;border-radius:var(--rsm);white-space:nowrap}
+.lead-titulaire.amoi{background:var(--green-l);color:var(--green)}
 .lead-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:11px}
 .lead-notes{margin-top:11px;padding-top:11px;border-top:1px solid var(--g100)}
 .lead-note{font-size:.77rem;color:var(--g600);padding:5px 0;display:flex;gap:8px}
@@ -2396,6 +2398,10 @@ body{font-family:var(--fb);background:#FAFAFA;color:var(--g900);min-height:100vh
       <div class="lead-compte-sous">le plus ancien</div>
     </div>
     <button class="btn btn-outline" type="button" onclick="renderLeads()">Actualiser</button>
+    <label class="btn btn-outline" style="cursor:pointer;margin:0">
+      ⬆ Importer
+      <input type="file" accept=".csv,text/csv" style="display:none" onchange="importerLeads(event)">
+    </label>
     <button class="btn btn-brand" type="button" onclick="ouvrirLeadManuel()">+ Ajouter</button>
   </div>
 
@@ -4568,6 +4574,17 @@ async function renderLeads(){
 
     // tel: ouvre l'application téléphone du poste ou du mobile —
     // l'agent ne recopie pas un numéro à la main.
+    // Dans un vivier partagé, savoir qui s'en occupe évite deux
+    // commerciaux sur le même contact. Et quand personne ne l'a pris,
+    // le bouton doit être le geste le plus visible de la carte.
+    const moi     = currentUser && currentUser.sbId;
+    const aMoi    = p._attribueA && p._attribueA === moi;
+    const titulaire = p._attribueA ? (nomDuMembre(p._attribueA) || 'un collègue') : null;
+    const prise = aMoi
+      ? '<span class="lead-titulaire amoi">✓ à vous</span>'
+      : '<button class="btn btn-brand" type="button" onclick="prendreLead(\'' + p.id + '\')">'
+        + (titulaire ? '↩ Reprendre (' + echapper(titulaire) + ')' : '✋ Prendre ce lead') + '</button>';
+
     const appel = p.tel
       ? '<a class="btn btn-brand" href="tel:' + encodeURIComponent(p.tel) + '" '
         + 'onclick="noterAppel(\'' + p.id + '\')">📞 Appeler</a>'
@@ -4579,6 +4596,7 @@ async function renderLeads(){
         + '<div class="lead-meta">' + meta.join('') + '</div>'
         + (notes ? '<div class="lead-notes">' + notes + '</div>' : '')
         + '<div class="lead-actions">'
+          + prise
           + appel
           + '<button class="btn btn-outline" type="button" onclick="ajouterNoteLead(\'' + p.id + '\')">✎ Note</button>'
           + '<button class="btn btn-outline" type="button" onclick="qualifierLead(\'' + p.id + '\')">→ Premier contact</button>'
@@ -4590,6 +4608,120 @@ async function renderLeads(){
   }).join('');
 
   majBadgeLeads();
+}
+
+function nomDuMembre(id){
+  if(!_equipe || !_equipe.membres) return null;
+  const m = _equipe.membres.find(function(x){ return x.id === id; });
+  if(!m) return null;
+  return ((m.prenom || '') + ' ' + (m.nom || '')).trim() || m.email;
+}
+
+// La prise passe par le serveur, pas par une écriture directe : c'est
+// l'instant où quelqu'un s'engage sur un contact payé. Si un collègue
+// a été plus rapide, il faut un refus clair plutôt qu'un écrasement
+// silencieux.
+async function prendreLead(id){
+  const sb = getSB();
+  try{
+    const { error } = await sb.rpc('prendre_lead', { p_prospect: id });
+    if(error) throw new Error(error.message);
+    const p = _lead(id);
+    if(p) p._attribueA = currentUser && currentUser.sbId;
+    renderLeads();
+    toast('✋ Lead pris — à vous de jouer');
+  }catch(e){ toast('⚠️ ' + e.message); renderLeads(); }
+}
+
+// ── Import d'un fichier ──
+// Un export de régie ou de portail arrive en CSV. Plutôt que
+// d'imposer un gabarit, on reconnaît les intitulés courants : c'est
+// la même tolérance que côté serveur pour les webhooks.
+const IMPORT_ALIAS = {
+  prenom: ['prenom','prénom','firstname','first name','first_name'],
+  nom:    ['nom','lastname','last name','last_name','surname','nom complet','full name','fullname','name'],
+  tel:    ['tel','telephone','téléphone','phone','phone number','mobile','portable'],
+  email:  ['email','mail','courriel','e-mail','adresse email'],
+  bien:   ['bien','projet','property','type de bien','message','recherche'],
+  source: ['source','origine','campagne','campaign'],
+};
+
+function _colonne(entetes, cible){
+  const norm = function(v){ return String(v||'').toLowerCase().trim().replace(/^"|"$/g,''); };
+  for(const alias of IMPORT_ALIAS[cible]){
+    const i = entetes.findIndex(function(h){ return norm(h) === alias; });
+    if(i >= 0) return i;
+  }
+  return -1;
+}
+
+// Découpe une ligne CSV en respectant les guillemets : une adresse
+// « Lyon, 3e » ne doit pas devenir deux colonnes.
+function _decouper(ligne, sep){
+  const out = []; let cur = ''; let entre = false;
+  for(let i = 0; i < ligne.length; i++){
+    const c = ligne[i];
+    if(c === '"'){ 
+      if(entre && ligne[i+1] === '"'){ cur += '"'; i++; } else entre = !entre;
+    } else if(c === sep && !entre){ out.push(cur); cur = ''; }
+    else cur += c;
+  }
+  out.push(cur);
+  return out.map(function(v){ return v.trim(); });
+}
+
+function importerLeads(evt){
+  const f = evt.target.files && evt.target.files[0];
+  if(!f) return;
+  const lect = new FileReader();
+  lect.onload = function(){
+    const lignes = String(lect.result).split(/\r?\n/).filter(function(l){ return l.trim(); });
+    if(lignes.length < 2){ toast('⚠️ Fichier vide ou sans données'); return; }
+
+    // Les exports français utilisent souvent le point-virgule.
+    const sep = (lignes[0].match(/;/g) || []).length > (lignes[0].match(/,/g) || []).length ? ';' : ',';
+    const entetes = _decouper(lignes[0], sep);
+    const col = {};
+    for(const k in IMPORT_ALIAS) col[k] = _colonne(entetes, k);
+
+    if(col.tel < 0 && col.email < 0){
+      toast('⚠️ Aucune colonne téléphone ni email reconnue');
+      evt.target.value = '';
+      return;
+    }
+
+    let ajoutes = 0, doublons = 0;
+    const existants = new Set(prospects.map(function(p){ return (p.tel || p.email || '').replace(/\s/g,''); }));
+
+    lignes.slice(1).forEach(function(l){
+      const c = _decouper(l, sep);
+      const val = function(k){ return col[k] >= 0 ? (c[col[k]] || '') : ''; };
+      const tel = val('tel'), email = val('email');
+      const cle = (tel || email).replace(/\s/g,'');
+      if(!cle) return;
+      if(existants.has(cle)){ doublons++; return; }
+      existants.add(cle);
+
+      let prenom = val('prenom'), nom = val('nom');
+      if(!prenom && nom){ const b = nom.split(/\s+/); prenom = b[0]; nom = b.slice(1).join(' ') || b[0]; }
+
+      prospects.push({
+        id: 'p' + Date.now() + Math.round(Math.random()*1e6),
+        prenom: prenom || 'Lead', nom: nom || prenom || 'sans nom',
+        tel: tel, email: email, bien: val('bien'),
+        source: val('source') || ('Import ' + f.name),
+        stage: 'nouveau', createdAt: new Date().toISOString(), activities: []
+      });
+      ajoutes++;
+    });
+
+    saveP_();
+    renderLeads();
+    toast('✅ ' + ajoutes + ' lead' + (ajoutes > 1 ? 's' : '') + ' importé'
+          + (ajoutes > 1 ? 's' : '') + (doublons ? ' · ' + doublons + ' doublon(s) ignoré(s)' : ''));
+    evt.target.value = '';
+  };
+  lect.readAsText(f, 'utf-8');
 }
 
 function majBadgeLeads(){

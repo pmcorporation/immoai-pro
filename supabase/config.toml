@@ -1,0 +1,16 @@
+project_id = "wwqccgacezbzkbaptyup"
+
+# Un webhook n'ouvre pas de session : ni Meta ni systeme.io n'envoient
+# de jeton d'authentification. Exiger celui de la passerelle rendrait
+# l'ingestion inutilisable.
+#
+# La preuve d'origine est portée par la fonction elle-même : signature
+# HMAC pour Meta, secret partagé dans l'URL pour les autres. Sans l'un
+# ou l'autre, elle refuse.
+[functions.lead-entrant]
+verify_jwt = false
+
+# Celle-ci, au contraire, agit au nom d'une direction connectée : le
+# jeton est exigé, et vérifié une seconde fois dans le code.
+[functions.equipe]
+verify_jwt = true
