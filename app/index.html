@@ -20,7 +20,7 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="js/donnees.js"></script>
+<script src="/app/js/donnees.js"></script>
 <style>
 /* ══════════════════════════════════════════
    DESIGN SYSTEM — IMMOAI PRO v3
@@ -1781,7 +1781,7 @@ body{font-family:var(--fb);background:#FAFAFA;color:var(--g900);min-height:100vh
 
   <div class="auth-left">
     <div class="auth-brand">
-      <img src="img/logo-manalex.png" alt="Manalex Immobilier" class="auth-logo">
+      <img src="/app/img/logo-manalex.png" alt="Manalex Immobilier" class="auth-logo">
     </div>
     <div class="auth-tagline">
       <h2>L'outil interne<br>de l'<em>agence</em></h2>
@@ -8068,7 +8068,7 @@ const ANNU_FONCTIONS = {proprietaire:'Gérant', direction:'Administratif', agent
 
 // La photo est nommée d'après la partie locale de l'adresse. Pas de
 // colonne à tenir à jour : ajouter quelqu'un, c'est déposer un fichier.
-function annuPhoto(m){ return 'img/equipe/' + m.mail.split('@')[0] + '.jpg'; }
+function annuPhoto(m){ return '/app/img/equipe/' + m.mail.split('@')[0] + '.jpg'; }
 function annuInitiales(m){ return (m.prenom[0] + m.nom[0]).toUpperCase(); }
 
 // Interroge la base, puis redessine. Volontairement tolérante : si
