@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>mon-crm-immo — CRM pour agents immobiliers</title>
+<title>Manalex Immobilier — Espace interne</title>
 
 <!-- Favicons -->
 <link rel="icon" type="image/x-icon" href="/public/favicon.ico">
@@ -146,14 +146,23 @@ body{font-family:var(--fb);background:#FAFAFA;color:var(--g900);min-height:100vh
   padding:20px 16px 18px;
   flex-shrink:0;
 }
-.sb-logo-mark{width:32px;height:32px;min-width:32px;background:var(--brand);border-radius:9px;display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-weight:800;font-size:.65rem;color:#fff;letter-spacing:.04em;flex-shrink:0;position:relative}
+/* Le logo de l'agence remplace le monogramme. Sur fond noir il faut
+   l'inverser : le fichier est sombre, il disparaîtrait sinon. */
+.sb-logo-img{
+  width:30px;height:30px;min-width:30px;object-fit:contain;
+  filter:invert(1) brightness(1.6);
+}
 .sb-logo-text{
-  font-family:var(--fd);font-weight:800;font-size:.95rem;
-  letter-spacing:-.025em;color:#fff;
+  font-family:var(--fd);font-weight:800;font-size:.92rem;
+  letter-spacing:-.025em;color:#fff;line-height:1.15;
   white-space:nowrap;overflow:hidden;
   transition:opacity .2s,width .2s;
 }
-.sb-logo-text span{color:var(--brand)}
+/* Le nom sur deux lignes : « Manalex » porte, « Immobilier » précise. */
+.sb-logo-text span{
+  display:block;color:rgba(255,255,255,.42);
+  font-weight:600;font-size:.66rem;letter-spacing:.09em;text-transform:uppercase;
+}
 .sidebar.collapsed .sb-logo-text{opacity:0;width:0}
 
 /* ── Toggle ── */
@@ -2324,8 +2333,8 @@ body{font-family:var(--fb);background:#FAFAFA;color:var(--g900);min-height:100vh
 
   <!-- Logo -->
   <div class="sb-logo">
-    <div class="sb-logo-mark">MCI</div>
-    <div class="sb-logo-text">mon-<span>crm</span>-immo</div>
+    <img src="/app/img/logo-manalex.png" alt="" class="sb-logo-img">
+    <div class="sb-logo-text">Manalex<span>Immobilier</span></div>
   </div>
 
   <div class="sb-nav">
@@ -2400,7 +2409,7 @@ body{font-family:var(--fb);background:#FAFAFA;color:var(--g900);min-height:100vh
     </button>
     <div>
       <div class="topbar-title" id="tb-title">Tableau de <em>bord</em></div>
-      <div class="topbar-breadcrumb"><span>mon-crm-immo</span><span class="sep">›</span><span id="tb-sub">Dashboard</span></div>
+      <div class="topbar-breadcrumb"><span>Manalex Immobilier</span><span class="sep">›</span><span id="tb-sub">Dashboard</span></div>
     </div>
     <div class="topbar-search">
       <span style="color:var(--g400);font-size:.85rem">🔍</span>
@@ -3481,7 +3490,7 @@ body{font-family:var(--fb);background:#FAFAFA;color:var(--g900);min-height:100vh
       <div class="plan-card plan-card-featured" id="plan-pro-card">
         <div style="position:absolute;top:-1px;left:50%;transform:translateX(-50%);background:var(--brand);color:#fff;font-size:.62rem;font-weight:800;padding:4px 14px;border-radius:0 0 10px 10px;letter-spacing:.06em;white-space:nowrap">⭐ LE PLUS POPULAIRE</div>
         <div style="font-size:1.6rem;margin-bottom:10px;margin-top:8px">🤖</div>
-        <div style="font-family:var(--fd);font-weight:800;font-size:1rem;color:var(--g900);margin-bottom:4px">mon-crm-immo</div>
+        <div style="font-family:var(--fd);font-weight:800;font-size:1rem;color:var(--g900);margin-bottom:4px">Manalex Immobilier</div>
         <div style="font-size:.75rem;color:var(--g500);margin-bottom:14px;line-height:1.5">Tout le CRM Pro + 6 assistants IA + juridique Opus + finance.</div>
         <div style="margin-bottom:14px">
           <span style="font-family:var(--fd);font-weight:800;font-size:2rem;color:var(--brand)" id="price-pro">49</span>
@@ -3534,13 +3543,13 @@ body{font-family:var(--fb);background:#FAFAFA;color:var(--g900);min-height:100vh
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr 100px 100px;padding:10px 12px;border-bottom:1px solid var(--g100);align-items:center">
           <div style="font-size:.78rem;color:var(--g700)">Avr. 2026</div>
-          <div style="font-size:.78rem;color:var(--g700)">mon-crm-immo</div>
+          <div style="font-size:.78rem;color:var(--g700)">Manalex Immobilier</div>
           <div style="font-size:.78rem;font-weight:700;color:var(--g900)">49,00 €</div>
           <div><span style="background:#F0FDF4;color:var(--green);font-size:.65rem;font-weight:700;padding:2px 8px;border-radius:8px">✓ Payé</span></div>
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr 100px 100px;padding:10px 12px;border-bottom:1px solid var(--g100);align-items:center">
           <div style="font-size:.78rem;color:var(--g700)">Mar. 2026</div>
-          <div style="font-size:.78rem;color:var(--g700)">mon-crm-immo</div>
+          <div style="font-size:.78rem;color:var(--g700)">Manalex Immobilier</div>
           <div style="font-size:.78rem;font-weight:700;color:var(--g900)">49,00 €</div>
           <div><span style="background:#F0FDF4;color:var(--green);font-size:.65rem;font-weight:700;padding:2px 8px;border-radius:8px">✓ Payé</span></div>
         </div>
@@ -4414,9 +4423,18 @@ async function chargerDonnees(){
   // sinon on rattacherait l'utilisateur à son ancienne organisation.
   await consommerInvitation();
   if(!Donnees.contexte() && !(await etablirContexte())) return;
-  await Donnees.chargerTout(sb);
+  const bilan = await Donnees.chargerTout(sb);
   rafraichirDepuisCouche();
   majIndicateurSync();
+
+  // Une opération refusée par Postgres reste en file et repart à
+  // chaque tour, indéfiniment. Sans trace, elle est invisible : le
+  // compteur « modifications en attente » monte sans dire pourquoi.
+  if(bilan && bilan.erreurs && bilan.erreurs.length){
+    console.warn('Synchronisation — %d opération(s) refusée(s) :', bilan.erreurs.length, bilan.erreurs);
+    const refus = bilan.erreurs.filter(function(e){ return /policy|permission|denied/i.test(e.message || ''); });
+    if(refus.length) toast('⚠️ ' + refus.length + ' modification(s) refusée(s) par le serveur');
+  }
 }
 
 function majIndicateurSync(){
@@ -5000,9 +5018,10 @@ async function renderLeads(){
 // preuve que le lead a été traité dans les temps. Sans ce bouton, le
 // commercial n'a aucune raison de le consigner — et le délai de
 // premier contact resterait vide alors qu'il a fait son travail.
-function sansReponse(id){
+async function sansReponse(id){
   const p = _lead(id);
   if(!p) return;
+  await assurerPrise(p);
   p.activities = p.activities || [];
   const n = _tentatives(p) + 1;
   p.activities.push({
@@ -5013,6 +5032,27 @@ function sansReponse(id){
   saveP_();
   renderLeads();
   toast('☎ Tentative ' + n + ' enregistrée');
+}
+
+// Qui travaille le lead le prend. Sans cela, un commercial qui note un
+// appel sur un lead attribué à un collègue voit sa modification
+// refusée par Postgres — la politique du vivier exige que la ligne
+// reste attribuée à celui qui écrit — et l'opération reste bloquée
+// dans la file, sans message. Le défaut était invisible pour la
+// direction, qui passe par est_direction() quoi qu'il arrive.
+//
+// Silencieuse à dessein : le commercial vient de décrocher son
+// téléphone, ce n'est pas le moment de lui demander de confirmer une
+// question d'attribution. La prise est inscrite au journal.
+async function assurerPrise(p){
+  const moi = currentUser && currentUser.sbId;
+  if(!p || !moi || p._attribueA === moi) return;
+  try{
+    const sb = getSB();
+    if(!sb) return;
+    const { error } = await sb.rpc('prendre_lead', { p_prospect: p.id });
+    if(!error) p._attribueA = moi;
+  }catch(e){ /* le serveur tranchera ; l'écriture locale reste */ }
 }
 
 function nomDuMembre(id){
@@ -5249,9 +5289,10 @@ function _lead(id){ return prospects.find(function(p){ return p.id === id; }); }
 // Tracer l'appel sans le demander : un commercial qui vient de
 // décrocher son téléphone ne remplira pas un formulaire d'abord.
 // C'est cette trace qui horodate le premier contact côté serveur.
-function noterAppel(id){
+async function noterAppel(id){
   const p = _lead(id);
   if(!p) return;
+  await assurerPrise(p);
   p.activities = p.activities || [];
   p.activities.push({ type: 'call', note: 'Appel passé depuis les leads', date: new Date().toISOString() });
   saveP_();
@@ -5359,14 +5400,18 @@ function _panneauHtml(p){
   return '';
 }
 
-function enregistrerNote(id){
+async function enregistrerNote(id){
   const p = _lead(id);
   const champ = document.getElementById('pan-note');
   if(!p || !champ) return;
   const t = champ.value.trim();
   if(!t){ champ.focus(); return; }
+  await assurerPrise(p);
   p.activities = p.activities || [];
-  p.activities.push({ type: 'call', note: t, date: new Date().toISOString() });
+  // 'autre' et non 'call' : une note n'est pas une tentative d'appel.
+  // Les compter ensemble gonflerait le nombre de relances et fausserait
+  // la seule mesure qui dise si un lead a été travaillé.
+  p.activities.push({ type: 'autre', note: t, date: new Date().toISOString() });
   saveP_();
   _panneau = null;
   renderLeads();
@@ -5388,9 +5433,10 @@ async function confirmerDon(id, versId){
   }catch(e){ toast('⚠️ ' + e.message); }
 }
 
-function confirmerEcart(id, motif){
+async function confirmerEcart(id, motif){
   const p = _lead(id);
   if(!p) return;
+  await assurerPrise(p);
   p.perdu = true;
   p.motifPerte = String(motif || '').trim() || 'Non qualifié';
   saveP_();
@@ -5414,9 +5460,12 @@ function qualifierLead(id){
   ouvrirPanneau(id, 'qualifier');
 }
 
-function confirmerQualification(id, nature){
+async function confirmerQualification(id, nature){
   const p = _lead(id);
   if(!p) return;
+  // Prendre avant de qualifier : sinon la bascule d'étape est refusée
+  // par la politique du vivier, et le lead resterait bloqué.
+  await assurerPrise(p);
 
   p.stage  = 'contact';
   p.mandat = (nature === 'vendeur') ? 'vente' : 'recherche';
@@ -5426,7 +5475,7 @@ function confirmerQualification(id, nature){
   const t = champ && champ.value.trim();
   if(t){
     p.activities = p.activities || [];
-    p.activities.push({ type: 'call', note: t, date: new Date().toISOString() });
+    p.activities.push({ type: 'autre', note: t, date: new Date().toISOString() });
   }
 
   saveP_();
@@ -11269,7 +11318,7 @@ if(window.location.hash === '#admin'){
       <div class="admin-logo">
         <div class="admin-logo-mark">M</div>
         <div>
-          <div class="admin-logo-text">mon-crm-immo</div>
+          <div class="admin-logo-text">Manalex Immobilier</div>
         </div>
       </div>
       <span class="admin-logo-badge">Backoffice</span>
