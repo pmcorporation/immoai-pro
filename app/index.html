@@ -8056,6 +8056,12 @@ const ANNUAIRE_REPLI = [
 
 let ANNUAIRE = ANNUAIRE_REPLI.slice();
 
+// Quelle agence sert ce déploiement. La base contient d'autres
+// organisations — vestiges de l'époque SaaS — donc on la désigne
+// au lieu de la laisser deviner. Une autre agence : un autre slug,
+// et rien d'autre à changer.
+const AGENCE_SLUG = 'manalex';
+
 // Les rôles techniques ne veulent rien dire pour qui se connecte :
 // on affiche la fonction, pas le niveau de droits.
 const ANNU_FONCTIONS = {proprietaire:'Gérant', direction:'Administratif', agent:'Négociateur'};
@@ -8072,7 +8078,7 @@ async function rafraichirAnnuaire(){
   try{
     const sb = getSB();
     if(!sb) return;
-    const { data, error } = await sb.rpc('annuaire_connexion');
+    const { data, error } = await sb.rpc('annuaire_connexion', { p_slug: AGENCE_SLUG });
     if(error || !data || !data.length) return;
     ANNUAIRE = data.map(function(l){
       return {

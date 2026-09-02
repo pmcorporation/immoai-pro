@@ -6,3 +6,4 @@ supabase/.temp/
 .vercel
 identifiants-equipe.txt
 creer-equipe.sql
+slug-manalex.sql
