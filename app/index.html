@@ -9969,16 +9969,46 @@ async function doRegister(){
   }
 }
 
-function doLogout(){
-  if(!confirm('Se déconnecter de mon-crm-immo ?'))return;
-  addLog('Déconnexion',currentUser);
+/**
+ * La déconnexion ne retirait qu'une clé de sessionStorage. Restaient
+ * en place : la session Supabase — donc un jeton toujours valide —, la
+ * persistance « se souvenir de moi » sur trente jours, et tout le CRM
+ * en clair dans le cache local.
+ *
+ * Sur un poste partagé, le cas nominal ici, cela suffisait : le
+ * suivant rechargeait la page et se retrouvait dans la session du
+ * précédent, avec ses prospects et ses mandats.
+ *
+ * On ferme donc les trois portes, et on recharge : c'est la seule
+ * façon de garantir qu'aucune donnée ne subsiste en mémoire.
+ */
+async function doLogout(){
+  if(!confirm('Se déconnecter ?')) return;
+
+  // Les modifications non envoyées appartiennent à l'utilisateur qui
+  // part. Tenter de les faire partir avant d'effacer, plutôt que de
+  // les perdre en silence.
+  try{
+    if(typeof Donnees !== 'undefined' && Donnees.enAttente() > 0){
+      const sb = getSB();
+      if(sb) await Donnees.synchroniser(sb);
+    }
+  }catch(e){ console.warn('Envoi avant déconnexion :', e); }
+
+  addLog('Déconnexion', currentUser);
+
+  try{
+    const sb = getSB();
+    if(sb) await sb.auth.signOut();   // révoque le jeton côté serveur
+  }catch(e){ console.warn('signOut :', e); }
+
   sessionStorage.removeItem('immoai_session');
-  currentUser=null;
-  const app=document.getElementById('app-root');
-  if(app)app.style.display='none';
-  showScreen('login-screen');
-  document.getElementById('login-email').value='';
-  document.getElementById('login-pwd').value='';
+  localStorage.removeItem('immoai_remember');
+  localStorage.removeItem('immoai_session_persist');
+  try{ if(typeof Donnees !== 'undefined') Donnees.viderTout(); }catch(e){}
+
+  currentUser = null;
+  location.reload();
 }
 
 // ── RESET MOT DE PASSE ──
@@ -10160,13 +10190,28 @@ function renderLogs(){
   }).join('');
 }
 
+/**
+ * L'export lisait immoai_crm, immoai_mandats, immoai_rdvs — les clés
+ * de l'ancien stockage. Les données vivent depuis longtemps dans le
+ * cache mci_*, si bien que le fichier produit était vide : trois cents
+ * octets qu'on archivait en croyant sauvegarder son CRM.
+ *
+ * Combiné à l'import, cela formait un piège parfait — on restaurait
+ * un fichier vide, et l'import effaçait tout.
+ */
 function exportData(){
+  const lire = function(entite, cleHeritee){
+    try{
+      if(typeof Donnees !== 'undefined' && Donnees[entite]) return Donnees[entite].liste();
+    }catch(e){}
+    return JSON.parse(localStorage.getItem(cleHeritee)||'[]');
+  };
   const data = {
     exportedAt: new Date().toISOString(),
     exportedBy: currentUser,
-    prospects: JSON.parse(localStorage.getItem('immoai_crm')||'[]'),
-    mandats: JSON.parse(localStorage.getItem('immoai_mandats')||'[]'),
-    rdvs: JSON.parse(localStorage.getItem('immoai_rdvs')||'[]'),
+    prospects: lire('prospects','immoai_crm'),
+    mandats: lire('mandats','immoai_mandats'),
+    rdvs: lire('rdvs','immoai_rdvs'),
     reseau: JSON.parse(localStorage.getItem('immoai_reseau')||'[]'),
     shared: JSON.parse(localStorage.getItem('immoai_shared')||'[]'),
     finance: JSON.parse(localStorage.getItem('immoai_finance')||'[]'),
@@ -10176,11 +10221,15 @@ function exportData(){
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = 'immoai-backup-' + new Date().toISOString().split('T')[0] + '.json';
+  a.download = 'manalex-sauvegarde-' + new Date().toISOString().split('T')[0] + '.json';
   a.click();
   URL.revokeObjectURL(url);
   addLog('Export données', currentUser);
-  toast('📥 Sauvegarde exportée avec succès');
+  // Annoncer ce que le fichier contient : un « exporté avec succès »
+  // sur un fichier vide est exactement ce qui a rendu le piège
+  // invisible.
+  toast('📥 Sauvegarde : ' + data.prospects.length + ' prospects, '
+        + data.mandats.length + ' mandats, ' + data.rdvs.length + ' RDV');
 }
 
 function importData(e){
@@ -10190,11 +10239,39 @@ function importData(e){
   r.onload = ev => {
     try{
       const data = JSON.parse(ev.target.result);
-      // Restauration d'une sauvegarde : on confie à la couche, qui
-      // enverra le tout en base au lieu de le laisser dans le navigateur.
-      if(data.prospects) Donnees.prospects.remplacerTout(data.prospects);
-      if(data.mandats)   Donnees.mandats.remplacerTout(data.mandats);
-      if(data.rdvs)      Donnees.rdvs.remplacerTout(data.rdvs);
+
+      // `if(data.prospects)` passait pour un tableau vide : en
+      // JavaScript, [] est vrai. remplacerTout([]) posait alors une
+      // pierre tombale sur chaque fiche — l'import d'une sauvegarde
+      // vide effaçait le CRM entier, en silence et sans retour possible.
+      const tailles = {
+        prospects: Array.isArray(data.prospects) ? data.prospects.length : null,
+        mandats:   Array.isArray(data.mandats)   ? data.mandats.length   : null,
+        rdvs:      Array.isArray(data.rdvs)      ? data.rdvs.length      : null,
+      };
+      const actuel = {
+        prospects: (Donnees.prospects.liste()||[]).length,
+        mandats:   (Donnees.mandats.liste()||[]).length,
+        rdvs:      (Donnees.rdvs.liste()||[]).length,
+      };
+
+      // Une restauration qui détruit plus qu'elle ne rend n'est pas une
+      // restauration. On la nomme, chiffres en main, avant d'agir.
+      const pertes = ['prospects','mandats','rdvs']
+        .filter(function(k){ return tailles[k] !== null && tailles[k] < actuel[k]; })
+        .map(function(k){ return '· ' + k + ' : ' + actuel[k] + ' → ' + tailles[k]; });
+
+      if(pertes.length){
+        const ok = confirm(
+          'ATTENTION — cette sauvegarde contient MOINS de données que votre CRM actuel :\n\n'
+          + pertes.join('\n')
+          + '\n\nLes fiches absentes du fichier seront supprimées.\n\nContinuer ?');
+        if(!ok){ toast('Import annulé'); return; }
+      }
+
+      if(tailles.prospects) Donnees.prospects.remplacerTout(data.prospects);
+      if(tailles.mandats)   Donnees.mandats.remplacerTout(data.mandats);
+      if(tailles.rdvs)      Donnees.rdvs.remplacerTout(data.rdvs);
       if(data.reseau)    localStorage.setItem('immoai_reseau', JSON.stringify(data.reseau));
       if(data.shared)    localStorage.setItem('immoai_shared', JSON.stringify(data.shared));
       if(data.finance)   localStorage.setItem('immoai_finance', JSON.stringify(data.finance));
@@ -10295,6 +10372,34 @@ function bootApp(){
   }
 }
 
+/**
+ * Une session locale ne prouve rien : c'est Supabase qui décide. On
+ * exige un jeton vivant ET la même personne — sans quoi un objet
+ * fabriqué dans la console suffirait à porter l'identité d'un autre.
+ */
+async function sessionValide(idAttendu){
+  try{
+    const sb = getSB();
+    if(!sb) return false;
+    const { data } = await sb.auth.getSession();
+    const u = data && data.session && data.session.user;
+    if(!u) return false;
+    return !idAttendu || u.id === idAttendu;
+  }catch(e){ return false; }
+}
+
+function fermerSessionInvalide(){
+  sessionStorage.removeItem('immoai_session');
+  localStorage.removeItem('immoai_remember');
+  localStorage.removeItem('immoai_session_persist');
+  try{ if(typeof Donnees !== 'undefined') Donnees.viderTout(); }catch(e){}
+  currentUser = null;
+  const app = document.getElementById('app-root');
+  if(app) app.style.display = 'none';
+  showScreen('login-screen');
+  toast('Session expirée — reconnectez-vous');
+}
+
 // ══════════ INIT ══════════
 (function(){
   chargerAnnuaire();      // le repli, tout de suite : jamais de grille vide
@@ -10308,6 +10413,12 @@ function bootApp(){
       updateUserUI();startClock();updateStorageIndicator();
       bootApp();
       chargerDonnees().catch(function(_){});
+      // Affichage immédiat pour ne pas faire attendre, mais on vérifie
+      // dans la foulée : un jeton révoqué ou expiré doit refermer la
+      // porte, même si l'objet local est resté.
+      sessionValide(currentUser && currentUser.sbId).then(function(ok){
+        if(!ok) fermerSessionInvalide();
+      });
     }catch(e){sessionStorage.removeItem('immoai_session');}
   } else {
     document.getElementById('app-root').style.display='none';
@@ -10316,11 +10427,25 @@ function bootApp(){
       var _p=JSON.parse(localStorage.getItem('immoai_session_persist')||'null');
       var _r=JSON.parse(localStorage.getItem('immoai_remember')||'null');
       if(_p&&_r&&(Date.now()-_r.ts)<(30*24*60*60*1000)){
-        currentUser=_p;
-        sessionStorage.setItem('immoai_session',JSON.stringify(currentUser));
-        document.getElementById('login-screen').classList.add('hidden');
-        document.getElementById('app-root').style.display='flex';
-        updateUserUI();startClock();updateStorageIndicator();bootApp();
+        // Cet objet n'est pas signé : n'importe qui pouvait l'écrire
+        // depuis la console et prendre l'identité d'un collègue. On
+        // n'ouvre donc l'application que si Supabase confirme une
+        // session vivante, et que c'est bien la même personne.
+        sessionValide(_p.sbId).then(function(ok){
+          if(!ok){
+            localStorage.removeItem('immoai_remember');
+            localStorage.removeItem('immoai_session_persist');
+            var _e=document.getElementById('login-email');
+            if(_e&&_r.email)_e.value=_r.email;
+            return;
+          }
+          currentUser=_p;
+          sessionStorage.setItem('immoai_session',JSON.stringify(currentUser));
+          document.getElementById('login-screen').classList.add('hidden');
+          document.getElementById('app-root').style.display='flex';
+          updateUserUI();startClock();updateStorageIndicator();bootApp();
+          chargerDonnees().catch(function(_){});
+        });
         return;
       }
       if(_r&&_r.email){

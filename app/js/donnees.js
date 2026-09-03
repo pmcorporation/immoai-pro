@@ -647,6 +647,18 @@
     enAttente: () => File.taille(),
     vider: Cache.vider,
 
+    /**
+     * Efface tout : cache, curseur de synchronisation ET file d'attente.
+     * Cache.vider() laissait la file intacte, ce qui suffisait au
+     * débogage mais pas à une déconnexion — les modifications non
+     * envoyées de l'un seraient reparties sous la session du suivant.
+     */
+    viderTout() {
+      Cache.vider();
+      localStorage.removeItem(CLE_FILE);
+      _contexte = null;
+    },
+
     // Exposés pour les tests et le débogage.
     _remplacerId: remplacerId,
     _signature: signature,
