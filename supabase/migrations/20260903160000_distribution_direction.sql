@@ -1,3 +1,13 @@
+-- ⚠️ NE PAS APPLIQUER — REMPLACÉ PAR LE FICHIER 20
+--
+-- Ce fichier n'a jamais été posé sur la base, et le fichier
+-- 20260903180000_etat_cible.sql décrit directement l'état voulu.
+-- Les trois fichiers 17, 18 et 19 se contredisaient partiellement :
+-- les rejouer dans l'ordre ferait passer la base par un état
+-- intermédiaire qu'elle n'a aucune raison de connaître.
+--
+-- Conservé pour l'historique du raisonnement, pas pour l'exécution.
+
 -- ═══════════════════════════════════════════════════════════════
 -- 19 · LA DIRECTION DISTRIBUE, PERSONNE NE SE SERT
 -- ═══════════════════════════════════════════════════════════════
