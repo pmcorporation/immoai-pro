@@ -10286,8 +10286,16 @@ function importData(e){
   r.readAsText(file);
 }
 
+/**
+ * Cette fonction ne parcourait que STORAGE_KEYS, c'est-à-dire les clés
+ * immoai_* de l'ancien stockage. Les données réelles vivent dans le
+ * cache mci_* : « Supprimer toutes les données » n'en supprimait donc
+ * aucune, et laissait tout le CRM sur le poste.
+ */
 function clearAllData(){
   STORAGE_KEYS.forEach(k=>localStorage.removeItem(k.key));
+  try{ if(typeof Donnees !== 'undefined') Donnees.viderTout(); }catch(e){}
+  prospects = []; mandats = []; rdvs = [];
   addLog('Suppression données', currentUser);
   toast('🗑️ Données supprimées. Rechargement…');
   setTimeout(()=>location.reload(),1200);
@@ -10399,6 +10407,23 @@ function fermerSessionInvalide(){
   showScreen('login-screen');
   toast('Session expirée — reconnectez-vous');
 }
+
+// Le stockage du navigateur est plafonné. Quand il déborde, la couche
+// de données ne peut plus rien écrire — et sans avertissement, l'agent
+// continue de saisir des fiches qui disparaîtront au rechargement.
+try{
+  if(typeof Donnees !== 'undefined' && Donnees.surSaturation){
+    Donnees.surSaturation(function(){
+      const el = document.getElementById('toast');
+      if(el){
+        el.textContent = '⚠️ Mémoire du navigateur saturée — vos dernières saisies ne sont pas enregistrées. Prévenez la direction.';
+        el.classList.add('show');
+        setTimeout(function(){ el.classList.remove('show'); }, 12000);
+      }
+      console.error('Stockage saturé : les écritures locales échouent.');
+    });
+  }
+}catch(e){}
 
 // ══════════ INIT ══════════
 (function(){

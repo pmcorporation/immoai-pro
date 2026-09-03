@@ -30,6 +30,11 @@
 
   const PREFIXE      = 'mci_';
   const CLE_FILE     = PREFIXE + 'file_attente';
+  const CLE_SEQ      = PREFIXE + 'file_seq';
+
+  // L'application y branche son avertisseur : la couche ne connaît pas
+  // l'interface, mais elle doit pouvoir la prévenir.
+  let _alerteStockage = null;
   const CLE_SYNC     = PREFIXE + 'dernier_sync';
   const CLE_CACHE    = (entite) => PREFIXE + 'cache_' + entite;
 
@@ -90,7 +95,11 @@
       enfants: {
         notes:      { table: 'prospect_notes',      champs: { text: 'texte', date: 'created_at' } },
         activities: { table: 'prospect_activites',  champs: { type: 'type', note: 'note', date: 'date_activite' } },
-        followups:  { table: 'prospect_relances',   champs: { titre: 'titre', date: 'echeance', done: 'faite' } },
+        // L'application pousse { title, date, done } — avec « title »
+        // en anglais. Le schéma attendait « titre » : la colonne
+        // partait donc vide, l'insertion était rejetée, et l'erreur
+        // n'était pas lue. Aucune relance n'a jamais atteint la base.
+        followups:  { table: 'prospect_relances',   champs: { title: 'titre', date: 'echeance', done: 'faite' } },
       },
     },
 
@@ -213,9 +222,18 @@
       ligne[colonne] = v;
     }
 
-    // Un identifiant hérité ('p1777922942986') n'est pas un uuid :
-    // on le laisse au serveur, qui en générera un.
-    if (!estUuid(ligne.id)) delete ligne.id;
+    // Un identifiant hérité ('p1777922942986') n'est pas un uuid. Le
+    // laisser au serveur rendait l'envoi non rejouable : si la réponse
+    // se perdait après l'insertion, la tentative suivante créait un
+    // second exemplaire, puis un troisième.
+    //
+    // On en fabrique un ici : l'upsert redevient idempotent, et un
+    // réseau qui hoquette ne peuple plus le CRM de doublons.
+    if (!estUuid(ligne.id)) {
+      const neuf = (typeof crypto !== 'undefined' && crypto.randomUUID)
+        ? crypto.randomUUID() : null;
+      if (neuf) ligne.id = neuf; else delete ligne.id;
+    }
 
     if (s.details.length) {
       const d = {};
@@ -255,6 +273,23 @@
    * Comparer sur (type, note, date) suffit donc à éviter les doublons
    * sans avoir à leur inventer un identifiant.
    */
+  /**
+   * Ramène une date à la forme ISO attendue par Postgres. Accepte le
+   * jj/mm/aaaa français, l'ISO déjà correct, et un horodatage complet.
+   * Rend null plutôt qu'une valeur douteuse : une échéance fausse est
+   * pire qu'une échéance absente, parce qu'on lui fait confiance.
+   */
+  function versIso(v) {
+    if (!v) return null;
+    const t = String(v).trim();
+    let m = t.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+    if (m) return `${m[3]}-${m[2]}-${m[1]}`;
+    m = t.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (m) return `${m[1]}-${m[2]}-${m[3]}`;
+    const d = new Date(t);
+    return isNaN(d.getTime()) ? null : d.toISOString().slice(0, 10);
+  }
+
   async function envoyerEnfants(sb, schema, parentId, objet) {
     if (!parentId || !estUuid(parentId)) return;
 
@@ -283,8 +318,13 @@
         const r = { prospect_id: parentId };
         for (const [champApp, colonne] of Object.entries(e.champs)) {
           let v = l[champApp];
-          if (colonne === 'date_activite' && v) v = String(v).slice(0, 10);
-          if (v !== undefined && v !== '') r[colonne] = v;
+          // L'application écrit ses dates au format français
+          // (toLocaleDateString('fr-FR')). Envoyées telles quelles dans
+          // une colonne date, elles sont rejetées — ou pire, acceptées
+          // avec le jour et le mois inversés jusqu'au 12 du mois, ce qui
+          // décale silencieusement toutes les échéances.
+          if (/date|echeance/.test(colonne) && v) v = versIso(v);
+          if (v !== undefined && v !== '' && v !== null) r[colonne] = v;
         }
         return r;
       });
@@ -357,9 +397,22 @@
       try { return JSON.parse(localStorage.getItem(CLE_CACHE(entite)) || '[]'); }
       catch (_) { return []; }
     },
+    /**
+     * Rend faux quand l'écriture a échoué. Elle avalait l'exception de
+     * quota dans un console.warn et rendait la main comme si de rien
+     * n'était : l'agent voyait sa fiche à l'écran, croyait l'avoir
+     * enregistrée, et la perdait au rechargement. Un échec de stockage
+     * doit se voir.
+     */
     ecrire(entite, liste) {
-      try { localStorage.setItem(CLE_CACHE(entite), JSON.stringify(liste)); }
-      catch (e) { console.warn('Cache saturé pour', entite, '—', e.name); }
+      try {
+        localStorage.setItem(CLE_CACHE(entite), JSON.stringify(liste));
+        return true;
+      } catch (e) {
+        console.error('Stockage saturé pour', entite, '—', e.name);
+        if (typeof _alerteStockage === 'function') _alerteStockage(entite, e);
+        return false;
+      }
     },
     vider() {
       Object.keys(SCHEMAS).forEach((e) => localStorage.removeItem(CLE_CACHE(e)));
@@ -386,14 +439,28 @@
     },
     ajouter(op) {
       const ops = File.lire();
+      // Chaque mise en file porte un numéro d'ordre. Sans lui, une
+      // modification faite pendant qu'une synchronisation attendait le
+      // réseau était retirée de la file en même temps que la version
+      // précédente — donc perdue, alors qu'elle s'affichait à l'écran
+      // comme enregistrée.
+      op.seq = (Number(localStorage.getItem(CLE_SEQ)) || 0) + 1;
+      try { localStorage.setItem(CLE_SEQ, String(op.seq)); } catch (e) {}
+
       // Une même ligne modifiée deux fois de suite ne part qu'une fois.
       const i = ops.findIndex((o) => o.entite === op.entite && o.id === op.id && o.type === op.type);
       if (i >= 0) ops[i] = op; else ops.push(op);
       File.ecrire(ops);
     },
+    /**
+     * Ne retire que l'opération exactement envoyée. Sans la comparaison
+     * de rang, une modification arrivée pendant l'envoi disparaissait
+     * avec celle qu'elle remplaçait.
+     */
     retirer(op) {
       File.ecrire(File.lire().filter(
-        (o) => !(o.entite === op.entite && o.id === op.id && o.type === op.type)
+        (o) => !(o.entite === op.entite && o.id === op.id && o.type === op.type
+                 && (o.seq === undefined || o.seq === op.seq))
       ));
     },
     taille() { return File.lire().length; },
@@ -585,6 +652,14 @@
               const local = Array.isArray(liste[i][nom]) ? liste[i][nom] : [];
               if (local.length > (obj[nom] || []).length) obj[nom] = local;
             }
+            // versApp() ne reconstruit que ce que le schéma déclare.
+            // Remplacer l'objet entier détruisait donc tout le reste —
+            // les documents rattachés à une fiche, l'auteur d'une note —
+            // quelques secondes après leur saisie, sans trace. Ce que le
+            // serveur ne connaît pas est conservé plutôt qu'effacé.
+            for (const cle of Object.keys(liste[i])) {
+              if (!(cle in obj)) obj[cle] = liste[i][cle];
+            }
             liste[i] = obj;
             bilan.recus++;
           }
@@ -592,7 +667,16 @@
         Cache.ecrire(entite, liste);
       }
 
-      if (!bilan.erreurs.length) localStorage.setItem(CLE_SYNC, maintenant);
+      // Le curseur n'avançait que si AUCUNE erreur n'était survenue,
+      // envoi compris. Une seule opération refusée par une politique —
+      // et elle repart à chaque tour — gelait donc le curseur pour
+      // toujours : chaque synchronisation rechargeait l'intégralité des
+      // tables, indéfiniment.
+      //
+      // Les deux phases sont indépendantes : ce qui a été reçu l'a bien
+      // été, quoi qu'il soit arrivé à l'envoi.
+      const echecReception = bilan.erreurs.some((e) => e.entite && !e.op);
+      if (!echecReception) localStorage.setItem(CLE_SYNC, maintenant);
       return bilan;
 
     } finally {
@@ -646,6 +730,7 @@
     contexte: contexteCourant,
     enAttente: () => File.taille(),
     vider: Cache.vider,
+    surSaturation(fn) { _alerteStockage = fn; },
 
     /**
      * Efface tout : cache, curseur de synchronisation ET file d'attente.
@@ -663,6 +748,7 @@
     _remplacerId: remplacerId,
     _signature: signature,
     _versBase: versBase,
+    _versIso:  versIso,
     _versApp:  versApp,
     _schemas:  SCHEMAS,
   };

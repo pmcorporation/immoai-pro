@@ -37,7 +37,14 @@ const ctx = { orgId: 'aaaaaaaa-1111-2222-3333-444444444444',
 const ligne = D._versBase('prospects', prospect, ctx);
 
 console.log('\n── Conversion vers la base ──');
-t('identifiant hérité écarté (le serveur génère l\'uuid)', !('id' in ligne), ligne.id);
+// L'identifiant est désormais fabriqué côté client. Laisser le serveur
+// le générer rendait l'envoi non rejouable : une réponse perdue après
+// l'insertion faisait créer un second exemplaire à chaque tentative.
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+t('identifiant hérité remplacé par un uuid, pas supprimé',
+  typeof ligne.id === 'string' && UUID.test(ligne.id), ligne.id);
+t('l\'envoi est rejouable : deux conversions donnent des uuid valides',
+  UUID.test(D._versBase('prospects', prospect, null).id), 'non');
 t('« 350 000 € » devient 350000', ligne.budget === 350000, ligne.budget);
 t('rayon « 10 » devient l\'entier 10', ligne.rayon_km === 10, ligne.rayon_km);
 t('date vide devient null, pas \'\'', ligne.relance_le === null, ligne.relance_le);
@@ -218,6 +225,52 @@ console.log('\n── Création puis suppression avant la première synchro ─�
     !('activities' in ligne) && !('activites' in ligne), Object.keys(ligne));
   t('le tableau des notes non plus',
     !('notes' in ligne), Object.keys(ligne));
+})();
+
+// ══════════════════════════════════════════════════════════════
+// LES DATES FRANÇAISES NE DOIVENT PLUS PARTIR TELLES QUELLES
+// ══════════════════════════════════════════════════════════════
+// L'application écrit ses échéances en jj/mm/aaaa. Envoyées ainsi dans
+// une colonne date, elles étaient rejetées — ou pire, acceptées avec le
+// jour et le mois inversés jusqu'au 12 du mois, ce qui décalait
+// silencieusement les relances sans que personne ne le voie.
+(function () {
+  console.log('\n▸ Dates');
+
+  t('le jj/mm/aaaa français devient de l\'ISO',
+    D._versIso('25/12/2026') === '2026-12-25', D._versIso('25/12/2026'));
+
+  // Le cas qui rendait le défaut invisible : avant le 13, la date
+  // inversée reste une date valide, donc personne ne voit l'erreur.
+  t('03/09 est le 3 septembre, pas le 9 mars',
+    D._versIso('03/09/2026') === '2026-09-03', D._versIso('03/09/2026'));
+
+  t('une date déjà ISO est laissée intacte',
+    D._versIso('2026-09-03') === '2026-09-03', D._versIso('2026-09-03'));
+
+  t('un horodatage complet est ramené au jour',
+    D._versIso('2026-09-03T14:32:11.000Z') === '2026-09-03', D._versIso('2026-09-03T14:32:11.000Z'));
+
+  // Rendre null plutôt qu'une valeur douteuse : une échéance fausse est
+  // pire qu'une échéance absente, parce qu'on lui fait confiance.
+  t('une saisie illisible rend null, pas une date inventée',
+    D._versIso('la semaine prochaine') === null, D._versIso('la semaine prochaine'));
+  t('une valeur vide rend null',
+    D._versIso('') === null && D._versIso(null) === null);
+})();
+
+// ══════════════════════════════════════════════════════════════
+// LES RELANCES DOIVENT ATTEINDRE LEUR COLONNE
+// ══════════════════════════════════════════════════════════════
+// L'application pousse { title, date, done }. Le schéma attendait
+// « titre » : la colonne partait vide, l'insertion était rejetée, et
+// l'erreur n'était pas lue. Aucune relance n'a jamais atteint la base.
+(function () {
+  console.log('\n▸ Relances');
+  const c = D._schemas.prospects.enfants.followups.champs;
+  t('le champ applicatif « title » vise la colonne « titre »',
+    c.title === 'titre', c);
+  t('la date vise « echeance »', c.date === 'echeance', c);
 })();
 
 console.log(`\n${ok} réussis, ${ko} échoués`);
